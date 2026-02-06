@@ -58,6 +58,11 @@ class PlayState(GameplayState):
         """Called when entering this state."""
         area_data = AREAS[self.area_id]
         get_sound_manager().play_music(area_data["music"])
+        # Track area visits for quest objectives
+        self.game.world_state["current_area"] = self.area_id
+        self.game.quest_manager.update_objective("visit", self.area_id)
+        # Auto-start side_2 (goblin slayer) since it has no prerequisites
+        self.game.quest_manager.start_quest("side_2")
 
     def _spawn_enemies(self):
         from zelda_miloutte.entities.enemy import Enemy
@@ -172,6 +177,35 @@ class PlayState(GameplayState):
         target_area = conn["area"]
         spawn_edge = conn["spawn_edge"]
 
+        # Area gating based on story progress
+        qm = self.game.quest_manager
+        gate_msg = None
+        if target_area == "forest":
+            q = qm.get_quest("story_1")
+            if q and q.status == "inactive":
+                gate_msg = "Talk to Elder Mira before heading to the forest."
+        elif target_area == "desert":
+            q = qm.get_quest("story_2")
+            if q and q.status != "completed":
+                gate_msg = "Cleanse the forest before entering the desert."
+        elif target_area == "volcano":
+            q = qm.get_quest("story_4")
+            if q and q.status != "completed":
+                gate_msg = "Defeat the Sand Worm before entering the volcano."
+
+        if gate_msg:
+            self.textbox.show(gate_msg)
+            # Push player back slightly
+            if direction == "east":
+                self.player.x -= 8
+            elif direction == "west":
+                self.player.x += 8
+            elif direction == "north":
+                self.player.y += 8
+            elif direction == "south":
+                self.player.y -= 8
+            return
+
         # Calculate current player position in tile coordinates
         player_tile_x = int(player.center_x / TILE_SIZE)
         player_tile_y = int(player.center_y / TILE_SIZE)
@@ -242,6 +276,10 @@ class PlayState(GameplayState):
         if self.textbox.active:
             self._update_textbox(dt)
             return
+
+        # Update NPC dialogue states based on quest progress
+        for npc in self.npcs:
+            npc.update_dialogue_state(self.game.quest_manager)
 
         # Check for NPC interaction first, then sign interaction
         if not self._check_npc_interaction():
@@ -347,10 +385,14 @@ class PlayState(GameplayState):
         # Check player death
         self._check_player_death()
 
-        # Update camera, particles, floating text
+        # Update camera, particles, floating text, ambient
         self._update_camera(dt)
         self._update_particles(dt)
         self._update_floating_texts(dt)
+        self._update_ambient_particles(dt)
+        self._update_damage_vignette(dt)
+        self._update_quest_notification(dt)
+        self._update_item_glow(dt)
 
     def draw(self, surface):
         # Use base class drawing
@@ -359,6 +401,54 @@ class PlayState(GameplayState):
         # Draw area name banner if timer is active
         if self.area_banner_timer > 0:
             self._draw_area_banner(surface)
+
+    def _handle_npc_choice(self, npc, choice_index):
+        """Handle dialogue choice — start/complete quests via quest_manager."""
+        qm = self.game.quest_manager
+        if not npc.quest_id:
+            return
+        quest = qm.get_quest(npc.quest_id)
+        if quest is None:
+            return
+
+        if choice_index == 0:  # Accept / positive choice
+            if quest.status == "inactive":
+                # Start the quest
+                if qm.start_quest(npc.quest_id):
+                    self.show_quest_notification(f"New Quest: {quest.name}!")
+                    # Update objective for "talk" type quests
+                    qm.update_objective("talk", npc.name.split()[0].lower())
+                    # Check for immediate completion (talk-only quests)
+                    if qm.check_quest_complete(npc.quest_id):
+                        rewards = qm.complete_quest(npc.quest_id)
+                        self._apply_quest_rewards(rewards)
+                        self.show_quest_notification(f"Quest Complete: {quest.name}!")
+                    self.game.world_state["story_progress"] = len(qm.get_completed_quests())
+            elif quest.status == "active":
+                # Try to complete if objectives met
+                if qm.check_quest_complete(npc.quest_id):
+                    rewards = qm.complete_quest(npc.quest_id)
+                    self._apply_quest_rewards(rewards)
+                    self.game.world_state["story_progress"] = len(qm.get_completed_quests())
+
+    def _apply_quest_rewards(self, rewards):
+        """Apply quest rewards to the player."""
+        if rewards is None:
+            return
+        from zelda_miloutte.ui.floating_text import FloatingText
+        if "xp" in rewards:
+            leveled = self.player.gain_xp(rewards["xp"])
+            self.floating_texts.append(FloatingText(
+                f"+{rewards['xp']} XP", self.player.center_x, self.player.center_y - 20,
+                (100, 200, 255), size=24
+            ))
+            if leveled:
+                self.floating_texts.append(FloatingText(
+                    "LEVEL UP!", self.player.center_x, self.player.center_y - 40,
+                    (255, 255, 100), size=28, duration=1.5
+                ))
+        if "keys" in rewards:
+            self.player.keys += rewards["keys"]
 
     def _draw_area_banner(self, surface):
         """Draw area name banner with fade-in/fade-out."""

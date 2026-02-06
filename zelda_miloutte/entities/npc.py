@@ -43,6 +43,20 @@ class NPC(Entity):
         fn = frame_fns.get(self.variant, get_villager_frames)
         self._anim = AnimatedSprite(fn(), frame_duration=0.4)
 
+    def update_dialogue_state(self, quest_manager):
+        """Update dialogue state based on quest progress."""
+        if not self.quest_id:
+            return
+        quest = quest_manager.get_quest(self.quest_id)
+        if quest is None:
+            return
+        if quest.status == "completed":
+            self.dialogue_state = "quest_done"
+        elif quest.status == "active":
+            self.dialogue_state = "quest_active"
+        else:
+            self.dialogue_state = "default"
+
     def get_dialogue(self):
         """Return the current dialogue messages based on state."""
         return self.dialogue_tree.get(self.dialogue_state,
