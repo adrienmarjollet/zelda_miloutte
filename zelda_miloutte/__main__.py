@@ -1,3 +1,4 @@
+import asyncio
 from zelda_miloutte.main import main
 
-main()
+asyncio.run(main())
