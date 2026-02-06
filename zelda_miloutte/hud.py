@@ -104,14 +104,15 @@ class HUD:
             self._draw_boss_bar(surface, boss)
 
     def _draw_status_effects(self, surface, player):
-        """Draw status effect indicators next to hearts."""
+        """Draw status effect indicators with remaining duration."""
         effects = getattr(player, 'status_effects', {})
         if not effects:
             return
         font = self._get_font()
+        small = self.small_font
         ex = SCREEN_WIDTH - HUD_MARGIN - 60
         ey = HUD_MARGIN + 2
-        for name in effects:
+        for name, effect_data in effects.items():
             if name == "poison":
                 color = (80, 200, 80)
                 label = "PSN"
@@ -123,7 +124,12 @@ class HUD:
                 label = name[:3].upper()
             txt = font.render(label, True, color)
             surface.blit(txt, (ex, ey))
-            ex -= 40
+            # Draw remaining duration below
+            remaining = effect_data.get("timer", 0) if isinstance(effect_data, dict) else 0
+            if remaining > 0:
+                timer_txt = small.render(f"{remaining:.0f}s", True, color)
+                surface.blit(timer_txt, (ex + 2, ey + 18))
+            ex -= 45
 
     def _draw_boss_bar(self, surface, boss):
         bar_x = (SCREEN_WIDTH - BOSS_BAR_WIDTH) // 2

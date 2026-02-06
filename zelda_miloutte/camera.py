@@ -20,6 +20,11 @@ class Camera:
         self.true_x = 0.0
         self.true_y = 0.0
 
+        # Zoom state (for boss intros)
+        self.zoom = 1.0
+        self._zoom_target = 1.0
+        self._zoom_speed = 2.0
+
     def follow(self, target):
         # Center camera on target
         target_cx = target.x + target.width / 2
@@ -56,6 +61,26 @@ class Camera:
         self.shake_intensity = intensity
         self.shake_duration = duration
         self.shake_timer = duration
+
+    def start_zoom(self, target_zoom, speed=2.0):
+        """Start a smooth zoom effect.
+
+        Args:
+            target_zoom: Target zoom level (1.0 = normal, 1.3 = zoomed in)
+            speed: How fast to zoom (units per second)
+        """
+        self._zoom_target = target_zoom
+        self._zoom_speed = speed
+
+    def update_zoom(self, dt):
+        """Update zoom interpolation."""
+        if abs(self.zoom - self._zoom_target) > 0.01:
+            if self.zoom < self._zoom_target:
+                self.zoom = min(self._zoom_target, self.zoom + self._zoom_speed * dt)
+            else:
+                self.zoom = max(self._zoom_target, self.zoom - self._zoom_speed * dt)
+        else:
+            self.zoom = self._zoom_target
 
     def update_shake(self, dt):
         """Update the shake effect. Call this each frame."""

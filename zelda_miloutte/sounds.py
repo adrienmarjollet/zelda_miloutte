@@ -47,6 +47,7 @@ class SoundManager:
         self.sounds['boss_death'] = self._make_boss_death()
         self.sounds['dungeon_enter'] = self._make_dungeon_enter()
         self.sounds['chest_open'] = self._make_chest_open()
+        self.sounds['victory_fanfare'] = self._make_victory_fanfare()
 
     def _generate_music(self):
         """Generate all music tracks and cache them."""
@@ -56,6 +57,7 @@ class SoundManager:
         self._music_tracks['forest'] = self._generate_forest_music()
         self._music_tracks['desert'] = self._generate_desert_music()
         self._music_tracks['volcano'] = self._generate_volcano_music()
+        self._music_tracks['boss'] = self._generate_boss_music()
 
     def _make_sound(self, duration, generator_func):
         """
@@ -586,6 +588,66 @@ class SoundManager:
         sound = self._concatenate_notes(note_arrays)
         return sound
 
+    def _generate_boss_music(self):
+        """Generate intense, fast-paced boss battle theme — aggressive D minor."""
+        notes = [
+            (147, 0.3),   # D3 (fast)
+            (0, 0.1),
+            (175, 0.3),   # F3
+            (196, 0.4),   # G3
+            (0, 0.1),
+            (220, 0.3),   # A3
+            (233, 0.4),   # Bb3 (tension)
+            (220, 0.3),   # A3
+            (196, 0.3),   # G3
+            (0, 0.1),
+            (175, 0.4),   # F3
+            (147, 0.5),   # D3 (resolve)
+            (0, 0.2),
+            (131, 0.3),   # C3
+            (147, 0.3),   # D3
+            (175, 0.3),   # F3
+            (0, 0.1),
+            (196, 0.4),   # G3
+            (220, 0.3),   # A3
+            (233, 0.4),   # Bb3
+            (0, 0.1),
+            (262, 0.5),   # C4 (peak)
+            (233, 0.3),   # Bb3
+            (220, 0.3),   # A3
+            (196, 0.3),   # G3
+            (0, 0.1),
+            (175, 0.3),   # F3
+            (147, 0.6),   # D3 (heavy resolve)
+            (0, 0.3),
+        ]
+
+        note_arrays = []
+        for freq, dur in notes:
+            if freq == 0:
+                note_arrays.append(self._make_rest(dur))
+            else:
+                note_arrays.append(self._make_note(freq, dur, amplitude=0.32, warm=False))
+        return self._concatenate_notes(note_arrays)
+
+    def _make_victory_fanfare(self):
+        """Ascending triumphant fanfare — C major ascending."""
+        notes = [
+            (262, 0.15), (330, 0.15), (392, 0.15), (523, 0.4),
+            (0, 0.1),
+            (392, 0.15), (523, 0.15), (659, 0.5),
+        ]
+        note_arrays = []
+        for freq, dur in notes:
+            if freq == 0:
+                note_arrays.append(self._make_rest(dur))
+            else:
+                note_arrays.append(self._make_note(freq, dur, amplitude=0.4, warm=True))
+        sound = self._concatenate_notes(note_arrays)
+        if sound:
+            sound.set_volume(0.45)
+        return sound
+
     # Public play methods
 
     def play_sword_swing(self):
@@ -637,6 +699,11 @@ class SoundManager:
         """Play chest open sound."""
         if self.sounds_enabled and 'chest_open' in self.sounds:
             self.sounds['chest_open'].play()
+
+    def play_victory_fanfare(self):
+        """Play victory fanfare after boss defeat."""
+        if self.sounds_enabled and 'victory_fanfare' in self.sounds:
+            self.sounds['victory_fanfare'].play()
 
     # Music playback methods
 

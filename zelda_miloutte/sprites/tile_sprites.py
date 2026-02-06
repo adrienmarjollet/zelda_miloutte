@@ -422,9 +422,78 @@ LAVA_GRID = [
     "lLllrllllylllLyl",
 ]
 
+# ── Tile Variants (2-3 per grass/floor/sand type) ────────────────
+
+# Variant grids swap a few detail characters for visual variety.
+# Selected by position hash so the same tile always looks the same.
+
+GRASS_GRID_V2 = [
+    "gGggggggGggggdgg",
+    "ggggdggggggGgggg",
+    "ggggggggdgggggGg",
+    "gGgggggggggggggg",
+    "ggdgggggGggggggg",
+    "gggggggggggGgggg",
+    "ggggGgggggdggggg",
+    "ggdggggggggggGgg",
+    "gggggGgggggggggg",
+    "ggggggdggggGgggg",
+    "gGgggggggdgggggg",
+    "ggggggGgggggggdg",
+    "gggdggggggGggggg",
+    "ggggggggdggggggg",
+    "gGggggggggggdgGg",
+    "ggggGgggdggggggg",
+]
+
+FLOOR_GRID_V2 = [
+    "fffFffffffflffff",
+    "fflfffffffffffff",
+    "fffffffffffFffff",
+    "fFfffffcffffffff",
+    "ffffffffflfffff",
+    "fffffffFffffffff",
+    "fffffffffffflFff",
+    "fflfffffffffffff",
+    "fffFffffffflffff",
+    "ffffffffffffffff",
+    "ffFfffffcfffffff",
+    "fffffffffflfffff",
+    "ffffffffffffffff",
+    "fFffflfffFfffflf",
+    "ffffffffffffffff",
+    "fflffffffffFffff",
+]
+
+SAND_GRID_V2 = [
+    "sssSssssslssssss",
+    "sssssrsssssssSss",
+    "slssssssssssssss",
+    "ssSssssssSssssss",
+    "ssssssssssssslss",
+    "ssssslsssssSssss",
+    "ssSssssssssslsss",
+    "sssssssSssssssss",
+    "sslssssssssssSss",
+    "ssssssssrsssssss",
+    "sSssslsssssSssss",
+    "ssssssssssssssss",
+    "ssssSsssslssssss",
+    "sssssssssssssSss",
+    "slsssssSssssssss",
+    "ssssssssslssSsss",
+]
+
+_VARIANT_DATA = {
+    0: [(GRASS_GRID, _GRASS_PAL), (GRASS_GRID_V2, _GRASS_PAL)],
+    5: [(FLOOR_GRID, _FLOOR_PAL), (FLOOR_GRID_V2, _FLOOR_PAL)],
+    17: [(SAND_GRID, _SAND_PAL), (SAND_GRID_V2, _SAND_PAL)],
+}
+
 # ── Pre-built surfaces (created on first access) ─────────────────
 
 _tile_cache = {}
+_variant_cache = {}
 
 
 def get_tile_surface(tile_type_value):
@@ -438,6 +507,27 @@ def get_tile_surface(tile_type_value):
     grid, palette = _TILE_DATA[tile_type_value]
     surf = surface_from_grid(grid, palette, scale=2)
     _tile_cache[tile_type_value] = surf
+    return surf
+
+
+def get_tile_surface_variant(tile_type_value, tile_x, tile_y):
+    """Return a variant tile surface chosen by position hash.
+
+    Falls back to the base surface for tiles without variants.
+    """
+    variants = _VARIANT_DATA.get(tile_type_value)
+    if not variants:
+        return get_tile_surface(tile_type_value)
+
+    # Deterministic variant selection based on position
+    variant_idx = (tile_x * 7 + tile_y * 13) % len(variants)
+    cache_key = (tile_type_value, variant_idx)
+    if cache_key in _variant_cache:
+        return _variant_cache[cache_key]
+
+    grid, palette = variants[variant_idx]
+    surf = surface_from_grid(grid, palette, scale=2)
+    _variant_cache[cache_key] = surf
     return surf
 
 

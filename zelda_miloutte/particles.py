@@ -176,3 +176,69 @@ class ParticleSystem:
             size_range=(3, 6),
             gravity=150
         )
+
+    # ── Ambient particles ──────────────────────────────────────────
+
+    def emit_ambient_grass(self, screen_w, screen_h, camera_x, camera_y):
+        """Grass sway — green wisps that float upward (overworld)."""
+        x = random.uniform(camera_x, camera_x + screen_w)
+        y = random.uniform(camera_y + screen_h * 0.5, camera_y + screen_h)
+        colors = [(100, 180, 60), (80, 160, 50), (120, 200, 70)]
+        self.emit(x, y, count=1, color=colors,
+                  speed_range=(8, 20), lifetime_range=(2.0, 3.5),
+                  size_range=(1, 3), gravity=-5)
+
+    def emit_ambient_spores(self, screen_w, screen_h, camera_x, camera_y):
+        """Floating spores — glowing dots that drift slowly (forest)."""
+        x = random.uniform(camera_x, camera_x + screen_w)
+        y = random.uniform(camera_y, camera_y + screen_h)
+        colors = [(120, 220, 100), (180, 255, 120), (80, 180, 60)]
+        self.emit(x, y, count=1, color=colors,
+                  speed_range=(5, 15), lifetime_range=(3.0, 5.0),
+                  size_range=(1, 3), gravity=-3)
+
+    def emit_ambient_sand(self, screen_w, screen_h, camera_x, camera_y):
+        """Sand wind — tan particles blowing rightward (desert)."""
+        x = random.uniform(camera_x - 20, camera_x + screen_w * 0.3)
+        y = random.uniform(camera_y, camera_y + screen_h)
+        self.particles.append(Particle(
+            x, y,
+            random.uniform(40, 80), random.uniform(-5, 5),
+            (210, 180, 120), random.uniform(2.0, 4.0),
+            random.uniform(1, 2), gravity=0
+        ))
+
+    def emit_ambient_embers(self, screen_w, screen_h, camera_x, camera_y):
+        """Floating embers — orange dots rising (volcano)."""
+        x = random.uniform(camera_x, camera_x + screen_w)
+        y = random.uniform(camera_y + screen_h * 0.3, camera_y + screen_h)
+        colors = [(255, 120, 30), (255, 80, 20), (255, 200, 50)]
+        self.emit(x, y, count=1, color=colors,
+                  speed_range=(10, 30), lifetime_range=(2.0, 4.0),
+                  size_range=(1, 3), gravity=-15)
+
+    # ── Enhanced effects ───────────────────────────────────────────
+
+    def emit_death_burst_dramatic(self, x, y, color):
+        """More dramatic enemy death burst with extra particles."""
+        self.emit(x, y, count=random.randint(20, 30), color=color,
+                  speed_range=(100, 200), lifetime_range=(0.4, 0.8),
+                  size_range=(2, 6), gravity=200)
+        # Add white flash particles
+        self.emit(x, y, count=5, color=(255, 255, 255),
+                  speed_range=(60, 100), lifetime_range=(0.1, 0.2),
+                  size_range=(4, 8), gravity=0)
+
+    def emit_levelup_burst(self, x, y):
+        """Golden particle explosion on level up."""
+        colors = [(255, 200, 50), (255, 220, 100), (255, 180, 30), (255, 255, 150)]
+        self.emit(x, y, count=random.randint(25, 35), color=colors,
+                  speed_range=(80, 180), lifetime_range=(0.5, 1.0),
+                  size_range=(2, 5), gravity=-30)
+
+    def emit_item_glow(self, x, y):
+        """Subtle glow particles around pickups."""
+        colors = [(255, 255, 200), (255, 220, 100)]
+        self.emit(x, y, count=1, color=colors,
+                  speed_range=(5, 15), lifetime_range=(0.5, 1.0),
+                  size_range=(1, 3), gravity=-10)
