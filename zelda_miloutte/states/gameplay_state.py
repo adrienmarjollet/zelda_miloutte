@@ -1,6 +1,7 @@
+import random
 import pygame
 from zelda_miloutte.states.state import State
-from zelda_miloutte.settings import SWORD_DAMAGE, RED
+from zelda_miloutte.settings import SWORD_DAMAGE, RED, SCREEN_WIDTH, SCREEN_HEIGHT
 from zelda_miloutte.entities.item import Item
 from zelda_miloutte.world.tile import TileType
 from zelda_miloutte.ui.textbox import TextBox
@@ -27,6 +28,11 @@ class GameplayState(State):
         self.npcs = []
         self.dialogue_box = None
         self.fire_trails = []
+        self._ambient_timer = 0.0
+        self._damage_vignette_timer = 0.0
+        self._quest_notification = None
+        self._quest_notification_timer = 0.0
+        self._screen_flash_alpha = 0
         self._init_dialogue_box()
 
     def _init_dialogue_box(self):
@@ -121,6 +127,7 @@ class GameplayState(State):
                 if player.take_damage(enemy.damage):
                     # Trigger screen shake on damage
                     self.camera.shake(5, 0.3)
+                    self._trigger_damage_vignette()
                     # Apply status effects from special enemies
                     if hasattr(enemy, 'applies_poison') and enemy.applies_poison:
                         player.apply_status("poison", 6.0, {"tick_damage": 1, "tick_interval": 2.0})
@@ -259,7 +266,7 @@ class GameplayState(State):
         from zelda_miloutte.ui.floating_text import FloatingText
         for enemy in self.enemies:
             if not enemy.alive:
-                self.particles.emit_death_burst(enemy.center_x, enemy.center_y, enemy.color)
+                self.particles.emit_death_burst_dramatic(enemy.center_x, enemy.center_y, enemy.color)
                 # Check for item drops
                 drop = enemy.get_drop()
                 if drop is not None:
@@ -277,6 +284,38 @@ class GameplayState(State):
                         "LEVEL UP!", self.player.center_x, self.player.center_y - 20,
                         (255, 255, 100), size=28, duration=1.5
                     ))
+                    self.particles.emit_levelup_burst(self.player.center_x, self.player.center_y)
+                # Track enemy kills for sidequests
+                enemy_type = type(enemy).__name__.lower()
+                self.game.quest_manager.update_objective("kill", enemy_type)
+                # Also count as generic "enemy" for broad kill quests
+                self.game.quest_manager.update_objective("kill", "enemy")
+                # Auto-complete quests whose objectives are now met
+                for quest in self.game.quest_manager.get_active_quests():
+                    if self.game.quest_manager.check_quest_complete(quest.id):
+                        rewards = self.game.quest_manager.complete_quest(quest.id)
+                        self.game.world_state["story_progress"] = len(
+                            self.game.quest_manager.get_completed_quests()
+                        )
+                        self.show_quest_notification(f"Quest Complete: {quest.name}!")
+                        # Apply rewards
+                        if rewards and "xp" in rewards:
+                            leveled = self.player.gain_xp(rewards["xp"])
+                            self.floating_texts.append(FloatingText(
+                                f"+{rewards['xp']} XP", self.player.center_x,
+                                self.player.center_y - 20, (100, 200, 255)
+                            ))
+                            if leveled:
+                                self.floating_texts.append(FloatingText(
+                                    "LEVEL UP!", self.player.center_x,
+                                    self.player.center_y - 40, (255, 255, 100),
+                                    size=28, duration=1.5
+                                ))
+                                self.particles.emit_levelup_burst(
+                                    self.player.center_x, self.player.center_y
+                                )
+                        if rewards and "keys" in rewards:
+                            self.player.keys += rewards.get("keys", 0)
         self.enemies = [e for e in self.enemies if e.alive]
         self.items = [i for i in self.items if i.alive]
 
@@ -384,6 +423,51 @@ class GameplayState(State):
 
         return False
 
+    def _update_ambient_particles(self, dt):
+        """Spawn area-specific ambient particles."""
+        from zelda_miloutte.settings import SCREEN_WIDTH, SCREEN_HEIGHT
+        self._ambient_timer += dt
+        area_id = getattr(self, 'area_id', None)
+        # Spawn ~3 ambient particles per second
+        if self._ambient_timer >= 0.33:
+            self._ambient_timer = 0.0
+            cx, cy = self.camera.true_x, self.camera.true_y
+            if area_id == "overworld":
+                self.particles.emit_ambient_grass(SCREEN_WIDTH, SCREEN_HEIGHT, cx, cy)
+            elif area_id == "forest":
+                self.particles.emit_ambient_spores(SCREEN_WIDTH, SCREEN_HEIGHT, cx, cy)
+            elif area_id == "desert":
+                self.particles.emit_ambient_sand(SCREEN_WIDTH, SCREEN_HEIGHT, cx, cy)
+            elif area_id == "volcano":
+                self.particles.emit_ambient_embers(SCREEN_WIDTH, SCREEN_HEIGHT, cx, cy)
+
+    def _update_damage_vignette(self, dt):
+        """Update damage vignette timer."""
+        if self._damage_vignette_timer > 0:
+            self._damage_vignette_timer -= dt
+
+    def _trigger_damage_vignette(self):
+        """Trigger red edge flash on player hit."""
+        self._damage_vignette_timer = 0.3
+
+    def _update_quest_notification(self, dt):
+        """Update quest notification popup."""
+        if self._quest_notification_timer > 0:
+            self._quest_notification_timer -= dt
+            if self._quest_notification_timer <= 0:
+                self._quest_notification = None
+
+    def show_quest_notification(self, text):
+        """Show a quest notification banner."""
+        self._quest_notification = text
+        self._quest_notification_timer = 2.5
+
+    def _update_item_glow(self, dt):
+        """Emit glow particles around items on the ground."""
+        for item in self.items:
+            if item.alive and random.random() < dt * 2:
+                self.particles.emit_item_glow(item.center_x, item.center_y)
+
     def _update_floating_texts(self, dt):
         """Update floating texts and remove expired ones."""
         for ft in self.floating_texts:
@@ -432,7 +516,50 @@ class GameplayState(State):
         for ft in self.floating_texts:
             ft.draw(surface, self.camera)
         self.hud.draw(surface, self.player)
+        # Damage vignette overlay
+        if self._damage_vignette_timer > 0:
+            vignette_alpha = int(80 * (self._damage_vignette_timer / 0.3))
+            vig_surf = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+            # Red edges only — draw rectangles on edges
+            edge = 40
+            for i in range(edge):
+                a = int(vignette_alpha * (1 - i / edge))
+                vig_surf.fill((200, 0, 0, a), (0, i, SCREEN_WIDTH, 1))
+                vig_surf.fill((200, 0, 0, a), (0, SCREEN_HEIGHT - 1 - i, SCREEN_WIDTH, 1))
+                vig_surf.fill((200, 0, 0, a), (i, 0, 1, SCREEN_HEIGHT))
+                vig_surf.fill((200, 0, 0, a), (SCREEN_WIDTH - 1 - i, 0, 1, SCREEN_HEIGHT))
+            surface.blit(vig_surf, (0, 0))
+        # Screen flash (boss phase change)
+        if self._screen_flash_alpha > 0:
+            flash_surf = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+            flash_surf.fill((255, 255, 255, int(self._screen_flash_alpha)))
+            surface.blit(flash_surf, (0, 0))
+        # Quest notification popup
+        if self._quest_notification and self._quest_notification_timer > 0:
+            self._draw_quest_notification(surface)
         # Draw UI layers last
         self.textbox.draw(surface)
         if self.dialogue_box:
             self.dialogue_box.draw(surface)
+
+    def _draw_quest_notification(self, surface):
+        """Draw floating quest notification banner."""
+        font = pygame.font.Font(None, 32)
+        text_surf = font.render(self._quest_notification, True, (255, 220, 50))
+        # Fade based on timer
+        if self._quest_notification_timer > 2.0:
+            alpha = int(255 * (2.5 - self._quest_notification_timer) / 0.5)
+        elif self._quest_notification_timer < 0.5:
+            alpha = int(255 * self._quest_notification_timer / 0.5)
+        else:
+            alpha = 255
+        alpha = max(0, min(255, alpha))
+        text_surf.set_alpha(alpha)
+        # Draw centered near top
+        x = (SCREEN_WIDTH - text_surf.get_width()) // 2
+        y = 50
+        # Background bar
+        bg = pygame.Surface((text_surf.get_width() + 20, text_surf.get_height() + 10), pygame.SRCALPHA)
+        bg.fill((0, 0, 0, int(alpha * 0.6)))
+        surface.blit(bg, (x - 10, y - 5))
+        surface.blit(text_surf, (x, y))

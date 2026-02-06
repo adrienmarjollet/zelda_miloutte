@@ -9,39 +9,44 @@ from zelda_miloutte.sounds import get_sound_manager
 
 
 class CinematicState(State):
-    """Cinematic intro sequence that plays before the title screen."""
+    """Cinematic sequence — intro, mid-game, or ending."""
 
-    def __init__(self, game):
+    # Presets for different cutscene types
+    INTRO_SCENES = [
+        {"duration": 5.0, "text": "In a land of ancient magic...", "particle_color": (255, 200, 50)},
+        {"duration": 5.0, "text": "A darkness awakened...", "particle_color": (150, 50, 200)},
+        {"duration": 5.0, "text": "Its minions spread across the land...", "particle_color": (50, 180, 50)},
+        {"duration": 5.0, "text": "But one hero remained...", "particle_color": (255, 200, 50)},
+        {"duration": 5.0, "text": "Miloutte, the cat-eared adventurer, set out to save the world.", "particle_color": (255, 200, 50)},
+    ]
+
+    MIDGAME_SCENES = [
+        {"duration": 4.0, "text": "The Forest Guardian has fallen...", "particle_color": (50, 180, 50)},
+        {"duration": 4.0, "text": "But the corruption runs deeper than anyone knew.", "particle_color": (150, 50, 200)},
+        {"duration": 4.0, "text": "An ancient tomb stirs beneath the desert sands...", "particle_color": (210, 180, 120)},
+        {"duration": 4.0, "text": "Miloutte must journey south to stop the spreading evil.", "particle_color": (255, 200, 50)},
+    ]
+
+    ENDING_SCENES = [
+        {"duration": 4.0, "text": "The Inferno Drake is slain!", "particle_color": (255, 120, 30)},
+        {"duration": 4.0, "text": "The ancient seal is restored...", "particle_color": (255, 200, 50)},
+        {"duration": 4.0, "text": "Peace returns to the land of Miloutte.", "particle_color": (100, 200, 100)},
+        {"duration": 5.0, "text": "Thank you for playing!", "particle_color": (255, 200, 50)},
+        {"duration": 4.0, "text": "Zelda Miloutte — A game by the Miloutte team", "particle_color": (255, 255, 255)},
+    ]
+
+    def __init__(self, game, cutscene_type="intro", on_complete=None):
         super().__init__(game)
+        self._cutscene_type = cutscene_type
+        self._on_complete = on_complete
 
         # Scene definitions
-        self.scenes = [
-            {
-                "duration": 5.0,
-                "text": "In a land of ancient magic...",
-                "particle_color": (255, 200, 50),  # gold
-            },
-            {
-                "duration": 5.0,
-                "text": "A darkness awakened...",
-                "particle_color": (150, 50, 200),  # purple
-            },
-            {
-                "duration": 5.0,
-                "text": "Its minions spread across the land...",
-                "particle_color": (50, 180, 50),  # green
-            },
-            {
-                "duration": 5.0,
-                "text": "But one hero remained...",
-                "particle_color": (255, 200, 50),  # gold
-            },
-            {
-                "duration": 5.0,
-                "text": "Miloutte, the cat-eared adventurer, set out to save the world.",
-                "particle_color": (255, 200, 50),  # gold
-            },
-        ]
+        if cutscene_type == "midgame":
+            self.scenes = list(self.MIDGAME_SCENES)
+        elif cutscene_type == "ending":
+            self.scenes = list(self.ENDING_SCENES)
+        else:
+            self.scenes = list(self.INTRO_SCENES)
 
         self.current_scene = 0
         self.scene_timer = 0.0
@@ -169,8 +174,11 @@ class CinematicState(State):
         return self._sword_surf
 
     def _go_to_title(self):
-        from zelda_miloutte.states.title_state import TitleState
-        self.game.change_state(TitleState(self.game))
+        if self._on_complete:
+            self._on_complete()
+        else:
+            from zelda_miloutte.states.title_state import TitleState
+            self.game.change_state(TitleState(self.game))
 
     def handle_event(self, event):
         if event.type == pygame.KEYDOWN and event.key in (pygame.K_RETURN, pygame.K_SPACE):

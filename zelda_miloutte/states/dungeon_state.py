@@ -100,6 +100,8 @@ class DungeonState(GameplayState):
             )
             self.chests.append(chest)
 
+        # Store boss config for ID tracking
+        self._boss_config = boss_config
         self.victory = False
         self.victory_timer = 0.0
         self.victory_duration = 3.0
@@ -108,13 +110,16 @@ class DungeonState(GameplayState):
         self.particles = ParticleSystem()
         self.projectiles = []
         self.boss_death_emitted = False
+        self._boss_prev_phase = 1
+        self._boss_intro_timer = 1.5  # Brief zoom-in when boss appears
+        self.camera.start_zoom(1.15, speed=0.3)  # Gentle zoom in
 
         # Initialize signs
         self._spawn_signs()
 
     def enter(self):
         """Called when entering this state."""
-        get_sound_manager().play_music('dungeon')
+        get_sound_manager().play_music('boss')
 
     def _spawn_signs(self):
         from zelda_miloutte.entities.sign import Sign
@@ -152,13 +157,41 @@ class DungeonState(GameplayState):
         if self.victory:
             self.victory_timer += dt
             if self.victory_timer >= self.victory_duration:
-                # Return to overworld
+                # Determine boss type for cutscene triggers
+                boss_class_name = type(self.boss).__name__
 
                 def return_to_overworld():
                     self._copy_stats_back()
                     self.game.pop_state()
 
-                self.game.transition_to(return_to_overworld)
+                if boss_class_name == "ForestGuardian":
+                    # Mid-game cutscene after forest boss
+                    def show_midgame_cutscene():
+                        self._copy_stats_back()
+                        self.game.pop_state()  # pop dungeon
+                        from zelda_miloutte.states.cinematic_state import CinematicState
+                        self.game.push_state(CinematicState(
+                            self.game, cutscene_type="midgame",
+                            on_complete=lambda: self.game.pop_state()
+                        ))
+                    self.game.transition_to(show_midgame_cutscene)
+                elif boss_class_name == "InfernoDrake":
+                    # Ending cutscene after final boss
+                    def show_ending():
+                        self._copy_stats_back()
+                        self.game.pop_state()  # pop dungeon
+                        from zelda_miloutte.states.cinematic_state import CinematicState
+                        from zelda_miloutte.states.title_state import TitleState
+                        self.game.push_state(CinematicState(
+                            self.game, cutscene_type="ending",
+                            on_complete=lambda: (
+                                self.game.pop_state(),
+                                self.game.change_state(TitleState(self.game)),
+                            )
+                        ))
+                    self.game.transition_to(show_ending)
+                else:
+                    self.game.transition_to(return_to_overworld)
             return
 
         # If textbox is active, only update textbox (pauses game)
@@ -182,6 +215,26 @@ class DungeonState(GameplayState):
             # If boss just started charging, trigger screen shake
             if not was_charging and getattr(self.boss, 'charging', False):
                 self.camera.shake(8, 0.4)
+
+        # Boss intro zoom timer
+        if self._boss_intro_timer > 0:
+            self._boss_intro_timer -= dt
+            if self._boss_intro_timer <= 0:
+                self.camera.start_zoom(1.0, speed=0.5)  # Zoom back to normal
+
+        self.camera.update_zoom(dt)
+
+        # Detect boss phase change -> screen flash
+        boss_phase = getattr(self.boss, 'phase', 1)
+        if boss_phase != self._boss_prev_phase:
+            self._boss_prev_phase = boss_phase
+            self._screen_flash_alpha = 200
+            self.camera.shake(10, 0.5)
+            get_sound_manager().play_boss_roar()
+
+        # Decay screen flash
+        if self._screen_flash_alpha > 0:
+            self._screen_flash_alpha = max(0, self._screen_flash_alpha - 400 * dt)
 
         # Handle vine summons from Forest Guardian
         if hasattr(self.boss, 'pending_summons') and self.boss.pending_summons:
@@ -269,6 +322,7 @@ class DungeonState(GameplayState):
             if player.take_damage(self.boss.damage):
                 # Trigger screen shake on damage
                 self.camera.shake(5, 0.3)
+                self._trigger_damage_vignette()
             # Apply stronger knockback to player from boss
             player.apply_knockback(self.boss.center_x, self.boss.center_y, 350)
 
@@ -302,6 +356,8 @@ class DungeonState(GameplayState):
                 self.particles.emit_boss_death(self.boss.center_x, self.boss.center_y)
                 self.boss_death_emitted = True
                 self.camera.shake(12, 0.8)
+                get_sound_manager().play_victory_fanfare()
+                get_sound_manager().stop_music()
                 drop = self.boss.get_drop()
                 if drop is not None:
                     item = Item(self.boss.rect.centerx, self.boss.rect.centery, drop)
@@ -318,6 +374,46 @@ class DungeonState(GameplayState):
                         "LEVEL UP!", self.player.center_x, self.player.center_y - 20,
                         (255, 255, 100), size=28, duration=1.5
                     ))
+                # Track boss defeat for quests
+                boss_id = getattr(self.boss, 'boss_id', None)
+                if boss_id is None:
+                    # Infer boss_id from class name or config
+                    class_name = type(self.boss).__name__
+                    boss_id_map = {
+                        "Boss": "boss_1",
+                        "ForestGuardian": "forest_guardian",
+                        "SandWorm": "sand_worm",
+                        "InfernoDrake": "inferno_drake",
+                    }
+                    boss_id = boss_id_map.get(class_name, class_name.lower())
+                    # Check if this is boss_2 (Ice Demon) via config
+                    if class_name == "Boss" and self._boss_config and self._boss_config.get("color") == ICE_BLUE:
+                        boss_id = "boss_2"
+                if boss_id not in self.game.world_state["defeated_bosses"]:
+                    self.game.world_state["defeated_bosses"].append(boss_id)
+                self.game.quest_manager.update_objective("defeat_boss", boss_id)
+                # Auto-complete any quests whose objectives are now met
+                for quest in self.game.quest_manager.get_active_quests():
+                    if self.game.quest_manager.check_quest_complete(quest.id):
+                        rewards = self.game.quest_manager.complete_quest(quest.id)
+                        self.game.world_state["story_progress"] = len(
+                            self.game.quest_manager.get_completed_quests()
+                        )
+                        self.show_quest_notification(f"Quest Complete: {quest.name}!")
+                        if rewards and "xp" in rewards:
+                            leveled = self.player.gain_xp(rewards["xp"])
+                            self.floating_texts.append(FloatingText(
+                                f"+{rewards['xp']} XP", self.player.center_x,
+                                self.player.center_y - 20, (100, 200, 255)
+                            ))
+                            if leveled:
+                                self.floating_texts.append(FloatingText(
+                                    "LEVEL UP!", self.player.center_x,
+                                    self.player.center_y - 40, (255, 255, 100),
+                                    size=28, duration=1.5
+                                ))
+                        if rewards and "keys" in rewards:
+                            self.player.keys += rewards.get("keys", 0)
             self.victory = True
             self.victory_timer = 0.0
 
@@ -336,10 +432,12 @@ class DungeonState(GameplayState):
         # Check player death
         self._check_player_death()
 
-        # Update camera, particles, floating text
+        # Update camera, particles, floating text, polish
         self._update_camera(dt)
         self._update_particles(dt)
         self._update_floating_texts(dt)
+        self._update_damage_vignette(dt)
+        self._update_item_glow(dt)
 
     def draw(self, surface):
         # Draw tilemap, chests, items, enemies, player, particles
