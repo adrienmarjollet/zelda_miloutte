@@ -1,13 +1,12 @@
 import random
 import pygame
 from zelda_miloutte.states.state import State
-from zelda_miloutte.settings import SWORD_DAMAGE, RED, SCREEN_WIDTH, SCREEN_HEIGHT
+from zelda_miloutte.settings import RED, SCREEN_WIDTH, SCREEN_HEIGHT
 from zelda_miloutte.entities.item import Item
 from zelda_miloutte.entities.gold import Gold
 from zelda_miloutte.world.tile import TileType
 from zelda_miloutte.ui.textbox import TextBox
 from zelda_miloutte.ui.shop_ui import ShopUI
-from zelda_miloutte.time_system import PHASE_NIGHT
 
 
 class GameplayState(State):
@@ -29,7 +28,7 @@ class GameplayState(State):
         self.textbox = TextBox()
         self.floating_texts = []
         self.npcs = []
-        self.dialogue_box = None
+        self._interacting_npc = None
         self.fire_trails = []
         self._ambient_timer = 0.0
         self._damage_vignette_timer = 0.0
@@ -66,7 +65,8 @@ class GameplayState(State):
         player = self.player
         input_h = self.game.input
 
-        player.apply_input(input_h)
+        # Pass companion to player for speed bonus calculation
+        player.apply_input(input_h, self.companion)
 
         # Move with tile collision (axis-separated)
         player.move_x(dt)
@@ -74,11 +74,29 @@ class GameplayState(State):
         player.move_y(dt)
         self.tilemap.resolve_collision_y(player)
 
+        # Apply companion MP regen bonus (Fairy) before player.update()
+        if self.companion is not None:
+            from zelda_miloutte.entities.companion import Fairy
+            if isinstance(self.companion, Fairy):
+                player._companion_mp_bonus = 0.50  # +50% MP regen
+            else:
+                player._companion_mp_bonus = 0.0
+        else:
+            player._companion_mp_bonus = 0.0
+
         player.update(dt)
 
         # Emit dust particles when player is moving
         if player.is_moving:
             self.particles.emit_dust(player.center_x, player.y + player.height)
+
+        # Handle ability cycling (Q key)
+        if input_h.cycle_ability:
+            player.cycle_ability()
+
+        # Handle ability activation (R key)
+        if input_h.use_ability and player.active_ability is not None:
+            player.active_ability.use(player, self.enemies, self.projectiles, self.particles, self.camera)
 
     def _update_enemies(self, dt):
         """Update all enemies and collect projectiles from archers, vine snappers, and magma golems. Collect fire trails from fire imps."""
@@ -96,8 +114,22 @@ class GameplayState(State):
         # Update group behavior (flanking/spread) for enemies chasing the player
         update_group_behavior(self.enemies, self.player)
 
+        # Apply companion stealth factor to enemy detection ranges (Cat)
+        stealth_factor = 0.0
+        if self.companion is not None:
+            stealth_factor = self.companion.get_stealth_factor()
+
         for enemy in self.enemies:
+            # Temporarily reduce detection range based on stealth factor
+            original_detection = getattr(enemy, 'detection_range', None)
+            if original_detection is not None and stealth_factor > 0:
+                enemy.detection_range = original_detection * (1.0 - stealth_factor)
+
             enemy.update(dt, self.player, self.tilemap)
+
+            # Restore original detection range
+            if original_detection is not None and stealth_factor > 0:
+                enemy.detection_range = original_detection
             # Discover enemy in bestiary on first encounter
             enemy_class = type(enemy).__name__
             self.game.bestiary.discover(enemy_class)
@@ -192,6 +224,54 @@ class GameplayState(State):
         for plate in self.pressure_plates:
             if plate.check_activation(self.player, self.push_blocks):
                 self._on_pressure_plate_activated(plate)
+
+    def _spawn_puzzles(self, spawn_dict):
+        """Spawn puzzle entities from spawn data.
+
+        Args:
+            spawn_dict: Dictionary containing puzzle spawn data with a "puzzles" key
+        """
+        from zelda_miloutte.entities.puzzle import PushBlock, PressurePlate, CrystalSwitch, Torch
+
+        self.push_blocks = []
+        self.pressure_plates = []
+        self.crystal_switches = []
+        self.torches = []
+
+        puzzle_data = spawn_dict.get("puzzles", [])
+        for pdata in puzzle_data:
+            ptype = pdata.get("type")
+            x = pdata["x"]
+            y = pdata["y"]
+            puzzle_id = pdata.get("id")
+            trigger = pdata.get("trigger")
+
+            if ptype == "push_block":
+                block = PushBlock(x, y, block_id=puzzle_id)
+                self.push_blocks.append(block)
+
+            elif ptype == "pressure_plate":
+                linked_targets = [trigger] if trigger else []
+                plate = PressurePlate(x, y, plate_id=puzzle_id, linked_targets=linked_targets)
+                self.pressure_plates.append(plate)
+
+            elif ptype == "crystal_switch":
+                linked_targets = [trigger] if trigger else []
+                initial_state = pdata.get("state", False)
+                switch = CrystalSwitch(x, y, switch_id=puzzle_id, linked_targets=linked_targets, state=initial_state)
+                self.crystal_switches.append(switch)
+
+            elif ptype == "torch":
+                linked_targets = [trigger] if trigger else []
+                torch = Torch(x, y, torch_id=puzzle_id, linked_targets=linked_targets)
+                self.torches.append(torch)
+
+        # Store puzzle door configuration for later use
+        self._puzzle_doors = spawn_dict.get("puzzle_doors", {})
+
+        # Store original map data for barrier restoration when crystal switches toggle
+        import copy
+        self._original_map_data = copy.deepcopy(self.tilemap.data)
 
     def _check_push_block_interaction(self):
         """Check if player is pushing into a push block."""
@@ -573,9 +653,6 @@ class GameplayState(State):
         inp = self.game.input
         if inp.interact:
             self.dialogue_box.advance()
-        if hasattr(inp, 'move_y'):
-            # Check for up/down on this frame for choice navigation
-            pass  # Choices handled via handle_event in subclass
 
         if not self.dialogue_box.active:
             # Dialogue just ended - check if a choice was made
@@ -713,7 +790,11 @@ class GameplayState(State):
         return False
 
     def _update_night_enemies(self):
-        """Apply night-time stat boosts to enemies."""
+        """Apply night-time stat boosts to enemies.
+
+        Night scaling (1.5x HP/damage) is applied multiplicatively on top of NG+ scaling.
+        Example: NG+2 enemy with base HP=10 becomes 22 HP (10 * 1.5^2), then 33 HP at night (22 * 1.5).
+        """
         time_sys = self.game.time_system
         for enemy in self.enemies:
             if not hasattr(enemy, '_night_boosted'):
@@ -882,6 +963,10 @@ class GameplayState(State):
         # Draw companion after player (on top)
         if self.companion is not None:
             self.companion.draw(surface, self.camera)
+        # Draw active ability visual effects
+        for ability in self.player.abilities:
+            if ability.active:
+                ability.draw(surface, self.camera, self.player)
         self.particles.draw(surface, self.camera)
         # Day/night overlay (drawn after entities, before HUD)
         self._draw_day_night_overlay(surface)

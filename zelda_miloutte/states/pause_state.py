@@ -40,12 +40,17 @@ class PauseState(State):
             "player": {
                 "hp": player.hp,
                 "max_hp": player.max_hp,
+                "mp": getattr(player, "mp", 50),
+                "max_mp": getattr(player, "max_mp", 50),
                 "keys": player.keys,
                 "level": getattr(player, "level", 1),
                 "xp": getattr(player, "xp", 0),
                 "xp_to_next": getattr(player, "xp_to_next", 100),
                 "base_attack": getattr(player, "base_attack", 0),
                 "base_defense": getattr(player, "base_defense", 0),
+                "gold": player.gold,
+                "inventory": player.inventory.to_dict(),
+                "unlocked_abilities": getattr(player, "unlocked_abilities", []),
             },
             "defeated_bosses": self.game.world_state.get("defeated_bosses", []),
             "opened_chests": self.game.world_state.get("opened_chests", []),
@@ -56,6 +61,9 @@ class PauseState(State):
         # Save minimap visited tiles
         if hasattr(play_state, 'minimap'):
             data["visited_tiles"] = play_state.minimap.get_save_data()
+        # Save companion state
+        if hasattr(play_state, 'companion') and play_state.companion is not None:
+            data["companion"] = play_state.companion.to_dict()
         return data
 
     def _save_to_slot(self, slot):

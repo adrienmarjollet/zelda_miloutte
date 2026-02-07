@@ -39,6 +39,8 @@ class DungeonState(GameplayState):
         self.player = Player(spawn[0] * TILE_SIZE, spawn[1] * TILE_SIZE)
         self.player.hp = play_state.player.hp
         self.player.max_hp = play_state.player.max_hp
+        self.player.mp = play_state.player.mp
+        self.player.max_mp = play_state.player.max_mp
         self.player.keys = play_state.player.keys
         self.player.level = play_state.player.level
         self.player.xp = play_state.player.xp
@@ -47,6 +49,19 @@ class DungeonState(GameplayState):
         self.player.base_defense = play_state.player.base_defense
         self.player.gold = play_state.player.gold
         self.player.inventory = play_state.player.inventory
+        self.player.unlocked_abilities = play_state.player.unlocked_abilities
+        # Copy ability instances (not just names)
+        self.player.abilities = play_state.player.abilities
+        self.player.active_ability_index = play_state.player.active_ability_index
+
+        # Carry companion from overworld to dungeon
+        self.companion = play_state.companion
+        if self.companion is not None:
+            # Reposition companion near player in dungeon
+            self.companion.x = self.player.x - 30
+            self.companion.y = self.player.y
+            self.companion.target_x = self.companion.x
+            self.companion.target_y = self.companion.y
 
         self.camera = Camera(self.tilemap.pixel_width, self.tilemap.pixel_height)
         self.hud = HUD()
@@ -54,6 +69,9 @@ class DungeonState(GameplayState):
         # Enemies
         from zelda_miloutte.entities.archer import Archer
         from zelda_miloutte.entities.vine_snapper import VineSnapper
+        from zelda_miloutte.entities.ice_wraith import IceWraith
+        from zelda_miloutte.entities.frost_golem import FrostGolem
+        from zelda_miloutte.ng_plus import scale_enemy_stats
         self.enemies = []
         for edata in dungeon_spawns.get("enemies", []):
             # Check enemy type
@@ -66,14 +84,40 @@ class DungeonState(GameplayState):
                 e = VineSnapper(
                     edata["x"] * TILE_SIZE, edata["y"] * TILE_SIZE,
                 )
+            elif edata.get("type") == "ice_wraith":
+                e = IceWraith(
+                    edata["x"] * TILE_SIZE, edata["y"] * TILE_SIZE,
+                )
+            elif edata.get("type") == "frost_golem":
+                e = FrostGolem(
+                    edata["x"] * TILE_SIZE, edata["y"] * TILE_SIZE,
+                )
             else:
                 e = Enemy(
                     edata["x"] * TILE_SIZE, edata["y"] * TILE_SIZE,
                     edata.get("patrol", []),
                 )
+
+            # Apply NG+ scaling if in a New Game+ cycle
+            if self.game.ng_plus_count > 0:
+                scaled_hp, scaled_damage, scaled_speed = scale_enemy_stats(
+                    e.hp, e.damage, e.speed, self.game.ng_plus_count
+                )
+                e.hp = scaled_hp
+                e.max_hp = scaled_hp
+                e.damage = scaled_damage
+                e.speed = scaled_speed
+                # Scale chase_speed if enemy has it
+                if hasattr(e, 'chase_speed'):
+                    _, _, scaled_chase = scale_enemy_stats(
+                        e.max_hp, e.damage, e.chase_speed, self.game.ng_plus_count
+                    )
+                    e.chase_speed = scaled_chase
+
             self.enemies.append(e)
 
         # Boss - use custom class if provided, otherwise default Boss
+        from zelda_miloutte.ng_plus import scale_boss_stats, get_boss_cooldown_scale
         bdata = dungeon_spawns["boss"]
         if boss_class is not None:
             # Use custom boss class (e.g., ForestGuardian)
@@ -82,6 +126,53 @@ class DungeonState(GameplayState):
             self.boss = Boss(bdata["x"] * TILE_SIZE, bdata["y"] * TILE_SIZE)
         else:
             self.boss = Boss(bdata["x"] * TILE_SIZE, bdata["y"] * TILE_SIZE, **boss_config)
+
+        # Apply NG+ scaling to boss if in a New Game+ cycle
+        if self.game.ng_plus_count > 0:
+            scaled_hp, scaled_damage, scaled_speed = scale_boss_stats(
+                self.boss.hp, self.boss.damage, self.boss.speed, self.game.ng_plus_count
+            )
+            self.boss.hp = scaled_hp
+            self.boss.max_hp = scaled_hp
+            self.boss.damage = scaled_damage
+            self.boss.speed = scaled_speed
+            # Scale chase_speed and charge_speed if boss has them
+            if hasattr(self.boss, 'chase_speed'):
+                _, _, scaled_chase = scale_boss_stats(
+                    self.boss.max_hp, self.boss.damage, self.boss.chase_speed, self.game.ng_plus_count
+                )
+                self.boss.chase_speed = scaled_chase
+            if hasattr(self.boss, 'charge_speed'):
+                _, _, scaled_charge = scale_boss_stats(
+                    self.boss.max_hp, self.boss.damage, self.boss.charge_speed, self.game.ng_plus_count
+                )
+                self.boss.charge_speed = scaled_charge
+            # Apply faster attack cooldowns for all boss types
+            cooldown_scale = get_boss_cooldown_scale(self.game.ng_plus_count)
+            # Standard Boss charge attack
+            if hasattr(self.boss, 'charge_cooldown'):
+                if not hasattr(self.boss, '_base_charge_cooldown'):
+                    from zelda_miloutte.settings import BOSS_CHARGE_COOLDOWN
+                    self.boss._base_charge_cooldown = BOSS_CHARGE_COOLDOWN
+                self.boss.charge_cooldown = self.boss._base_charge_cooldown * cooldown_scale
+            # Forest Guardian root slam
+            if hasattr(self.boss, 'root_slam_cooldown'):
+                if not hasattr(self.boss, '_base_root_slam_cooldown'):
+                    self.boss._base_root_slam_cooldown = self.boss.root_slam_cooldown
+                self.boss.root_slam_cooldown = self.boss._base_root_slam_cooldown * cooldown_scale
+            if hasattr(self.boss, 'vine_summon_cooldown'):
+                if not hasattr(self.boss, '_base_vine_summon_cooldown'):
+                    self.boss._base_vine_summon_cooldown = self.boss.vine_summon_cooldown
+                self.boss.vine_summon_cooldown = self.boss._base_vine_summon_cooldown * cooldown_scale
+            # Inferno Drake fire breath and meteors
+            if hasattr(self.boss, 'fire_breath_cooldown'):
+                if not hasattr(self.boss, '_base_fire_breath_cooldown'):
+                    self.boss._base_fire_breath_cooldown = self.boss.fire_breath_cooldown
+                self.boss.fire_breath_cooldown = self.boss._base_fire_breath_cooldown * cooldown_scale
+            if hasattr(self.boss, 'meteor_cooldown'):
+                if not hasattr(self.boss, '_base_meteor_cooldown'):
+                    self.boss._base_meteor_cooldown = self.boss.meteor_cooldown
+                self.boss.meteor_cooldown = self.boss._base_meteor_cooldown * cooldown_scale
 
         # Items
         self.items = []
@@ -119,6 +210,9 @@ class DungeonState(GameplayState):
         # Initialize signs
         self._spawn_signs()
 
+        # Initialize puzzles
+        self._spawn_puzzles(dungeon_spawns)
+
     def enter(self):
         """Called when entering this state."""
         get_sound_manager().play_music('boss')
@@ -127,6 +221,8 @@ class DungeonState(GameplayState):
         # Discover boss in bestiary
         boss_class = type(self.boss).__name__
         self.game.bestiary.discover(boss_class)
+        # Clear fire trails on dungeon entry to prevent visual artifacts
+        self.fire_trails = []
 
     def _spawn_signs(self):
         from zelda_miloutte.entities.sign import Sign
@@ -143,6 +239,8 @@ class DungeonState(GameplayState):
         p = self.play_state.player
         p.hp = self.player.hp
         p.max_hp = self.player.max_hp
+        p.mp = self.player.mp
+        p.max_mp = self.player.max_mp
         p.keys = self.player.keys
         p.level = self.player.level
         p.xp = self.player.xp
@@ -151,6 +249,19 @@ class DungeonState(GameplayState):
         p.base_defense = self.player.base_defense
         p.gold = self.player.gold
         p.inventory = self.player.inventory
+        p.unlocked_abilities = self.player.unlocked_abilities
+        # Copy ability instances back
+        p.abilities = self.player.abilities
+        p.active_ability_index = self.player.active_ability_index
+
+        # Copy companion back to overworld
+        self.play_state.companion = self.companion
+        if self.companion is not None:
+            # Reposition companion near player in overworld
+            self.companion.x = p.x - 30
+            self.companion.y = p.y
+            self.companion.target_x = self.companion.x
+            self.companion.target_y = self.companion.y
 
     def handle_event(self, event):
         pass
@@ -220,6 +331,20 @@ class DungeonState(GameplayState):
 
         # Shared gameplay updates
         self._update_movement(dt)
+
+        # Update puzzles
+        self._update_puzzles(dt)
+
+        # Check push block interactions
+        self._check_push_block_interaction()
+
+        # Resolve push block collision (prevent player from walking through blocks)
+        self._resolve_push_block_collision()
+
+        # Update abilities
+        for ability in self.player.abilities:
+            ability.update(dt, self.player, self.enemies, self.projectiles, self.particles)
+
         self._update_enemies(dt)
         self._update_projectiles(dt)
 
@@ -366,6 +491,12 @@ class DungeonState(GameplayState):
         self._check_hazards()
         self._cleanup_dead()
 
+        # Update companion (if exists)
+        self._update_companion(dt)
+
+        # Check companion petting (if exists)
+        self._check_companion_pet()
+
         # Boss defeated (DungeonState-specific)
         if not self.boss.alive and not self.victory:
             if not self.boss_death_emitted:
@@ -408,6 +539,21 @@ class DungeonState(GameplayState):
                 if boss_id not in self.game.world_state["defeated_bosses"]:
                     self.game.world_state["defeated_bosses"].append(boss_id)
                 self.game.quest_manager.update_objective("defeat_boss", boss_id)
+                # Unlock ability if this boss grants one
+                from zelda_miloutte.abilities import BOSS_ABILITY_UNLOCKS
+                if boss_id in BOSS_ABILITY_UNLOCKS:
+                    ability_name = BOSS_ABILITY_UNLOCKS[boss_id]
+                    if self.player.unlock_ability(ability_name):
+                        # Show notification for new ability
+                        from zelda_miloutte.ui.floating_text import FloatingText
+                        from zelda_miloutte.abilities import create_ability
+                        ability = create_ability(ability_name)
+                        if ability:
+                            self.floating_texts.append(FloatingText(
+                                f"New Ability: {ability.display_name}!",
+                                self.player.center_x, self.player.center_y - 40,
+                                (255, 200, 100), size=24, duration=2.0
+                            ))
                 # Auto-complete any quests whose objectives are now met
                 for quest in self.game.quest_manager.get_active_quests():
                     if self.game.quest_manager.check_quest_complete(quest.id):
@@ -459,6 +605,10 @@ class DungeonState(GameplayState):
     def draw(self, surface):
         # Draw tilemap, chests, items, enemies, player, particles
         self.tilemap.draw(surface, self.camera)
+
+        # Draw puzzles (before enemies so they appear under entities)
+        self._draw_puzzles(surface)
+
         for chest in self.chests:
             chest.draw(surface, self.camera)
         for item in self.items:

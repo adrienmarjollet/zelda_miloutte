@@ -194,6 +194,10 @@ class Companion(Entity):
         """Return enemy detection range reduction factor. Default 0."""
         return 0.0
 
+    def get_mp_regen_bonus(self):
+        """Return MP regen multiplier bonus from this companion. Default 0."""
+        return 0.0
+
     def draw(self, surface, camera):
         if not self.alive:
             return
@@ -280,6 +284,9 @@ class Fairy(Companion):
     def _load_frames(self):
         from zelda_miloutte.sprites.companion_sprites import get_fairy_frames
         self._frames = get_fairy_frames()
+
+    def get_mp_regen_bonus(self):
+        return FAIRY_MP_REGEN_BONUS
 
     def update(self, dt, player=None):
         super().update(dt, player)

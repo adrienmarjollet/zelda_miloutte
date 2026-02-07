@@ -763,22 +763,23 @@ FROZEN_PEAKS_SPAWNS = {
 
 # Ice Cavern Dungeon: 20 columns x 15 rows
 # Uses ICE(22), CRACKED_ICE(23), FROZEN_WALL(24) tiles
+# Puzzle doors: (9,1)+(10,1) north, (9,13)+(10,13) south, (9,7)+(10,7) center barrier
 # fmt: off
 ICE_CAVERN = [
     [24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24],
-    [24,22,22,22,22,22,24,22,22,22,22,22,22,24,22,22,22,22,22,24],
+    [24,22,22,22,22,22,24,22,22,24,24,22,22,24,22,22,22,22,22,24],  # Row 1: north barrier at (9,1), (10,1)
     [24,22,22,23,22,22,24,22,22,22,22,22,22,24,22,22,22,23,22,24],
     [24,22,22,22,22,22,22,22,22,24,24,22,22,22,22,24,24,22,22,24],
     [24,22,22,24,24,22,22,22,22,22,22,22,22,22,22,24,24,22,22,24],
     [24,22,22,22,22,22,22,22,22,23,23,22,22,22,22,22,22,22,22,24],
     [24,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,24],
-    [ 6,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,24],
+    [ 6,22,22,22,22,22,22,22,22,24,24,22,22,22,22,22,22,22,22,24],  # Row 7: center barrier at (9,7), (10,7)
     [24,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,24],
     [24,22,22,22,22,22,22,22,22,23,23,22,22,22,22,22,22,22,22,24],
     [24,22,22,24,24,22,22,22,22,22,22,22,22,22,22,24,24,22,22,24],
     [24,22,22,22,22,22,22,22,22,24,24,22,22,22,22,22,22,22,22,24],
     [24,22,22,23,22,22,24,22,22,22,22,22,22,24,22,22,22,23,22,24],
-    [24,22,22,22,22,22,24,22,22,22,22,22,22,24,22,22,22,22,22,24],
+    [24,22,22,22,22,22,24,22,22,24,24,22,22,24,22,22,22,22,22,24],  # Row 13: south barrier at (9,13), (10,13)
     [24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24],
 ]
 # fmt: on
@@ -804,6 +805,29 @@ ICE_CAVERN_SPAWNS = {
         {"x": 4, "y": 7, "text": "The Crystal Dragon slumbers in the frozen depths..."},
         {"x": 10, "y": 7, "text": "Beware the cracking ice beneath your feet!"},
     ],
+    "puzzles": [
+        # Northern puzzle room - push blocks and pressure plates
+        {"type": "push_block", "x": 9, "y": 2, "id": "block_north_1"},
+        {"type": "push_block", "x": 10, "y": 2, "id": "block_north_2"},
+        {"type": "pressure_plate", "x": 6, "y": 3, "id": "plate_1", "trigger": "door_north"},
+        {"type": "pressure_plate", "x": 13, "y": 3, "id": "plate_2", "trigger": "door_north"},
+
+        # Southern puzzle room - torches
+        {"type": "torch", "x": 6, "y": 11, "id": "torch_1", "trigger": "door_south"},
+        {"type": "torch", "x": 9, "y": 12, "id": "torch_2", "trigger": "door_south"},
+        {"type": "torch", "x": 10, "y": 12, "id": "torch_3", "trigger": "door_south"},
+        {"type": "torch", "x": 13, "y": 11, "id": "torch_4", "trigger": "door_south"},
+
+        # Center puzzle - crystal switches
+        {"type": "crystal_switch", "x": 5, "y": 6, "id": "switch_1", "trigger": "barrier_center"},
+        {"type": "crystal_switch", "x": 14, "y": 8, "id": "switch_2", "trigger": "barrier_center"},
+    ],
+    "puzzle_doors": {
+        # Define which tiles are opened by which trigger
+        "door_north": [(9, 1), (10, 1)],  # Top barrier tiles
+        "door_south": [(9, 13), (10, 13)],  # Bottom barrier tiles
+        "barrier_center": [(9, 7), (10, 7)],  # Center barrier
+    },
 }
 
 # Patch AREAS with frozen_peaks data (defined after the map constant)

@@ -45,7 +45,7 @@ class PlayState(GameplayState):
         self._spawn_chests()
         self._spawn_signs()
         self._spawn_npcs()
-        self._spawn_campfires()
+        # Note: Campfires added to world but spawn method not yet implemented
 
         # Night ghost spawning tracker
         self._night_ghost_spawned = False
@@ -56,6 +56,8 @@ class PlayState(GameplayState):
             pdata = load_data.get("player", {})
             self.player.hp = pdata.get("hp", self.player.hp)
             self.player.max_hp = pdata.get("max_hp", self.player.max_hp)
+            self.player.mp = pdata.get("mp", self.player.mp)
+            self.player.max_mp = pdata.get("max_mp", self.player.max_mp)
             self.player.keys = pdata.get("keys", self.player.keys)
             self.player.level = pdata.get("level", 1)
             self.player.xp = pdata.get("xp", 0)
@@ -67,10 +69,27 @@ class PlayState(GameplayState):
             if "inventory" in pdata:
                 from zelda_miloutte.data.inventory import Inventory
                 self.player.inventory = Inventory.from_dict(pdata["inventory"])
+            # Restore unlocked abilities
+            if "unlocked_abilities" in pdata:
+                self.player.unlocked_abilities = pdata["unlocked_abilities"]
+                # Recreate ability instances from unlocked names
+                from zelda_miloutte.abilities import create_ability
+                self.player.abilities = []
+                for ability_name in self.player.unlocked_abilities:
+                    ability = create_ability(ability_name)
+                    if ability is not None:
+                        self.player.abilities.append(ability)
             # Restore minimap visited tiles
             visited = load_data.get("visited_tiles")
             if visited:
                 self.minimap.load_save_data(visited)
+            # Restore companion
+            if "companion" in load_data:
+                from zelda_miloutte.entities.companion import create_companion
+                companion_data = load_data["companion"]
+                companion_type = companion_data.get("type", "cat")
+                self.companion = create_companion(companion_type, self.player.x - 30, self.player.y)
+                self.companion.pet_cooldown = companion_data.get("pet_cooldown", 0.0)
 
     def enter(self):
         """Called when entering this state."""
@@ -83,6 +102,8 @@ class PlayState(GameplayState):
         self.game.achievement_manager.on_area_enter(self.area_id)
         # Auto-start side_2 (goblin slayer) since it has no prerequisites
         self.game.quest_manager.start_quest("side_2")
+        # Clear fire trails on area entry to prevent visual artifacts from previous visits
+        self.fire_trails = []
 
     def _spawn_enemies(self):
         from zelda_miloutte.entities.enemy import Enemy
@@ -93,6 +114,9 @@ class PlayState(GameplayState):
         from zelda_miloutte.entities.mummy import Mummy
         from zelda_miloutte.entities.fire_imp import FireImp
         from zelda_miloutte.entities.magma_golem import MagmaGolem
+        from zelda_miloutte.entities.ice_wraith import IceWraith
+        from zelda_miloutte.entities.frost_golem import FrostGolem
+        from zelda_miloutte.ng_plus import scale_enemy_stats
         self.enemies = []
         area_spawns = AREAS[self.area_id]["spawns"]
         for edata in area_spawns.get("enemies", []):
@@ -114,11 +138,32 @@ class PlayState(GameplayState):
                 e = FireImp(edata["x"] * TILE_SIZE, edata["y"] * TILE_SIZE)
             elif edata.get("type") == "magma_golem":
                 e = MagmaGolem(edata["x"] * TILE_SIZE, edata["y"] * TILE_SIZE)
+            elif edata.get("type") == "ice_wraith":
+                e = IceWraith(edata["x"] * TILE_SIZE, edata["y"] * TILE_SIZE)
+            elif edata.get("type") == "frost_golem":
+                e = FrostGolem(edata["x"] * TILE_SIZE, edata["y"] * TILE_SIZE)
             else:
                 e = Enemy(
                     edata["x"] * TILE_SIZE, edata["y"] * TILE_SIZE,
                     edata.get("patrol", []),
                 )
+
+            # Apply NG+ scaling if in a New Game+ cycle
+            if self.game.ng_plus_count > 0:
+                scaled_hp, scaled_damage, scaled_speed = scale_enemy_stats(
+                    e.hp, e.damage, e.speed, self.game.ng_plus_count
+                )
+                e.hp = scaled_hp
+                e.max_hp = scaled_hp
+                e.damage = scaled_damage
+                e.speed = scaled_speed
+                # Scale chase_speed if enemy has it
+                if hasattr(e, 'chase_speed'):
+                    _, _, scaled_chase = scale_enemy_stats(
+                        e.max_hp, e.damage, e.chase_speed, self.game.ng_plus_count
+                    )
+                    e.chase_speed = scaled_chase
+
             self.enemies.append(e)
 
     def _spawn_items(self):
@@ -235,6 +280,8 @@ class PlayState(GameplayState):
         player_data = {
             "hp": player.hp,
             "max_hp": player.max_hp,
+            "mp": player.mp,
+            "max_mp": player.max_mp,
             "keys": player.keys,
             "level": player.level,
             "xp": player.xp,
@@ -243,14 +290,23 @@ class PlayState(GameplayState):
             "base_defense": player.base_defense,
             "gold": player.gold,
             "inventory": player.inventory.to_dict(),
+            "unlocked_abilities": player.unlocked_abilities,
         }
 
         # Carry minimap visited tiles across transitions
         minimap_data = self.minimap.get_save_data()
 
+        # Carry companion across transitions
+        companion_data = None
+        if self.companion is not None:
+            companion_data = self.companion.to_dict()
+
         def do_transition():
             # Create new PlayState for target area
-            new_state = PlayState(self.game, area_id=target_area, load_data={"player": player_data})
+            load_data = {"player": player_data}
+            if companion_data is not None:
+                load_data["companion"] = companion_data
+            new_state = PlayState(self.game, area_id=target_area, load_data=load_data)
 
             # Carry minimap data
             new_state.minimap.load_save_data(minimap_data)
@@ -355,6 +411,11 @@ class PlayState(GameplayState):
 
         # Shared gameplay updates
         self._update_movement(dt)
+
+        # Update abilities
+        for ability in self.player.abilities:
+            ability.update(dt, self.player, self.enemies, self.projectiles, self.particles)
+
         self._update_enemies(dt)
         self._update_combat(dt)
         self._update_enemy_collision()
@@ -362,6 +423,12 @@ class PlayState(GameplayState):
         self._update_items(dt)
         self._check_hazards()
         self._cleanup_dead()
+
+        # Update companion (if exists)
+        self._update_companion(dt)
+
+        # Check companion petting (if exists)
+        self._check_companion_pet()
 
         # Check area transitions
         self._check_area_transition()
@@ -414,6 +481,30 @@ class PlayState(GameplayState):
                             victory_message="The Inferno Drake is slain! The seal is restored!"
                         ))
                     self.game.transition_to(enter_volcano_dungeon)
+                elif self.area_id == "frozen_peaks":
+                    def enter_ice_cavern():
+                        from zelda_miloutte.states.dungeon_state import DungeonState
+                        from zelda_miloutte.world.maps import ICE_CAVERN, ICE_CAVERN_SPAWNS
+                        from zelda_miloutte.sprites.boss_sprites import get_boss2_frames_phase1, get_boss2_frames_phase2
+                        # Configure Ice Cavern boss (Crystal Dragon variant of Boss)
+                        ice_boss_config = {
+                            'hp': BOSS2_HP,
+                            'speed': BOSS2_SPEED,
+                            'chase_speed': BOSS2_CHASE_SPEED,
+                            'charge_speed': BOSS2_CHARGE_SPEED,
+                            'damage': BOSS2_DAMAGE,
+                            'frames_phase1_fn': get_boss2_frames_phase1,
+                            'frames_phase2_fn': get_boss2_frames_phase2,
+                            'color': ICE_BLUE,
+                        }
+                        self.game.push_state(DungeonState(
+                            self.game, self,
+                            dungeon_map=ICE_CAVERN,
+                            dungeon_spawns=ICE_CAVERN_SPAWNS,
+                            boss_config=ice_boss_config,
+                            victory_message="The Crystal Dragon is defeated! The final seal is restored!"
+                        ))
+                    self.game.transition_to(enter_ice_cavern)
                 else:
                     # Default dungeon (overworld)
                     def enter_dungeon():
@@ -567,6 +658,8 @@ class PlayState(GameplayState):
         player_data = {
             "hp": self.player.hp,
             "max_hp": self.player.max_hp,
+            "mp": self.player.mp,
+            "max_mp": self.player.max_mp,
             "keys": self.player.keys,
             "level": self.player.level,
             "xp": self.player.xp,
@@ -575,13 +668,22 @@ class PlayState(GameplayState):
             "base_defense": self.player.base_defense,
             "gold": self.player.gold,
             "inventory": self.player.inventory.to_dict(),
+            "unlocked_abilities": self.player.unlocked_abilities,
         }
 
         # Carry minimap visited tiles
         minimap_data = self.minimap.get_save_data()
 
+        # Carry companion across fast travel
+        companion_data = None
+        if self.companion is not None:
+            companion_data = self.companion.to_dict()
+
         def do_fast_travel():
-            new_state = PlayState(self.game, area_id=target_area, load_data={"player": player_data})
+            load_data = {"player": player_data}
+            if companion_data is not None:
+                load_data["companion"] = companion_data
+            new_state = PlayState(self.game, area_id=target_area, load_data=load_data)
             new_state.minimap.load_save_data(minimap_data)
             self.game.change_state(new_state)
 

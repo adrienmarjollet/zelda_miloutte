@@ -2,7 +2,7 @@
 
 import pygame
 from zelda_miloutte.settings import SCREEN_WIDTH, SCREEN_HEIGHT, WHITE, GOLD, GRAY, BLACK
-from zelda_miloutte.data.inventory import get_item, ITEMS
+from zelda_miloutte.data.inventory import get_item, ITEMS, CATEGORY_EQUIPMENT
 from zelda_miloutte.data.shops import get_shop
 
 
@@ -98,10 +98,10 @@ class ShopUI:
         if self.mode == "buy":
             self._items_list = list(self.shop_data.get("items", []))
         else:
-            # Sell mode: show player inventory items that have a sell value
+            # Sell mode: show only consumable items (filter out equipment)
             self._items_list = [
                 iid for iid, qty in self.player.inventory.get_all()
-                if get_item(iid) is not None
+                if get_item(iid) is not None and get_item(iid).category != CATEGORY_EQUIPMENT
             ]
         # Clamp cursor
         if self._items_list:
@@ -166,12 +166,21 @@ class ShopUI:
             self._show_message("Not enough gold!", _ERROR_COLOR)
             return
 
+        # Check if inventory has space
+        if not self.player.inventory.add(item_id):
+            self._show_message("Inventory full!", _ERROR_COLOR)
+            return
+
         self.player.gold -= price
-        self.player.inventory.add(item_id)
         self._show_message(f"Bought {item_def.name}!", _SUCCESS_COLOR)
 
     def _do_sell(self, item_id, item_def):
         """Attempt to sell an item."""
+        # Prevent equipment from being sold (defense in depth)
+        if item_def.category == CATEGORY_EQUIPMENT:
+            self._show_message("Equipment cannot be sold!", _ERROR_COLOR)
+            return
+
         if not self.player.inventory.remove(item_id):
             self._show_message("Nothing to sell!", _ERROR_COLOR)
             return
@@ -249,7 +258,10 @@ class ShopUI:
         scroll_offset = max(0, self.cursor - max_visible + 1)
 
         if not self._items_list:
-            empty_text = "No items available." if self.mode == "buy" else "Inventory empty."
+            if self.mode == "buy":
+                empty_text = "No items available."
+            else:
+                empty_text = "No consumables to sell. (Equipment cannot be sold)"
             empty_surf = self._small_font.render(empty_text, True, GRAY)
             surface.blit(empty_surf, (left_x + 8, list_y + 8))
         else:

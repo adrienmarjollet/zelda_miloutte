@@ -189,13 +189,16 @@ class Player(Entity):
                 self.x + self.width, cy - SWORD_WIDTH // 2,
                 SWORD_LENGTH, SWORD_WIDTH)
 
-    def apply_input(self, input_handler):
+    def apply_input(self, input_handler, companion=None):
         # Skip normal movement input during knockback
         if self.knockback_timer > 0:
             self.vx = self.knockback_vx
             self.vy = self.knockback_vy
         else:
             speed = self.speed + self.inventory.get_stat_bonus("speed")
+            # Apply companion speed bonus (Fox)
+            if companion is not None:
+                speed += speed * companion.get_perk_speed_bonus()
             # Apply slow status effect
             if "slow" in self.status_effects:
                 speed *= self.status_effects["slow"].get("multiplier", 0.5)
@@ -247,9 +250,13 @@ class Player(Entity):
                 self.invincible = False
                 self.visible = True
 
-        # Mana regeneration
+        # Mana regeneration (with companion bonus from Fairy)
         if self.mp < self.max_mp:
-            self.mp = min(self.max_mp, self.mp + PLAYER_MP_REGEN * dt)
+            regen = PLAYER_MP_REGEN
+            # Apply Fairy MP regen bonus (pass via update)
+            if hasattr(self, '_companion_mp_bonus'):
+                regen *= (1.0 + self._companion_mp_bonus)
+            self.mp = min(self.max_mp, self.mp + regen * dt)
 
         # Status effects
         self.update_statuses(dt)

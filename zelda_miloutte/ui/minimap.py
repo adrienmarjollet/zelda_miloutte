@@ -50,6 +50,10 @@ class Minimap:
         # Cached surfaces
         self._cached_area_id = None
         self._cached_tile_surface = None
+        self._cached_fog_surface = None
+        self._cached_visited_count = 0
+        self._cached_scale = 1
+        self._cached_map_size = (0, 0)
 
     def toggle(self):
         """Toggle minimap visibility."""
@@ -61,6 +65,7 @@ class Minimap:
             self.visited_tiles[area_id] = set()
 
         visited = self.visited_tiles[area_id]
+        old_count = len(visited)
         player_col = int(player_x) // TILE_SIZE
         player_row = int(player_y) // TILE_SIZE
         r = self._reveal_radius
@@ -69,10 +74,16 @@ class Minimap:
             for col in range(max(0, player_col - r), min(tilemap.cols, player_col + r + 1)):
                 visited.add((col, row))
 
-        # Invalidate cache if area changed
+        # Invalidate cache if area changed or new tiles revealed
         if self._cached_area_id != area_id:
             self._cached_area_id = area_id
             self._cached_tile_surface = None
+            self._cached_fog_surface = None
+            self._cached_visited_count = len(visited)
+        elif len(visited) != old_count:
+            # New tiles revealed, fog cache is stale
+            self._cached_fog_surface = None
+            self._cached_visited_count = len(visited)
 
     def update(self, dt):
         """Update blink timer for player dot."""
@@ -97,26 +108,50 @@ class Minimap:
 
         map_pixel_w = int(tilemap.cols * scale)
         map_pixel_h = int(tilemap.rows * scale)
+        map_size = (map_pixel_w, map_pixel_h)
 
-        # Create minimap surface
-        minimap_surf = pygame.Surface((map_pixel_w + 4, map_pixel_h + 4), pygame.SRCALPHA)
-        minimap_surf.fill((0, 0, 0, MINIMAP_BG_ALPHA))
+        # ── STATIC LAYER: Base tiles (cached, drawn once per area) ──
+        if self._cached_tile_surface is None or self._cached_scale != scale or self._cached_map_size != map_size:
+            # Pre-render all tiles to a cached surface
+            self._cached_tile_surface = pygame.Surface((map_pixel_w + 4, map_pixel_h + 4), pygame.SRCALPHA)
+            self._cached_tile_surface.fill((0, 0, 0, MINIMAP_BG_ALPHA))
 
-        # Draw tiles
-        for row in range(tilemap.rows):
-            for col in range(tilemap.cols):
-                if (col, row) in visited:
+            for row in range(tilemap.rows):
+                for col in range(tilemap.cols):
                     tile_val = tilemap.data[row][col]
                     color = TILE_COLORS.get(tile_val, (60, 60, 60))
-                else:
-                    color = MINIMAP_FOG_COLOR
+                    px = int(col * scale) + 2
+                    py = int(row * scale) + 2
+                    if scale >= 2:
+                        pygame.draw.rect(self._cached_tile_surface, color, (px, py, int(scale), int(scale)))
+                    else:
+                        self._cached_tile_surface.set_at((px, py), (*color, 255))
 
-                px = int(col * scale) + 2
-                py = int(row * scale) + 2
-                if scale >= 2:
-                    pygame.draw.rect(minimap_surf, color, (px, py, int(scale), int(scale)))
-                else:
-                    minimap_surf.set_at((px, py), (*color, 255))
+            self._cached_scale = scale
+            self._cached_map_size = map_size
+
+        # ── FOG OF WAR LAYER: Cached, updated only when new tiles revealed ──
+        if self._cached_fog_surface is None:
+            self._cached_fog_surface = pygame.Surface((map_pixel_w + 4, map_pixel_h + 4), pygame.SRCALPHA)
+            self._cached_fog_surface.fill((0, 0, 0, 0))  # Transparent base
+
+            # Draw fog over unvisited tiles
+            for row in range(tilemap.rows):
+                for col in range(tilemap.cols):
+                    if (col, row) not in visited:
+                        px = int(col * scale) + 2
+                        py = int(row * scale) + 2
+                        if scale >= 2:
+                            pygame.draw.rect(self._cached_fog_surface, MINIMAP_FOG_COLOR,
+                                           (px, py, int(scale), int(scale)))
+                        else:
+                            self._cached_fog_surface.set_at((px, py), (*MINIMAP_FOG_COLOR, 255))
+
+        # ── COMPOSITE: Combine static layers ──
+        minimap_surf = self._cached_tile_surface.copy()
+        minimap_surf.blit(self._cached_fog_surface, (0, 0))
+
+        # ── DYNAMIC LAYER: Entities (drawn every frame) ──
 
         # Draw chests (yellow dots, only if visited and not opened)
         for chest in chests:

@@ -204,11 +204,16 @@ class FishingState(State):
     def _succeed(self):
         """Player caught the fish!"""
         self.phase = PHASE_RESULT
-        self.result_success = True
         self.result_timer = 0.0
 
-        # Add fish to player inventory
-        self.player.inventory.add(self.fish.fish_id, 1)
+        # Try to add fish to player inventory
+        if not self.player.inventory.add(self.fish.fish_id, 1):
+            # Inventory full - fish escapes
+            self._fail("Inventory full! Fish escaped!")
+            return
+
+        # Successfully caught
+        self.result_success = True
 
         # Track in fish collection
         fish_collection = self.game.world_state.setdefault("fish_collection", {})

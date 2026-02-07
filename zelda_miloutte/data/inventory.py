@@ -59,9 +59,11 @@ ITEMS = {}
 
 def _register(item_id, name, description, category=CATEGORY_CONSUMABLE,
               buy_price=0, effect=None, icon=None, equip_slot=None,
-              stats=None, tier="starter"):
+              stats=None, tier="starter", sell_price=None):
     item = InventoryItem(item_id, name, description, category, buy_price,
                          effect, icon, equip_slot, stats, tier)
+    if sell_price is not None:
+        item.sell_price = sell_price
     ITEMS[item_id] = item
     return item
 
@@ -82,6 +84,38 @@ _register("speed_boost", "Speed Tonic", "Move faster for 20s.",
           buy_price=25, effect={"speed": 1.5, "duration": 20}, tier="mid")
 _register("bomb", "Bomb", "Explodes for AoE damage.",
           buy_price=20, effect={"bomb": True, "damage": 3, "radius": 64}, tier="mid")
+
+# ── Fish (from fishing minigame) ─────────────────────────────────────────────
+# Fish cannot be bought (buy_price=0), only caught and sold
+# Sell prices and heal values match fish.py definitions
+
+# Village / Overworld fish
+_register("bass", "Bass", "A common river fish. Restores 2 HP.",
+          buy_price=0, effect={"heal": 2}, tier="starter", sell_price=5)
+_register("trout", "Trout", "A common stream fish. Restores 2 HP.",
+          buy_price=0, effect={"heal": 2}, tier="starter", sell_price=6)
+_register("golden_carp", "Golden Carp", "A rare golden fish. Restores 4 HP.",
+          buy_price=0, effect={"heal": 4}, tier="mid", sell_price=30)
+
+# Forest fish
+_register("mossy_pike", "Mossy Pike", "A forest pond fish. Restores 2 HP.",
+          buy_price=0, effect={"heal": 2}, tier="starter", sell_price=8)
+_register("magic_carp", "Magic Carp", "An enchanted fish. Restores 6 HP.",
+          buy_price=0, effect={"heal": 6}, tier="mid", sell_price=35)
+
+# Desert fish
+_register("sand_eel", "Sand Eel", "A desert oasis fish. Restores 2 HP.",
+          buy_price=0, effect={"heal": 2}, tier="starter", sell_price=10)
+_register("oasis_perch", "Oasis Perch", "A rare oasis fish. Restores 3 HP.",
+          buy_price=0, effect={"heal": 3}, tier="mid", sell_price=18)
+_register("ancient_fish", "Ancient Fish", "An ancient desert fish. Restores 6 HP.",
+          buy_price=0, effect={"heal": 6}, tier="mid", sell_price=45)
+
+# Volcano fish
+_register("lava_trout", "Lava Trout", "A volcanic fish. Restores 3 HP.",
+          buy_price=0, effect={"heal": 3}, tier="mid", sell_price=22)
+_register("magma_fish", "Magma Fish", "A rare magma fish. Restores 8 HP.",
+          buy_price=0, effect={"heal": 8}, tier="endgame", sell_price=50)
 
 # ── Equipment: Weapons ───────────────────────────────────────────────────────
 

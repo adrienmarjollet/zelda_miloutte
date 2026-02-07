@@ -54,9 +54,14 @@ class Game:
         if self.current_state and hasattr(self.current_state, 'player'):
             p = self.current_state.player
             data["player"] = {
-                "hp": p.hp, "max_hp": p.max_hp, "keys": p.keys,
+                "hp": p.hp, "max_hp": p.max_hp,
+                "mp": p.mp, "max_mp": p.max_mp,
+                "keys": p.keys,
                 "level": p.level, "xp": p.xp, "xp_to_next": p.xp_to_next,
                 "base_attack": p.base_attack, "base_defense": p.base_defense,
+                "gold": p.gold,
+                "inventory": p.inventory.to_dict(),
+                "unlocked_abilities": p.unlocked_abilities,
             }
         data["current_area"] = self.world_state.get("current_area", "overworld")
         data["time_state"] = self.time_system.to_dict()
