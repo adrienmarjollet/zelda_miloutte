@@ -5,153 +5,162 @@ from .pixel_art import surface_from_grid
 # ── Palette ───────────────────────────────────────────────────────
 _PAL = {
     'o': (20, 20, 20),        # dark outline
-    'r': (220, 80, 30),       # red body
+    'k': (40, 25, 25),        # charcoal/ash (dark body detail)
+    'K': (60, 35, 30),        # lighter ash
+    'r': (220, 80, 30),       # red body base
     'R': (180, 50, 20),       # darker red
-    'f': (255, 200, 50),      # yellow flame
-    'F': (255, 120, 30),      # orange flame
-    'e': (10, 10, 10),        # eyes
-    'h': (255, 100, 20),      # hot spots
+    'd': (140, 30, 15),       # deep crimson (darkest red)
+    'l': (255, 180, 60),      # lava glow (bright orange)
+    'L': (255, 220, 100),     # lava highlight (yellow-orange)
+    'w': (255, 255, 255),     # white-hot (eyes, flame core)
+    'y': (255, 240, 150),     # bright yellow flame
+    'Y': (255, 200, 80),      # yellow-orange flame
+    'f': (255, 160, 50),      # orange flame
+    'F': (255, 100, 30),      # deep orange flame
+    'h': (200, 50, 20),       # hot red (flame edge)
+    't': (120, 40, 20),       # dark red (flame trail end)
+    'e': (10, 10, 10),        # eye pupils
     '.': None,
 }
 
 # ── Down frames ───────────────────────────────────────────────────
 _DOWN_0 = [
-    "....oooooo....",
-    "...orrrrrro...",
-    "..orrRRRRrro..",
-    "..orReeeeRro..",
-    ".orrRRRRRRrro.",
-    ".orrRRhhRRrro.",
-    ".orrRRRRRRrro.",
-    "..orrRRRRrro..",
-    "..oFrrrrrFo...",
-    "...oFfffFo....",
-    "....offfoo....",
-    ".....oFo......",
-    "......o.......",
-    "..............",
+    "......oo......",
+    ".....oKKo.....",
+    "....oKddKo....",
+    "...odRRRRdo...",
+    "..odRwewRdo...",
+    "..odReeERdo...",
+    ".odRRoooRRdo..",
+    ".odRlLLlRdo...",
+    ".odRRRRRRdo...",
+    "..odRdRdRo....",
+    "...oKdRdo.....",
+    "....oooo......",
+    "...oYfFho.....",
+    "....oYto......",
 ]
 
 _DOWN_1 = [
-    "....oooooo....",
-    "...orrrrrro...",
-    "..orrRRRRrro..",
-    "..orReeeeRro..",
-    ".orrRRRRRRrro.",
-    ".orrRRhhRRrro.",
-    ".orrRRRRRRrro.",
-    "..orrRRRRrro..",
-    "...oFrrrFo....",
-    "....oFfFo.....",
-    "...oofffoo....",
-    "....oFo.......",
-    ".....o........",
-    "..............",
+    "......oo......",
+    ".....oKKo.....",
+    "....oKddKo....",
+    "...odRRRRdo...",
+    "..odRwewRdo...",
+    "..odReeERdo...",
+    ".odRRoooRRdo..",
+    ".odRlLLlRdo...",
+    ".odRRRRRRdo...",
+    "..odRdRdRo....",
+    "....odRdo.....",
+    "...ooKKoo.....",
+    "..oyfFhto.....",
+    "...oyto.......",
 ]
 
 # ── Up frames ─────────────────────────────────────────────────────
 _UP_0 = [
-    "......o.......",
-    ".....oFo......",
-    "....offfoo....",
-    "...oFfffFo....",
-    "..oFrrrrrFo...",
-    "..orrRRRRrro..",
-    ".orrRRRRRRrro.",
-    ".orrRRhhRRrro.",
-    ".orrRRRRRRrro.",
-    "..orReeeeRro..",
-    "..orrRRRRrro..",
-    "...orrrrrro...",
-    "....oooooo....",
-    "..............",
+    "....oYto......",
+    "...oYfFho.....",
+    "....oooo......",
+    "...oKdRdo.....",
+    "..odRdRdRo....",
+    ".odRRRRRRdo...",
+    ".odRlLLlRdo...",
+    ".odRRoooRRdo..",
+    "..odReeERdo...",
+    "..odRwewRdo...",
+    "...odRRRRdo...",
+    "....oKddKo....",
+    ".....oKKo.....",
+    "......oo......",
 ]
 
 _UP_1 = [
-    ".....o........",
-    "....oFo.......",
-    "...oofffoo....",
-    "....oFfFo.....",
-    "...oFrrrFo....",
-    "..orrRRRRrro..",
-    ".orrRRRRRRrro.",
-    ".orrRRhhRRrro.",
-    ".orrRRRRRRrro.",
-    "..orReeeeRro..",
-    "..orrRRRRrro..",
-    "...orrrrrro...",
-    "....oooooo....",
-    "..............",
+    "...oyto.......",
+    "..oyfFhto.....",
+    "...ooKKoo.....",
+    "....odRdo.....",
+    "..odRdRdRo....",
+    ".odRRRRRRdo...",
+    ".odRlLLlRdo...",
+    ".odRRoooRRdo..",
+    "..odReeERdo...",
+    "..odRwewRdo...",
+    "...odRRRRdo...",
+    "....oKddKo....",
+    ".....oKKo.....",
+    "......oo......",
 ]
 
 # ── Left frames ───────────────────────────────────────────────────
 _LEFT_0 = [
-    "....oooo......",
-    "...orrrro.....",
-    "..orrRRRrro...",
-    "..orReReRroo..",
-    ".orrRRRRRRrFo.",
-    ".orrRhRRhhRfo.",
-    ".orrRRRRRRrFo.",
-    "..orrRRRRrroo.",
-    "..oFrrrrrrFo..",
-    "...oFffffFo...",
-    "....offffoo...",
-    ".....oFFo.....",
-    "......oo......",
-    "..............",
+    "....oo........",
+    "...oKKoo......",
+    "..oKddKo......",
+    ".odRRwRdo.....",
+    ".odReRRdo.....",
+    "odRRoRRRdo....",
+    "odRlLoRRdoo...",
+    "odRLlRRRdFo...",
+    ".odRRRRRdho...",
+    "..odRdRdoto...",
+    "...ooKKoo.....",
+    "....ooo.......",
+    "...oyfFht.....",
+    "....oYto......",
 ]
 
 _LEFT_1 = [
-    "....oooo......",
-    "...orrrro.....",
-    "..orrRRRrro...",
-    "..orReReRroo..",
-    ".orrRRRRRRrFo.",
-    ".orrRhRRhhRfo.",
-    ".orrRRRRRRrFo.",
-    "..orrRRRRrroo.",
-    "...oFrrrrFo...",
-    "....oFffFo....",
-    "...ooffffoo...",
-    "....oFFo......",
+    "....oo........",
+    "...oKKoo......",
+    "..oKddKo......",
+    ".odRRwRdo.....",
+    ".odReRRdo.....",
+    "odRRoRRRdo....",
+    "odRlLoRRdoo...",
+    "odRLlRRRdFo...",
+    ".odRRRRRdho...",
+    "..odRdRdoto...",
+    "....ooKoo.....",
     ".....oo.......",
-    "..............",
+    "...oYfFt......",
+    "....oyt.......",
 ]
 
 # ── Right frames ──────────────────────────────────────────────────
 _RIGHT_0 = [
-    "......oooo....",
-    ".....orrrro...",
-    "...orrRRRrro..",
-    "..oorReReRro..",
-    ".oFrRRRRRRrro.",
-    ".ofRhhRRhRrro.",
-    ".oFrRRRRRRrro.",
-    ".oorrRRRRrro..",
-    "..oFrrrrrrFo..",
-    "...oFffffFo...",
-    "...ooffffoo...",
-    ".....oFFo.....",
-    "......oo......",
-    "..............",
+    "........oo....",
+    "......ooKKo...",
+    "......oKddKo..",
+    ".....odRwRRdo.",
+    ".....odRReRdo.",
+    "....odRRRoRRdo",
+    "...oodRRoLlRdo",
+    "...oFdRRRlLRdo",
+    "...ohdRRRRRdo.",
+    "...otodRdRdo..",
+    ".....ooKKoo...",
+    ".......ooo....",
+    ".....thFfyo...",
+    "......otYo....",
 ]
 
 _RIGHT_1 = [
-    "......oooo....",
-    ".....orrrro...",
-    "...orrRRRrro..",
-    "..oorReReRro..",
-    ".oFrRRRRRRrro.",
-    ".ofRhhRRhRrro.",
-    ".oFrRRRRRRrro.",
-    ".oorrRRRRrro..",
-    "...oFrrrrFo...",
-    "....oFffFo....",
-    "..ooffffoo....",
-    "......oFFo....",
+    "........oo....",
+    "......ooKKo...",
+    "......oKddKo..",
+    ".....odRwRRdo.",
+    ".....odRReRdo.",
+    "....odRRRoRRdo",
+    "...oodRRoLlRdo",
+    "...oFdRRRlLRdo",
+    "...ohdRRRRRdo.",
+    "...otodRdRdo..",
+    ".....ooKoo....",
     ".......oo.....",
-    "..............",
+    "......tFfYo...",
+    ".......tyo....",
 ]
 
 # ── Build surfaces ────────────────────────────────────────────────

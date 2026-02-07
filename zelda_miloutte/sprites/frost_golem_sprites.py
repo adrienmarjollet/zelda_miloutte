@@ -4,156 +4,163 @@ from .pixel_art import surface_from_grid
 
 # ── Palette ───────────────────────────────────────────────────────
 _PAL = {
-    'o': (20, 30, 50),        # dark outline
-    'i': (80, 140, 200),      # ice body
-    'I': (50, 100, 160),      # dark ice
-    'c': (140, 200, 240),     # crystal highlight
-    'C': (180, 230, 255),     # bright crystal
-    'e': (255, 100, 60),      # glowing orange eyes
-    'E': (200, 60, 30),       # eye edge
-    'r': (60, 110, 170),      # rock/core dark
-    'R': (90, 150, 200),      # rock lighter
+    'o': (15, 25, 40),        # dark outline/shadow
+    'i': (90, 150, 210),      # ice body (medium blue)
+    'I': (50, 90, 140),       # dark ice (deep blue)
+    'L': (110, 170, 230),     # light ice (brighter)
+    'c': (150, 210, 250),     # crystal highlight
+    'C': (200, 240, 255),     # bright crystal/frost
+    'W': (180, 220, 255),     # frost white
+    'e': (255, 120, 40),      # glowing orange eyes
+    'E': (220, 80, 20),       # eye core (darker)
+    'g': (80, 180, 255),      # glowing blue (core)
+    'G': (40, 140, 220),      # glowing blue (darker)
+    'r': (50, 50, 60),        # rock dark
+    'R': (70, 80, 90),        # rock medium
+    'S': (90, 100, 110),      # stone/rock light
+    's': (110, 120, 130),     # stone lighter
+    'b': (30, 40, 50),        # rock shadow/crack
     '.': None,
 }
 
 # ── Down frames ───────────────────────────────────────────────────
 _DOWN_0 = [
     "....oooooo....",
-    "...oiiiiiio...",
-    "..oiiIIIIiio..",
-    "..oiEeiiEeio..",
-    ".oiiiIIIIiiio.",
-    ".oiiicIIciIio.",
-    ".oiiiIIIIiiio.",
-    "..oiiIIIIiio..",
-    "..orrRRRRrro..",
-    ".orrRRRRRRrro.",
-    ".orrRRIIRRrro.",
-    ".orrRRRRRRrro.",
-    "..orrRRRRrro..",
+    "...oCWCCWCo...",
+    "..oCLiiiiLCo..",
+    "..oLiIbIbIiLo.",
+    ".oCiiEeIEeiio.",
+    ".oLiiIbbIIiio.",
+    "oCiiiGggGiiio.",
+    "oCiiIgGGgIiio.",
+    "oSssiIIIIiiio.",
+    "oSRRsIIIIrrbo.",
+    "oSRRRRRRRrbbo.",
+    ".oSRbRRbRrboo.",
+    "..oRRRRRRroo..",
     "...oooooooo...",
 ]
 
 _DOWN_1 = [
     "....oooooo....",
-    "...oiiiiiio...",
-    "..oiiIIIIiio..",
-    "..oiEeiiEeio..",
-    ".oiiiIIIIiiio.",
-    ".oiiicIIciIio.",
-    ".oiiiIIIIiiio.",
-    "..oiiIIIIiio..",
-    "..orrRRRRrro..",
-    ".orrRRRRRRrro.",
-    ".orrRIIIRRrro.",
-    ".orrRRRRRRrro.",
-    "..orrRRRRrro..",
+    "...oWCCCWCo...",
+    "..oCLiiiiLCo..",
+    "..oLiIbIbIiLo.",
+    ".oCiiEeIEeiio.",
+    ".oLiiIbbIIiio.",
+    "oCiiiGggGiiio.",
+    "oCiiIgGGgIiio.",
+    ".oiiiIIIIisso.",
+    ".obrrIIIIsSRo.",
+    ".obbRRRRRRRSo.",
+    "..oorRbRRbSo..",
+    "..oorRRRRRo...",
     "...oooooooo...",
 ]
 
 # ── Up frames ─────────────────────────────────────────────────────
 _UP_0 = [
     "...oooooooo...",
-    "..orrRRRRrro..",
-    ".orrRRRRRRrro.",
-    ".orrRRIIRRrro.",
-    ".orrRRRRRRrro.",
-    "..orrRRRRrro..",
-    "..oiiIIIIiio..",
-    ".oiiiIIIIiiio.",
-    ".oiiicIIciIio.",
-    ".oiiiIIIIiiio.",
-    "..oiiiiiiiio..",
-    "..oiiIIIIiio..",
-    "...oiiiiiio...",
+    "..oorrRRrroo..",
+    ".oRRbRRbRRbSo.",
+    "oSRRRRRRRRRSo.",
+    "oSRRsiIIIIsso.",
+    "oCiiIIIIIiiio.",
+    "oCiiIgGGgIiio.",
+    "oCiiiGggGiiio.",
+    ".oLiiIbbIIiio.",
+    ".oCiiIbIbIiio.",
+    "..oLiEeIEeiLo.",
+    "..oCLiiiiLCo..",
+    "...oCWCCWCo...",
     "....oooooo....",
 ]
 
 _UP_1 = [
     "...oooooooo...",
-    "..orrRRRRrro..",
-    ".orrRRRRRRrro.",
-    ".orrRIIIRRrro.",
-    ".orrRRRRRRrro.",
-    "..orrRRRRrro..",
-    "..oiiIIIIiio..",
-    ".oiiiIIIIiiio.",
-    ".oiiicIIciIio.",
-    ".oiiiIIIIiiio.",
-    "..oiiiiiiiio..",
-    "..oiiIIIIiio..",
-    "...oiiiiiio...",
+    "..oorRRRRoo...",
+    "..oSbRRbRroo..",
+    ".oSRRRRRRRbbo.",
+    ".osSRIIIIrrbo.",
+    ".ossiIIIIiiio.",
+    "oCiiIgGGgIiio.",
+    "oCiiiGggGiiio.",
+    ".oLiiIbbIIiio.",
+    ".oCiiIbIbIiio.",
+    "..oLiEeIEeiLo.",
+    "..oCLiiiiLCo..",
+    "...oWCCCWCo...",
     "....oooooo....",
 ]
 
 # ── Left frames ───────────────────────────────────────────────────
 _LEFT_0 = [
-    "....oooo......",
-    "...oiiiio.....",
-    "..oiiIIiio....",
-    "..oiEeIeiioo..",
-    ".oiiicIIiiRro.",
-    ".oiiiIIiirRro.",
-    ".oiiicIIiiRro.",
-    "..oiiIIIiiroo.",
-    "..orrRRRRrro..",
-    ".orrRRRRRrro..",
-    ".orrRIIRRrro..",
-    ".orrRRRRRrro..",
-    "..orrRRRrro...",
-    "...oooooooo...",
+    "....oooooo....",
+    "...oCWCCLo....",
+    "..oCLiiiiCo...",
+    "..oLiIbIIiLo..",
+    ".oCiEeIbbiiCo.",
+    ".oLiIIGggIiio.",
+    "oCiiIgGGgiiCo.",
+    "oCiiiIIIiisoo.",
+    "oSssiIIIRRsSo.",
+    "oSRRsIIRRRRSo.",
+    "oSRRRbRRbRSoo.",
+    ".oSRRRRRRroo..",
+    "..oRRRRRroo...",
+    "...ooooooo....",
 ]
 
 _LEFT_1 = [
-    "....oooo......",
-    "...oiiiio.....",
-    "..oiiIIiio....",
-    "..oiEeIeiioo..",
-    ".oiiicIIiiRro.",
-    ".oiiiIIiirRro.",
-    ".oiiicIIiiRro.",
-    "..oiiIIIiiroo.",
-    "..orrRRRRrro..",
-    ".orrRRRRRrro..",
-    ".orrRRIRRrro..",
-    ".orrRRRRRrro..",
-    "..orrRRRrro...",
-    "...oooooooo...",
+    "....oooooo....",
+    "...oWCCCLo....",
+    "..oCLiiiiCo...",
+    "..oLiIbIIiLo..",
+    ".oCiEeIbbiiCo.",
+    ".oLiIIGggIiio.",
+    "oCiiIgGGgiiCo.",
+    ".ooCiiiIIiiso.",
+    ".osSRIIIIisso.",
+    ".oSRRRRRRRRSo.",
+    "..ooSRbRRbRSo.",
+    "...oorRRRRroo.",
+    "....oorrRRoo..",
+    "....ooooooo...",
 ]
 
 # ── Right frames ──────────────────────────────────────────────────
 _RIGHT_0 = [
-    "......oooo....",
-    ".....oiiiio...",
-    "....oiiIIiio..",
-    "..ooiieIeEio..",
-    ".orRiiIIciiio.",
-    ".orRriiIIiiio.",
-    ".orRiiIIciiio.",
-    "..ooriIIIiio..",
-    "..orrRRRRrro..",
-    "..orrRRRRRrro.",
-    "..orrRRIIRrro.",
-    "..orrRRRRRrro.",
-    "...orrRRRrro..",
-    "...oooooooo...",
+    "....oooooo....",
+    "....oLCCWCo...",
+    "...oCiiiiLCo..",
+    "..oLiIIbIiLo..",
+    ".oCiibbIeEiCo.",
+    ".oiiIgggGIiLo.",
+    ".ooCiiGGggIiio",
+    ".oosiIIIiiio..",
+    ".oSRRIIIisSso.",
+    ".oSRRRRIIsSRSo",
+    ".ooSRbRRbRRRSo",
+    "..oorRRRRRSo..",
+    "...oorRRRRo...",
+    "....ooooooo...",
 ]
 
 _RIGHT_1 = [
-    "......oooo....",
-    ".....oiiiio...",
-    "....oiiIIiio..",
-    "..ooiieIeEio..",
-    ".orRiiIIciiio.",
-    ".orRriiIIiiio.",
-    ".orRiiIIciiio.",
-    "..ooriIIIiio..",
-    "..orrRRRRrro..",
-    "..orrRRRRRrro.",
-    "..orrRRRIRrro.",
-    "..orrRRRRRrro.",
-    "...orrRRRrro..",
-    "...oooooooo...",
+    "....oooooo....",
+    "....oLCCCWo...",
+    "...oCiiiiLCo..",
+    "..oLiIIbIiLo..",
+    ".oCiibbIeEiCo.",
+    ".oiiIgggGIiLo.",
+    "oCiiIgGGgIiiCo",
+    ".osiiIIiiCoo..",
+    ".ossiIIIIRsSo.",
+    "oSRRRRRRRRRSo.",
+    "oSRbRRbRSoo...",
+    ".oorRRRRroo...",
+    "..ooRRrroo....",
+    "...ooooooo....",
 ]
 
 # ── Build surfaces ────────────────────────────────────────────────

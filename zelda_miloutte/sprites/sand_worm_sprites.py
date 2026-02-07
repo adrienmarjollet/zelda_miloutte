@@ -2,292 +2,320 @@
 
 from .pixel_art import surface_from_grid
 
-# ── Phase 1 Palette (tan/sandy worm) ──────────────────────────────────
+# ── Phase 1 Palette (tan/sandy worm with armor plates) ────────────────
 _PAL1 = {
-    'o': (100, 70, 40),     # dark outline
+    'o': (60, 40, 20),      # dark outline / deep shadows
     'w': (180, 150, 80),    # worm body main (sandy tan)
-    'W': (200, 170, 100),   # worm body light/highlight
+    'W': (210, 180, 110),   # worm body light/highlight
     's': (140, 110, 60),    # worm body shadow/segment
     'S': (160, 130, 70),    # segment highlight
-    'e': (255, 100, 100),   # eyes/mouth red
-    'E': (200, 60, 60),     # eye edge (darker red)
-    't': (240, 230, 220),   # teeth white
-    'T': (200, 190, 180),   # teeth shadow
-    'm': (80, 50, 30),      # mouth interior
+    'a': (120, 95, 55),     # armor plate dark
+    'A': (150, 120, 65),    # armor plate medium
+    'B': (170, 140, 75),    # armor plate light
+    'u': (200, 170, 100),   # underbelly soft
+    'U': (220, 190, 120),   # underbelly highlight
+    'e': (255, 60, 60),     # eyes bright red
+    'E': (180, 40, 40),     # eye dark red
+    't': (255, 245, 235),   # teeth bright white
+    'T': (220, 210, 200),   # teeth mid
+    'h': (180, 170, 160),   # teeth shadow
+    'm': (40, 20, 10),      # mouth interior (gullet)
+    'M': (60, 30, 15),      # mouth interior lighter
+    'g': (80, 50, 30),      # gums/mouth edge
+    'G': (100, 60, 35),     # gums lighter
+    'l': (140, 180, 100),   # slime/drool green
+    'L': (100, 140, 70),    # slime dark
     '.': None,
 }
 
 # ── Phase 2 Palette (darker, redder, angrier) ─────────────────────────
 _PAL2 = {
-    'o': (80, 50, 30),      # dark outline
+    'o': (40, 25, 15),      # dark outline
     'w': (160, 120, 70),    # worm body darker tan
-    'W': (180, 140, 90),    # worm body light
+    'W': (190, 150, 90),    # worm body light
     's': (120, 90, 50),     # worm body shadow
     'S': (140, 110, 60),    # segment highlight
-    'e': (255, 80, 40),     # eyes/mouth bright red-orange
-    'E': (220, 50, 30),     # eye edge (darker red)
-    't': (220, 200, 180),   # teeth off-white
-    'T': (180, 160, 140),   # teeth shadow
-    'm': (60, 30, 20),      # mouth interior
+    'a': (100, 75, 45),     # armor plate dark
+    'A': (130, 100, 55),    # armor plate medium
+    'B': (150, 120, 65),    # armor plate light
+    'u': (180, 140, 80),    # underbelly soft
+    'U': (200, 160, 100),   # underbelly highlight
+    'e': (255, 80, 40),     # eyes bright red-orange
+    'E': (200, 50, 20),     # eye dark red
+    't': (240, 220, 200),   # teeth off-white
+    'T': (200, 180, 160),   # teeth mid
+    'h': (160, 140, 120),   # teeth shadow
+    'm': (30, 15, 10),      # mouth interior
+    'M': (50, 25, 15),      # mouth interior lighter
+    'g': (70, 40, 25),      # gums/mouth edge
+    'G': (90, 50, 30),      # gums lighter
+    'l': (120, 160, 80),    # slime/drool green
+    'L': (80, 120, 50),     # slime dark
     '.': None,
 }
 
-# ── Burrowed Palette (mostly transparent, just dust) ──────────────────
+# ── Burrowed Palette (dust cloud with ground cracks) ──────────────────
 _PAL_BURROWED = {
-    'o': (140, 110, 70),    # dust ring outline
+    'o': (100, 80, 50),     # dust ring outline / cracks
+    'O': (80, 60, 40),      # darker cracks
     'd': (180, 150, 100),   # dust particles
-    'D': (200, 170, 120),   # dust highlight
+    'D': (210, 180, 130),   # dust highlight
+    'p': (160, 130, 90),    # dust medium
+    'P': (140, 110, 70),    # dust shadow
+    'r': (120, 100, 60),    # ground ripples
+    'R': (100, 80, 50),     # ripples dark
     '.': None,
 }
 
 # ── Surface frames (24x24 grid, scale=2 → 48x48px) ────────────────────
+# DOWN frames: Massive circular mouth with rings of teeth, compound eyes, segmented body
 _SURFACE_DOWN_0 = [
     "........................",
     "........................",
-    "........................",
-    ".......oooooooooo.......",
-    "......owWWWWWWWwo.......",
-    ".....owWsssssssWwo......",
-    ".....owWsSSSSSsWwo......",
-    "....owWsSeEeEeSsWwo.....",
-    "....owWsseeeeesWWwo.....",
-    "....owWssoommossWwo.....",
-    "....owWsomTTTmoWWwo.....",
-    "....owWWomtttmoWWwo.....",
-    ".....owWWommmoWWwo......",
-    ".....owWWWWWWWWwo.......",
-    "......owWsssssWwo.......",
-    "......owWsSSSsWwo.......",
-    ".......owWsssWwo........",
-    "........owWsWwo.........",
-    ".........owWwo..........",
-    "..........owo...........",
-    "..........owo...........",
-    "...........o............",
-    "........................",
-    "........................",
+    "......oooooooooooo......",
+    ".....oWWWWWWWWWWWWo.....",
+    "....oWAAAaBBBaAAAAWo....",
+    "....oWaeeoBBBoeeaAWo....",
+    "...oWAeEeaBaBeaEeeAWo...",
+    "...oWBeeoGggggGoeeBWo...",
+    "..oWAaoGgtTtTtTtGaAAWo..",
+    "..oWBaGgThhmMmhhTgGaBWo.",
+    "..oWAaGthmmmmmmmhTGaAWo.",
+    "..oWBaGthmLmmmLmhtGaBWo.",
+    "..oWAaGthmmmmmmMhtGaAWo.",
+    "..oWBaGgThhmmmhhTgGaBWo.",
+    "..oWAaoGgtTthtTtGaaAWo..",
+    "...oWBsaoGgglgGoasBWo...",
+    "...oWAssaBaBaBaasAWo....",
+    "....oWuUssBBBssuUWo.....",
+    "....oWUuusBaBsuuUWo.....",
+    ".....oWuUsaBasuUWo......",
+    "......oWusaBsuWo........",
+    ".......oWusuWo..........",
+    "........oWUWo...........",
+    ".........oo.............",
 ]
 
 _SURFACE_DOWN_1 = [
     "........................",
     "........................",
-    "........................",
-    ".......oooooooooo.......",
-    "......owWWWWWWWwo.......",
-    ".....owWsssssssWwo......",
-    ".....owWsSSSSSsWwo......",
-    "....owWsSeEeEeSsWwo.....",
-    "....owWsseeeeesWWwo.....",
-    "....owWssoommossWwo.....",
-    "....owWsomTTTmoWWwo.....",
-    "....owWWomtttmoWWwo.....",
-    ".....owWWommmoWWwo......",
-    ".....owWWWWWWWWwo.......",
-    "......owWsssssWwo.......",
-    "......owWsSSSsWwo.......",
-    ".......owWsssWwo........",
-    ".........owWsWwo........",
-    "..........owWwo.........",
-    "...........owo..........",
-    "...........owo..........",
-    "............o...........",
-    "........................",
-    "........................",
+    "......oooooooooooo......",
+    ".....oWWWWWWWWWWWWo.....",
+    "....oWAAAaBBBaAAAAWo....",
+    "....oWaeeoaBaoeeeAWo....",
+    "...oWAeeEaBBBaEeeoAWo...",
+    "...oWBseoGggggGoesBWo...",
+    "..oWAAaGgtTtTtTtGaaAWo..",
+    "..oWBaGgthhMmMhhTgGaBWo.",
+    "..oWAaGthmmmmmmmhtGaAWo.",
+    "..oWBaGthLmmmmmLhtGaBWo.",
+    "..oWAaGthmMmMmmmhtGaAWo.",
+    "..oWBaGgthhmmMhhTgGaBWo.",
+    "..oWAaaGgtTthTtTGoaAWo..",
+    "...oWBsaoGggllGoasBWo...",
+    "...oWAassBaBaBassAWo....",
+    "....oWuUusBBBsuUUWo.....",
+    "....oWUuusaBasuuUWo.....",
+    ".....oWuUsBaBsuUWo......",
+    "......oWusaBsuWo........",
+    ".......oWusuWo..........",
+    "........oWUWo...........",
+    ".........oo.............",
 ]
 
-# ── Up frames (back view, less detail) ────────────────────────────────
+# UP frames: Back view showing armored segments tapering down
 _SURFACE_UP_0 = [
     "........................",
-    "........................",
-    "...........o............",
-    "..........owo...........",
-    "..........owo...........",
-    ".........owWwo..........",
-    "........owWsWwo.........",
-    ".......owWsssWwo........",
-    "......owWsSSSsWwo.......",
-    "......owWsssssWwo.......",
-    ".....owWWWWWWWWwo.......",
-    ".....owWWWWWWWWwo.......",
-    "....owWWWWWWWWWWwo......",
-    "....owWsssssssssWwo.....",
-    "....owWsSSSSSSSsWwo.....",
-    ".....owWsssssssWwo......",
-    ".....owWWWWWWWWwo.......",
-    "......owWWWWWWwo........",
+    ".........oo.............",
+    "........oWUWo...........",
+    ".......oWusuWo..........",
+    "......oWusaBsuWo........",
+    ".....oWuUsaBasuUWo......",
+    "....oWUuusBaBsuuUWo.....",
+    "....oWuUssBBBssuUWo.....",
+    "...oWAssaBaBaBassAWo....",
+    "...oWBssBaBaBaBssBWo....",
+    "..oWAaaBaBaBaBaBaaAWo...",
+    "..oWBAABaBaBaBaBABBWo...",
+    "..oWAAAaBaBaBaBaAAAWo...",
+    "..oWWAAABaBaBaBAAAAWo...",
+    "...oWWAAaBaBaBaAAWWo....",
+    "...oWWWABaBaBaBAWWWo....",
+    "....oWWWaBaBaBaWWWo.....",
+    "....oWWWWBaBaBWWWWo.....",
+    ".....oWWWWaBaWWWWo......",
+    ".....oWWWWWBWWWWWo......",
+    "......oWWWWWWWWWo.......",
     ".......oooooooo.........",
-    "........................",
-    "........................",
-    "........................",
     "........................",
     "........................",
 ]
 
 _SURFACE_UP_1 = _SURFACE_UP_0  # Same frame for up
 
-# ── Left frames ───────────────────────────────────────────────────────
+# LEFT frames: Side view with mouth, eye cluster, undulating segments
 _SURFACE_LEFT_0 = [
     "........................",
     "........................",
-    "............o...........",
-    "...........owo..........",
-    "...........owo..........",
-    "..........owWwo.........",
-    ".........owWsWwo........",
-    "........owWsssWwo.......",
-    ".......owWsSSSsWwo......",
-    "......owWsssssWWwo......",
-    ".....owWWWWWWWWWwo......",
-    "....omTTTWWWWWWWwo......",
-    "....omtttssssssWwo......",
-    "....ommmsSSSSSsWwo......",
-    ".....oeeeSseEeSwo.......",
-    ".....oEeEsseeewo........",
-    "......oEEsssswo.........",
-    ".......owWWWwo..........",
-    "........oooooo..........",
-    "........................",
-    "........................",
-    "........................",
-    "........................",
+    "............oo..........",
+    "...........oWWo.........",
+    "..........oWuUWo........",
+    ".........oWusUWo........",
+    "........oWusaBWo........",
+    ".......oWusBaBWo........",
+    "......oWusBaBaWo........",
+    ".....oWUsaBaBaWo........",
+    "....oWusBaBaBAAo........",
+    "...oGgtTBaBaBAAWo.......",
+    "...oGthMaBaBaAAWo.......",
+    "...oGthmaBaBAAAWWo......",
+    "...oGthMmBasAAWWWo......",
+    "...oGthmmaeeEeAWWo......",
+    "...oGgtTaoEeeeAAWo......",
+    "....oGgGaeEeeoAWo.......",
+    ".....ooglLeeoAWo........",
+    "......ooaoeoaWo.........",
+    ".........oaoWo..........",
+    "..........oWo...........",
+    "...........o............",
     "........................",
 ]
 
 _SURFACE_LEFT_1 = [
     "........................",
     "........................",
-    "............o...........",
-    "...........owo..........",
-    "...........owo..........",
-    "..........owWwo.........",
-    ".........owWsWwo........",
-    "........owWsssWwo.......",
-    ".......owWsSSSsWwo......",
-    "......owWsssssWWwo......",
-    ".....owWWWWWWWWWwo......",
-    "....omTTTWWWWWWWwo......",
-    "....omtttssssssWwo......",
-    "....ommmsSSSSSsWwo......",
-    ".....oeeeSeEeSswo.......",
-    ".....oEeEsseeeewo.......",
-    "......oEEsssswo.........",
-    ".......owWWWwo..........",
-    "........oooooo..........",
-    "........................",
-    "........................",
-    "........................",
-    "........................",
+    "............oo..........",
+    "...........oWWo.........",
+    "..........oWUuWo........",
+    ".........oWusuWo........",
+    "........oWusBaWo........",
+    ".......oWuaBaBWo........",
+    "......oWusBaBaWo........",
+    ".....oWusBaBaBWo........",
+    "....oWUsaBaBaAAo........",
+    "...oGgtTBaBaBAAWo.......",
+    "...oGthmaBaBaAAWo.......",
+    "...oGthMaBaBAAAWWo......",
+    "...oGthmMBaaAAWWWo......",
+    "...oGthmmaeEeeAWWo......",
+    "...oGgtTaoeEeEAAWo......",
+    "....oGgGaeeEeoAWo.......",
+    ".....oogLleeaAWo........",
+    "......ooaoeoaWo.........",
+    ".........oaoWo..........",
+    "..........oWo...........",
+    "...........o............",
     "........................",
 ]
 
-# ── Right frames (mirror of left) ─────────────────────────────────────
+# RIGHT frames: Mirror of left
 _SURFACE_RIGHT_0 = [
     "........................",
     "........................",
-    "...........o............",
-    "..........owo...........",
-    "..........owo...........",
-    ".........owWwo..........",
-    "........owWsWwo.........",
-    ".......owWsssWwo........",
-    "......owWsSSSsWwo.......",
-    "......owWWsssssWwo......",
-    "......owWWWWWWWWWwo.....",
-    "......owWWWWWWWTTTmo....",
-    "......owWssssssstttmo...",
-    "......owWsSSSSSsmmmmo...",
-    ".......owSeEeSseeeeo....",
-    "........oweeeessEeEo....",
-    ".........owssssEEo......",
-    "..........owWWWwo.......",
-    "..........oooooo........",
-    "........................",
-    "........................",
-    "........................",
-    "........................",
+    "..........oo............",
+    ".........oWWo...........",
+    "........oWUuWo..........",
+    "........oWUsuo..........",
+    "........oWaBsuo.........",
+    "........oWaBaBsuo.......",
+    "........oWaBaBsuo.......",
+    "........oWaBaBasUWo.....",
+    "........oAABaBaBsuWo....",
+    ".......oWAABaBaBTtGGo...",
+    ".......oWAAaBaBaMhtGo...",
+    "......oWWAAABaBamhtGo...",
+    "......oWWWAAsaBMmhtGo...",
+    "......oWWeEeeamhtGo.....",
+    "......oWAAeeeEoaTtGGo...",
+    ".......oWAoeeEeaGgGo....",
+    "........oWAoeeLlgoo.....",
+    ".........oWaoeoaoo......",
+    "..........oWoao.........",
+    "...........oWo..........",
+    "............o...........",
     "........................",
 ]
 
 _SURFACE_RIGHT_1 = [
     "........................",
     "........................",
-    "...........o............",
-    "..........owo...........",
-    "..........owo...........",
-    ".........owWwo..........",
-    "........owWsWwo.........",
-    ".......owWsssWwo........",
-    "......owWsSSSsWwo.......",
-    "......owWWsssssWwo......",
-    "......owWWWWWWWWWwo.....",
-    "......owWWWWWWWTTTmo....",
-    "......owWssssssstttmo...",
-    "......owWsSSSSSsmmmmo...",
-    ".......owsSeEeSeeeeo....",
-    ".......oweeeessEeEo.....",
-    ".........owssssEEo......",
-    "..........owWWWwo.......",
-    "..........oooooo........",
-    "........................",
-    "........................",
-    "........................",
-    "........................",
+    "..........oo............",
+    ".........oWWo...........",
+    "........oWuUWo..........",
+    "........oWusuo..........",
+    "........oWaBsuo.........",
+    "........oWaBaBuo........",
+    "........oWaBaBsuo.......",
+    "........oWaBaBsBuWo.....",
+    "........oAAaBaBsUWo.....",
+    ".......oWAABaBaBTtGGo...",
+    ".......oWAAaBaBamhtGo...",
+    "......oWWAAABaBaMhtGo...",
+    "......oWWWAAaaBMmhtGo...",
+    "......oWWAeeEeamhtGo....",
+    "......oWAAEeEeoaTtGGo...",
+    ".......oWAoeeEeaGgGo....",
+    "........oWAaeeLlgoo.....",
+    ".........oWaoeoaoo......",
+    "..........oWoao.........",
+    "...........oWo..........",
+    "............o...........",
     "........................",
 ]
 
-# ── Burrowed frames (small dust mound, 24x24 grid) ────────────────────
+# ── Burrowed frames (dust cloud with ground cracks, radial spray) ──────
 _BURROWED_0 = [
     "........................",
     "........................",
+    "............d...........",
+    "........d...............",
+    "...........D...........d",
     "........................",
-    "........................",
-    "........................",
-    "........................",
-    "........................",
-    "........................",
-    "........................",
-    "........................",
-    ".........oooooo.........",
-    "........odDDDDdo........",
-    ".......odDdddDDdo.......",
-    "......odDddddddDdo......",
-    ".....odDdddddddddDo.....",
-    ".....oddddddddddddo.....",
-    "......odddddddddddo.....",
-    ".......oooooooooo.......",
-    "........................",
-    "........................",
-    "........................",
-    "........................",
-    "........................",
-    "........................",
+    "..d........OOOOo........",
+    ".......OOOorrrrrOOOo....",
+    "......OrrrRRRRRRrrrO....",
+    ".....OrRRoooooooooRrO...",
+    "....OrRoDDdddddddDDoRO..",
+    "....OrRodDpppppppDdoRo..",
+    "...OrRodDpPPPPPPPPdDoRo.",
+    "...oRRodpPPdddddPPpoRRo.",
+    "...oRRodpPdddddddPpoRRo.",
+    "...OrRodDPddddddDPdoRro.",
+    "....OroodDpPPPPpDdooRo..",
+    "....OrRoddDDDDDDdooRro..",
+    ".....OrrooooooooooRro...",
+    "......OrrrRRRRRRrrrO....",
+    ".......OOOorrrrrOOo.....",
+    "..........oOOOOo........",
+    ".......d................",
+    "..d.............D.......",
 ]
 
 _BURROWED_1 = [
     "........................",
+    ".........D..............",
     "........................",
-    "........................",
-    "........................",
-    "........................",
-    "........................",
-    "........................",
-    "........................",
-    "........................",
-    "........................",
-    ".........oooooo.........",
-    "........odDDDDdo........",
-    ".......odDddDDDdo.......",
-    "......odDdddddddDo......",
-    ".....odDddddddddDdo.....",
-    ".....odddddddddddddo....",
-    "......odddddddddddo.....",
-    ".......oooooooooo.......",
-    "........................",
-    "........................",
-    "........................",
-    "........................",
-    "........................",
-    "........................",
+    "......d................d",
+    "..d.....................",
+    "............OOOo........",
+    ".......OOOorrrrrOOo.....",
+    "......OrrrRRRRRRrrrO....",
+    ".....OrRRoooooooooRRo...",
+    "....OrRoDdddddddddDoRo..",
+    "...OrRodDpppppppppDdoRo.",
+    "...oRRodDPPPPPPPPPDdoRRo",
+    "...oRRodpPPdddddPPpoRRo.",
+    "...oRRodpPddddddPPpoRRo.",
+    "...OrRodDPPddddDPPdoRro.",
+    "....OroodDpPPPPPDdooRo..",
+    "....OrRoodDDDDDddooRro..",
+    ".....OrrRooooooooRRro...",
+    "......OrrrrRRRRrrrro....",
+    ".......OOOorrrrrOOo.....",
+    "..........oOOOoo........",
+    "........d...............",
+    "...............D........",
+    "..D.....................",
 ]
 
 # ── Build surfaces ────────────────────────────────────────────────────

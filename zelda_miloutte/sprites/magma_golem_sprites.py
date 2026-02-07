@@ -5,153 +5,161 @@ from .pixel_art import surface_from_grid
 # ── Palette ───────────────────────────────────────────────────────
 _PAL = {
     'o': (20, 20, 20),        # dark outline
-    'r': (100, 50, 30),       # dark brown/gray rocky body
-    'R': (80, 40, 25),        # darker rock
-    'c': (200, 60, 20),       # lava crack red
-    'C': (255, 120, 30),      # bright lava orange
-    'e': (255, 140, 50),      # glowing orange eyes
-    'g': (60, 35, 20),        # very dark gray/brown
+    'b': (40, 40, 45),        # dark basalt
+    'B': (55, 55, 60),        # medium basalt
+    'r': (70, 50, 45),        # brown rock
+    'R': (90, 65, 55),        # medium brown rock
+    'g': (105, 85, 75),       # gray stone
+    'G': (120, 100, 90),      # light gray stone
+    'd': (150, 40, 20),       # deep red lava (cooling)
+    'c': (200, 60, 20),       # dark red lava crack
+    'C': (255, 100, 30),      # bright red-orange lava
+    'l': (255, 150, 40),      # orange lava flow
+    'L': (255, 200, 60),      # bright yellow lava
+    'w': (255, 240, 200),     # white-hot lava core
+    'y': (255, 220, 100),     # yellow glow
+    'e': (255, 180, 80),      # eye glow orange
     '.': None,
 }
 
 # ── Down frames ───────────────────────────────────────────────────
 _DOWN_0 = [
     "....oooooo....",
-    "...orrrrrro...",
-    "..orRRRRRRro..",
-    "..orReRReRro..",
-    ".orRRcccRRRro.",
-    ".orRRCCCRRRro.",
-    ".orRRcccRRRro.",
-    ".orRRRRRRRRro.",
-    "..orRRRRRRro..",
-    "..orRgcgRRro..",
-    "...orRcRRro...",
-    "....orrrro....",
-    ".....oooo.....",
-    "..............",
+    "...ogyLygo....",
+    "..ogGwLwGgo...",
+    "..oGeyllyeGo..",
+    ".ogGlLwLlGgo.",
+    ".oRclLwLlcRo.",
+    ".obdCLLCdboo.",
+    ".obbcCCcbbbo.",
+    ".oBrdccdrbBo.",
+    "..orBdddBro..",
+    "..oRbdcdbRo..",
+    "...oRrcrRo...",
+    "....ogbgo....",
+    "....oooo.....",
 ]
 
 _DOWN_1 = [
     "....oooooo....",
-    "...orrrrrro...",
-    "..orRRRRRRro..",
-    "..orReRReRro..",
-    ".orRRcccRRRro.",
-    ".orRRCCCRRRro.",
-    ".orRRcccRRRro.",
-    ".orRRRRRRRRro.",
-    "..orRRRRRRro..",
-    "..orRgcgRRro..",
-    "...orRcRRro...",
-    "....orrrro....",
-    ".....oooo.....",
-    "..............",
+    "...ogyCygo....",
+    "..ogGlClGgo...",
+    "..oGeLllLeGo..",
+    ".ogGCwLwCGgo.",
+    ".oRcCwLwCcRo.",
+    ".obdlwwldoo..",
+    ".obbclclbbbo.",
+    ".oBrdlldrbBo.",
+    "..orBdcdBro..",
+    "..oRbdldbRo..",
+    "...oRrcrRo...",
+    "....ogbgo....",
+    "....oooo.....",
 ]
 
 # ── Up frames ─────────────────────────────────────────────────────
 _UP_0 = [
-    ".....oooo.....",
-    "....orrrro....",
-    "...orRcRRro...",
-    "..orRgcgRRro..",
-    "..orRRRRRRro..",
-    ".orRRRRRRRRro.",
-    ".orRRcccRRRro.",
-    ".orRRCCCRRRro.",
-    ".orRRcccRRRro.",
-    "..orReRReRro..",
-    "..orRRRRRRro..",
-    "...orrrrrro...",
+    "....oooo.....",
+    "....ogbgo....",
+    "...oRrcrRo...",
+    "..oRbdcdbRo..",
+    "..orBdddBro..",
+    ".oBrdccdrbBo.",
+    ".obbcCCcbbbo.",
+    ".obdCLLCdboo.",
+    ".oRclLwLlcRo.",
+    ".ogGlLwLlGgo.",
+    "..oGeyllyeGo..",
+    "..ogGwLwGgo...",
+    "...ogyLygo....",
     "....oooooo....",
-    "..............",
 ]
 
 _UP_1 = [
-    ".....oooo.....",
-    "....orrrro....",
-    "...orRcRRro...",
-    "..orRgcgRRro..",
-    "..orRRRRRRro..",
-    ".orRRRRRRRRro.",
-    ".orRRcccRRRro.",
-    ".orRRCCCRRRro.",
-    ".orRRcccRRRro.",
-    "..orReRReRro..",
-    "..orRRRRRRro..",
-    "...orrrrrro...",
+    "....oooo.....",
+    "....ogbgo....",
+    "...oRrcrRo...",
+    "..oRbdldbRo..",
+    "..orBdcdBro..",
+    ".oBrdlldrbBo.",
+    ".obbclclbbbo.",
+    ".obdlwwldoo..",
+    ".oRcCwLwCcRo.",
+    ".ogGCwLwCGgo.",
+    "..oGeLllLeGo..",
+    "..ogGlClGgo...",
+    "...ogyCygo....",
     "....oooooo....",
-    "..............",
 ]
 
 # ── Left frames ───────────────────────────────────────────────────
 _LEFT_0 = [
-    "....oooooo....",
-    "...orrrrrro...",
-    "..orRRRRRRro..",
-    "..orReRRRRro..",
-    ".orRRcRRRRRro.",
-    ".orRRCcRRRRro.",
-    ".orRRcRRRRRro.",
-    ".orRRRRRRRRro.",
-    "..orRRgcRRro..",
-    "..orRRRcRRro..",
-    "...orRRRRro...",
-    "....orrrro....",
-    ".....oooo.....",
-    "..............",
+    "...oooooo.....",
+    "..ogyLyGo.....",
+    ".ogGwLwGRo....",
+    ".oGeyLcdbRo...",
+    "ogGlwlCrbBo...",
+    "oRcLwCdbBBoo..",
+    "obdCLcdbbbbbo.",
+    "obbcCcrbBBBBo.",
+    "oBrdccdbBBoo..",
+    ".orBdcdrbBo...",
+    ".oRbdcdbRo....",
+    "..oRrcRGo.....",
+    "...ogbgo......",
+    "....oooo......",
 ]
 
 _LEFT_1 = [
-    "....oooooo....",
-    "...orrrrrro...",
-    "..orRRRRRRro..",
-    "..orReRRRRro..",
-    ".orRRcRRRRRro.",
-    ".orRRCcRRRRro.",
-    ".orRRcRRRRRro.",
-    ".orRRRRRRRRro.",
-    "..orRRgcRRro..",
-    "..orRRRcRRro..",
-    "...orRRRRro...",
-    "....orrrro....",
-    ".....oooo.....",
-    "..............",
+    "...oooooo.....",
+    "..ogyCyGo.....",
+    ".ogGlClGRo....",
+    ".oGeLlcdbRo...",
+    "ogGCwCcrbBo...",
+    "oRcCwldbBBoo..",
+    "obdlwcdbbbbbo.",
+    "obbclcrbBBBBo.",
+    "oBrdlcdbBBoo..",
+    ".orBdldrbBo...",
+    ".oRbdldbRo....",
+    "..oRrcRGo.....",
+    "...ogbgo......",
+    "....oooo......",
 ]
 
 # ── Right frames ──────────────────────────────────────────────────
 _RIGHT_0 = [
-    "....oooooo....",
-    "...orrrrrro...",
-    "..orRRRRRRro..",
-    "..orRRRReRro..",
-    ".orRRRRRcRRro.",
-    ".orRRRRcCRRro.",
-    ".orRRRRRcRRro.",
-    ".orRRRRRRRRro.",
-    "..orRRcgRRro..",
-    "..orRRcRRRro..",
-    "...orRRRRro...",
-    "....orrrro....",
-    ".....oooo.....",
-    "..............",
+    ".....oooooo...",
+    ".....oGyLygo..",
+    "....oRGwLwGgo.",
+    "...oRbdcLyeGo.",
+    "...oBbrClwlGgo",
+    "..ooBBbdCwLcRo",
+    ".obbbbbdcLCdbo",
+    ".oBBBBBrcCcbbo",
+    "..ooBBbdccdrBo",
+    "...oBbrdcdBro.",
+    "....oRbdcdBRo.",
+    ".....oGRcrRo..",
+    "......ogbgo...",
+    "......oooo....",
 ]
 
 _RIGHT_1 = [
-    "....oooooo....",
-    "...orrrrrro...",
-    "..orRRRRRRro..",
-    "..orRRRReRro..",
-    ".orRRRRRcRRro.",
-    ".orRRRRcCRRro.",
-    ".orRRRRRcRRro.",
-    ".orRRRRRRRRro.",
-    "..orRRcgRRro..",
-    "..orRRcRRRro..",
-    "...orRRRRro...",
-    "....orrrro....",
-    ".....oooo.....",
-    "..............",
+    ".....oooooo...",
+    ".....oGyCygo..",
+    "....oRGlClGgo.",
+    "...oRbdcLlEGo.",
+    "...oBbrcCwCGgo",
+    "..ooBBbdlwCcRo",
+    ".obbbbbdcwldbo",
+    ".oBBBBBrclcbbo",
+    "..ooBBbdcldrBo",
+    "...oBbrdldBro.",
+    "....oRbdldBRo.",
+    ".....oGRcrRo..",
+    "......ogbgo...",
+    "......oooo....",
 ]
 
 # ── Build surfaces ────────────────────────────────────────────────
@@ -176,12 +184,12 @@ def get_magma_golem_frames():
 # ── Magma Projectile ──────────────────────────────────────────────
 _PROJECTILE = [
     "..oooo..",
-    ".oCCCCo.",
-    "oCcccCCo",
-    "oCccccCo",
-    "oCccccCo",
-    "oCCcccCo",
-    ".oCCCCo.",
+    ".owwwwo.",
+    "owyyyLo",
+    "owLLLCo",
+    "oyCCCdo",
+    "oLCcdco",
+    ".odccdo.",
     "..oooo..",
 ]
 

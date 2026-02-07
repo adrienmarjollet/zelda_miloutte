@@ -5,153 +5,160 @@ from .pixel_art import surface_from_grid
 # ── Palette ───────────────────────────────────────────────────────
 _PAL = {
     'o': (20, 20, 20),        # dark outline
-    'b': (160, 120, 40),      # brown/tan body
-    'B': (140, 100, 30),      # darker brown
-    'p': (100, 70, 20),       # dark brown pincers
-    't': (180, 140, 60),      # tan tail
-    's': (120, 90, 30),       # stinger base
-    'S': (80, 50, 10),        # dark stinger tip
-    'e': (60, 30, 10),        # very dark eyes
+    'b': (160, 120, 40),      # tan body
+    'B': (140, 100, 30),      # medium brown body
+    'D': (100, 70, 20),       # dark brown segments
+    'y': (200, 180, 60),      # yellow/gold highlights
+    'p': (120, 80, 30),       # pincers base
+    'P': (160, 110, 40),      # pincers tips
+    't': (110, 80, 35),       # tail segments
+    'T': (90, 60, 25),        # dark tail
+    'v': (180, 60, 30),       # red-orange venom
+    'V': (220, 80, 40),       # bright venom tip
+    'g': (100, 180, 70),      # poison green glow
+    'G': (80, 140, 50),       # darker poison
+    'e': (255, 0, 0),         # red eyes
+    'l': (80, 60, 20),        # legs
     '.': None,
 }
 
 # ── Down frames ───────────────────────────────────────────────────
 _DOWN_0 = [
-    ".....oooo.....",
-    "....obbbo.....",
-    "...obbbbbo....",
-    "..obBBBBBbo...",
-    "..obBeeeBbo...",
-    ".obBBBBBBBbo..",
-    ".obBBBBBBBbo..",
-    ".obBBBBBBBbo..",
-    "..obBBBBBbo...",
-    "...obBBBbo....",
-    "....otttoo....",
-    "....ottsoo....",
-    ".....oSo......",
-    "......o.......",
+    "...oo....oo...",
+    "..oPoooooPos..",
+    "..oPooooooP...",
+    ".obbyBBBByo...",
+    ".obBeeBByo....",
+    "lobBBDBBbol...",
+    "lobBBDBBbol...",
+    ".obBBDBBbo....",
+    "..obBDBbo.....",
+    "...obTbo......",
+    "....oTo.......",
+    "...ooToo......",
+    "...ovVgo......",
+    "....oGo.......",
 ]
 
 _DOWN_1 = [
-    ".....oooo.....",
-    "....obbbo.....",
-    "...obbbbbo....",
-    "..obBBBBBbo...",
-    "..obBeeeBbo...",
-    ".obBBBBBBBbo..",
-    ".obBBBBBBBbo..",
-    ".obBBBBBBBbo..",
-    "..obBBBBBbo...",
-    "...obBBBbo....",
-    "...ootttoo....",
-    "....ottsoo....",
-    ".....oSo......",
-    "......o.......",
+    "...oo....oo...",
+    "..oPoooooPo...",
+    "..oPoooooPos..",
+    "..obbyBBByos..",
+    "...obBeeBBo...",
+    ".lobBBDBBbol..",
+    ".lobBBDBBbol..",
+    "..obBBDBBbo...",
+    "...obBDBbo....",
+    "....obTbo.....",
+    ".....oTo......",
+    "....ooToo.....",
+    "....ovVgo.....",
+    ".....oGo......",
 ]
 
 # ── Up frames ─────────────────────────────────────────────────────
 _UP_0 = [
-    "......o.......",
-    ".....oSo......",
-    "....ootsoo....",
-    "....ootttoo...",
-    "...obBBBbo....",
-    "..obBBBBBbo...",
-    ".obBBBBBBBbo..",
-    ".obBBBBBBBbo..",
-    ".obBBBBBBBbo..",
-    "..obBeeeBbo...",
-    "..obBBBBBbo...",
-    "...obbbbbo....",
-    "....obbbo.....",
-    ".....oooo.....",
+    ".....oGo......",
+    "....ovVgo.....",
+    "....ooToo.....",
+    ".....oTo......",
+    "....obTbo.....",
+    "...obBDBbo....",
+    "..obBBDBBbo...",
+    ".lobBBDBBbol..",
+    ".lobBBDBBbol..",
+    "...obBeeBBo...",
+    "..obbyBBByos..",
+    "..oPoooooPos..",
+    "..oPoooooPo...",
+    "...oo....oo...",
 ]
 
 _UP_1 = [
-    "......o.......",
-    ".....oSo......",
-    "....ootsoo....",
-    "...ootttoo....",
-    "...obBBBbo....",
-    "..obBBBBBbo...",
-    ".obBBBBBBBbo..",
-    ".obBBBBBBBbo..",
-    ".obBBBBBBBbo..",
-    "..obBeeeBbo...",
-    "..obBBBBBbo...",
-    "...obbbbbo....",
-    "....obbbo.....",
-    ".....oooo.....",
+    "....oGo.......",
+    "...ovVgo......",
+    "...ooToo......",
+    "....oTo.......",
+    "...obTbo......",
+    "..obBDBbo.....",
+    ".obBBDBBbo....",
+    "lobBBDBBbol...",
+    "lobBBDBBbol...",
+    ".obBeeBByo....",
+    ".obbyBBBByo...",
+    "..oPooooooP...",
+    "..oPoooooPos..",
+    "...oo....oo...",
 ]
 
 # ── Left frames ───────────────────────────────────────────────────
 _LEFT_0 = [
-    "....oooo......",
-    "...obbbo......",
-    "..obbbbbooo...",
-    ".obBBBBBopo...",
-    ".obBeBBBBo....",
-    "obBBBBBBBbo...",
-    "obBBBBBBBbo...",
-    "obBBBBBBbo....",
-    ".obBBBBBo.....",
-    "..obBBBo......",
-    "...oottsoo....",
-    "....ooSo......",
-    "......o.......",
+    "..............",
+    "...oooooo.....",
+    "..oPooobyo....",
+    "..oPobBeBo....",
+    ".obBBBBDBol...",
+    ".obBBBBDBoloo.",
+    "obBBBBDBol.oo.",
+    "obBBBBBol..ovV",
+    ".obBBBol..ooTG",
+    "..obBol...oTo.",
+    "...obo....oo..",
+    "....o.........",
+    "..............",
     "..............",
 ]
 
 _LEFT_1 = [
-    "....oooo......",
-    "...obbbo......",
-    "..obbbbbooo...",
-    ".obBBBBBopo...",
-    ".obBeBBBBo....",
-    "obBBBBBBBbo...",
-    "obBBBBBBBbo...",
-    "obBBBBBBbo....",
-    ".obBBBBBo.....",
-    "..obBBBo......",
-    "..oottsoo.....",
-    "...ooSo.......",
-    ".....o........",
+    "..............",
+    "...oooooo.....",
+    "..oPoobyo.....",
+    "..oPooBeBo....",
+    ".obBBBBDBol...",
+    ".obBBBBDBoloo.",
+    "obBBBBDBool.oo",
+    "obBBBBBol..ovV",
+    ".obBBBol...oTG",
+    "..obBol....oo.",
+    "...obol.......",
+    "....o.........",
+    "..............",
     "..............",
 ]
 
 # ── Right frames ──────────────────────────────────────────────────
 _RIGHT_0 = [
-    "......oooo....",
-    "......obbbo...",
-    "...ooobbbbbo..",
-    "...opopBBBBbo.",
-    "....obBBBeBbo.",
-    "...obBBBBBBBbo",
-    "...obBBBBBBBbo",
-    "....obBBBBBBbo",
-    ".....obBBBBbo.",
-    "......obBBbo..",
-    "....oosttoo...",
-    "......oSoo....",
-    ".......o......",
+    "..............",
+    ".....oooooo...",
+    "....oyboooPo..",
+    "....oBeBboPo..",
+    "...loBDBBBBbo.",
+    ".oolobDBBBBbo.",
+    ".oo.loBDBBBBbo",
+    "Vvo..loBBBBBbo",
+    "GToo..loBBBbo.",
+    ".oTo...loBbo..",
+    "..oo....obo...",
+    ".........o....",
+    "..............",
     "..............",
 ]
 
 _RIGHT_1 = [
-    "......oooo....",
-    "......obbbo...",
-    "...ooobbbbbo..",
-    "...opopBBBBbo.",
-    "....obBBBeBbo.",
-    "...obBBBBBBBbo",
-    "...obBBBBBBBbo",
-    "....obBBBBBBbo",
-    ".....obBBBBbo.",
-    "......obBBbo..",
-    ".....oosttoo..",
-    ".......oSoo...",
-    "........o.....",
+    "..............",
+    ".....oooooo...",
+    ".....oyboooPo.",
+    "....oBeBooP...",
+    "...loBDBBBBbo.",
+    ".oolobDBBBBbo.",
+    "oo.looBDBBBBbo",
+    "Vvo..loBBBBBbo",
+    "GTo...loBBBbo.",
+    ".oo....loBbo..",
+    ".......lobo...",
+    ".........o....",
+    "..............",
     "..............",
 ]
 

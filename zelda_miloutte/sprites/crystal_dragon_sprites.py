@@ -2,265 +2,279 @@
 
 from .pixel_art import surface_from_grid
 
-# ── Phase 1 Palette (icy blue crystal dragon) ────────────────────
+# ── Phase 1 Palette (brilliant icy crystal dragon) ──────────────────
 _PAL1 = {
-    'o': (20, 30, 50),       # dark outline
-    'd': (50, 90, 150),      # dark body
-    'D': (70, 120, 180),     # body mid
-    'b': (90, 160, 220),     # body light
-    'B': (120, 190, 240),    # body highlight
-    'c': (180, 220, 255),    # crystal
-    'C': (200, 240, 255),    # crystal bright
-    'e': (100, 200, 255),    # eye glow
-    'E': (60, 160, 230),     # eye edge
-    'w': (160, 200, 230),    # wing membrane
-    'W': (130, 180, 220),    # wing dark
-    'h': (220, 240, 255),    # horn/claw
-    't': (80, 140, 200),     # tail
-    'T': (60, 110, 170),     # tail dark
-    '.': None,
-}
-
-# ── Phase 2 Palette (darker, more aggressive) ───────────────────
-_PAL2 = {
-    'o': (15, 20, 40),       # dark outline
-    'd': (40, 70, 130),      # dark body
-    'D': (60, 100, 160),     # body mid
+    'o': (15, 25, 45),       # dark outline
+    'd': (40, 80, 140),      # dark body base
+    'D': (60, 110, 170),     # body mid tone
     'b': (80, 140, 200),     # body light
-    'B': (100, 170, 220),    # body highlight
-    'c': (160, 200, 240),    # crystal (duller)
-    'C': (180, 220, 250),    # crystal bright
-    'e': (255, 120, 60),     # eye glow (now orange-red!)
-    'E': (200, 80, 40),      # eye edge
-    'w': (140, 180, 210),    # wing membrane
-    'W': (110, 160, 200),    # wing dark
-    'h': (200, 220, 240),    # horn/claw
-    't': (60, 120, 180),     # tail
-    'T': (40, 90, 150),      # tail dark
+    'B': (100, 170, 230),    # body highlight
+    'c': (140, 200, 250),    # crystal base
+    'C': (180, 230, 255),    # crystal bright
+    'S': (220, 245, 255),    # brilliant sapphire
+    's': (200, 235, 255),    # sparkle/prismatic
+    'e': (120, 220, 255),    # eye glow (ice blue)
+    'E': (80, 180, 240),     # eye edge
+    'w': (150, 195, 235),    # wing membrane light
+    'W': (110, 160, 210),    # wing bone (darker crystal)
+    'h': (230, 250, 255),    # horn/ice crown (brilliant)
+    'H': (180, 220, 250),    # horn base
+    't': (70, 130, 190),     # tail base
+    'T': (50, 100, 160),     # tail dark
+    'i': (190, 215, 245),    # ice shard/spike
+    'f': (160, 210, 245),    # frost/mist effect
+    'p': (120, 180, 230),    # crystal plate mid
+    'P': (90, 150, 210),     # crystal plate dark
     '.': None,
 }
 
-# ── Down frames (24x24 grid, scale=2 -> 48x48px) ────────────────
+# ── Phase 2 Palette (darker, aggressive, red eyes) ──────────────────
+_PAL2 = {
+    'o': (10, 15, 35),       # dark outline
+    'd': (35, 65, 120),      # dark body base
+    'D': (50, 95, 150),      # body mid tone
+    'b': (70, 125, 180),     # body light
+    'B': (90, 155, 210),     # body highlight
+    'c': (120, 180, 230),    # crystal base (duller)
+    'C': (160, 210, 245),    # crystal bright
+    'S': (200, 230, 250),    # brilliant sapphire (muted)
+    's': (180, 220, 245),    # sparkle/prismatic
+    'e': (255, 100, 50),     # eye glow (fiery red-orange!)
+    'E': (220, 70, 30),      # eye edge
+    'w': (130, 175, 215),    # wing membrane light
+    'W': (95, 145, 190),     # wing bone (darker crystal)
+    'h': (210, 235, 250),    # horn/ice crown (brilliant)
+    'H': (160, 200, 235),    # horn base
+    't': (60, 115, 170),     # tail base
+    'T': (40, 85, 140),      # tail dark
+    'i': (170, 200, 230),    # ice shard/spike
+    'f': (140, 190, 225),    # frost/mist effect
+    'p': (100, 160, 210),    # crystal plate mid
+    'P': (75, 135, 190),     # crystal plate dark
+    '.': None,
+}
+
+# ── Down frames (24x24 grid, scale=2 -> 48x48px) ────────────────────
 _DOWN_0 = [
-    "........oooooooo........",
-    "......oocCCCCCcoo.......",
-    ".....odDDbbBBBBDdo......",
-    ".....odDbbBBBBBDdo......",
-    "....odDdEebbEedDDdo.....",
-    "....odDbbbbbbbdDDdo.....",
-    "..oodDDbbccbbDDDdoo.....",
-    ".oWwdDDbbbbbbDDdwWo.....",
-    "oWwwdDDbBBBbDDdwwWo.....",
-    "oWwwodDDbbbDDdowwWo.....",
-    ".oWwoodDDDDDdoowWo......",
-    "..oWwoodddddoowWo.......",
-    "...oWwoddddddwWo........",
-    "....oWoddddddWo.........",
-    ".....ooTttttToo..........",
-    "......oTtttTTo...........",
-    "......oTtttTTo...........",
-    ".....oTTtooTTTo..........",
-    ".....oTTo..oTTo..........",
-    ".....oTo....oTo..........",
-    "......o......o...........",
-    ".........................",
-    ".........................",
-    ".........................",
+    "......ooShhhhooo........",
+    ".....oShHHHHHHhSo.......",
+    "....oShHhsHsHhHhSo......",
+    "...odDhHhiiiihHhDdo.....",
+    "...odDDEebbbeEDDDdo.....",
+    "..odDddbbbbbbbddDdo.....",
+    "..odDbpfbbbbfpbDDdo.....",
+    ".oodDbpcCCCCcpbDdoo.....",
+    ".oWWdDbCsSsSsCbDdWWo....",
+    "oWwwdDbcCCCCcbDdwwWo....",
+    "oWwwodDpbBBbpDdowwWo....",
+    ".oWwoodDpbbpDdoowWo.....",
+    "..oWwoodDdDdoowWo.......",
+    "...oWwoodddoowWo........",
+    "....oWwoodddwWo.........",
+    ".....oWoPPPPWo..........",
+    "......ooTtiToo..........",
+    ".......oTtitTo..........",
+    ".......oTttTTo..........",
+    "......oTtssTTo..........",
+    "......oTTo.oTTo.........",
+    ".....oTTo...oTTo........",
+    ".....oTo.....oTo........",
+    "......o.......o.........",
 ]
 
 _DOWN_1 = [
-    "........oooooooo........",
-    "......oocCCCCCcoo.......",
-    ".....odDDbbBBBBDdo......",
-    ".....odDbbBBBBBDdo......",
-    "....odDdEebbEedDDdo.....",
-    "....odDbbbbbbbdDDdo.....",
-    "..oodDDbbccbbDDDdoo.....",
-    ".oWwdDDbbbbbbDDdwWo.....",
-    "oWwwdDDbBBBbDDdwwWo.....",
-    "oWwwodDDbbbDDdowwWo.....",
-    ".oWwoodDDDDDdoowWo......",
-    "..oWwoodddddoowWo.......",
-    "...oWwoddddddwWo........",
-    "....oWoddddddWo.........",
-    ".....ooTttttToo..........",
-    "......oTtttTTo...........",
-    "......oTtttTTo...........",
-    ".....oTTtooTTTo..........",
-    ".....oTTo..oTTo..........",
-    "......oTo...oTo..........",
-    "......o......o...........",
-    ".........................",
-    ".........................",
-    ".........................",
+    "......ooShhhhSoo........",
+    ".....oShHHHHHHhSo.......",
+    "....oShHhiHiHhHhSo......",
+    "...odDhHhsssshHhDdo.....",
+    "...odDDEebbbeEDDDdo.....",
+    "..odDddbbbbbbbddDdo.....",
+    "..odDbpfbbbbfpbDDdo.....",
+    ".oodDbpCcsCsCpbDdoo.....",
+    ".oWWdDbcCCCCcbDdWWo.....",
+    "oWwwdDbCsSsSCbDdwwWo....",
+    "oWwwodDpbBBbpDdowwWo....",
+    ".oWwoodDpbbpDdoowWo.....",
+    "..oWwoodDdDdoowWo.......",
+    "...oWwoodddoowWo........",
+    "....oWwodddowWo.........",
+    ".....oWoPPPPWo..........",
+    "......ooTitToo..........",
+    ".......oTttTTo..........",
+    ".......oTtitTo..........",
+    "......oTTssTTo..........",
+    "......oTTo.oTTo.........",
+    ".....oTTo...oTTo........",
+    "......oTo....oTo........",
+    "......o.......o.........",
 ]
 
-# ── Up frames ────────────────────────────────────────────────────
+# ── Up frames ────────────────────────────────────────────────────────
 _UP_0 = [
-    ".........................",
-    ".........................",
-    ".........................",
-    "......o......o...........",
-    ".....oTo....oTo..........",
-    ".....oTTo..oTTo..........",
-    ".....oTTtooTTTo..........",
-    "......oTtttTTo...........",
-    "......oTtttTTo...........",
-    ".....ooTttttToo..........",
-    "....oWoddddddWo.........",
-    "...oWwoddddddwWo........",
-    "..oWwoodddddoowWo.......",
-    ".oWwoodDDDDDdoowWo......",
-    "oWwwodDDbbbDDdowwWo.....",
-    "oWwwdDDbBBBbDDdwwWo.....",
-    ".oWwdDDbbbbbbDDdwWo.....",
-    "..oodDDbbccbbDDDdoo.....",
-    "....odDdddddddDDdo.....",
-    "....odDbbbbbbdDDdo......",
-    ".....odDDbbBBBBDdo......",
-    ".....odDDbbBBBBDdo......",
-    "......oocCCCCCcoo.......",
-    "........oooooooo........",
+    "......o.......o.........",
+    ".....oTo.....oTo........",
+    ".....oTTo...oTTo........",
+    "......oTTo.oTTo.........",
+    "......oTtssTTo..........",
+    ".......oTttTTo..........",
+    ".......oTtitTo..........",
+    "......ooTtiToo..........",
+    ".....oWoPPPPWo..........",
+    "....oWwodddowWo.........",
+    "...oWwoodddoowWo........",
+    "..oWwoodDdDdoowWo.......",
+    ".oWwoodDpbbpDdoowWo.....",
+    "oWwwodDpbBBbpDdowwWo....",
+    "oWwwdDbcCCCCcbDdwwWo....",
+    ".oWWdDbCsSsSsCbDdWWo....",
+    ".oodDbpcCCCCcpbDdoo.....",
+    "..odDbpfbbbbfpbDDdo.....",
+    "..odDddbbbbbbbddDdo.....",
+    "...odDDdbbbbdDDDdo......",
+    "...odDhHhiiiihHhDdo.....",
+    "....oShHhsHsHhHhSo......",
+    ".....oShHHHHHHhSo.......",
+    "......ooShhhhooo........",
 ]
 
 _UP_1 = [
-    ".........................",
-    ".........................",
-    ".........................",
-    "......o......o...........",
-    "......oTo...oTo..........",
-    ".....oTTo..oTTo..........",
-    ".....oTTtooTTTo..........",
-    "......oTtttTTo...........",
-    "......oTtttTTo...........",
-    ".....ooTttttToo..........",
-    "....oWoddddddWo.........",
-    "...oWwoddddddwWo........",
-    "..oWwoodddddoowWo.......",
-    ".oWwoodDDDDDdoowWo......",
-    "oWwwodDDbbbDDdowwWo.....",
-    "oWwwdDDbBBBbDDdwwWo.....",
-    ".oWwdDDbbbbbbDDdwWo.....",
-    "..oodDDbbccbbDDDdoo.....",
-    "....odDdddddddDDdo.....",
-    "....odDbbbbbbdDDdo......",
-    ".....odDDbbBBBBDdo......",
-    ".....odDDbbBBBBDdo......",
-    "......oocCCCCCcoo.......",
-    "........oooooooo........",
+    "......o.......o.........",
+    "......oTo....oTo........",
+    ".....oTTo...oTTo........",
+    "......oTTo.oTTo.........",
+    "......oTTssTTo..........",
+    ".......oTtitTo..........",
+    ".......oTttTTo..........",
+    "......ooTitToo..........",
+    ".....oWoPPPPWo..........",
+    "....oWwodddowWo.........",
+    "...oWwoodddoowWo........",
+    "..oWwoodDdDdoowWo.......",
+    ".oWwoodDpbbpDdoowWo.....",
+    "oWwwodDpbBBbpDdowwWo....",
+    "oWwwdDbCsSsSCbDdwwWo....",
+    ".oWWdDbcCCCCcbDdWWo.....",
+    ".oodDbpCcsCsCpbDdoo.....",
+    "..odDbpfbbbbfpbDDdo.....",
+    "..odDddbbbbbbbddDdo.....",
+    "...odDDdbbbbdDDDdo......",
+    "...odDhHhsssshHhDdo.....",
+    "....oShHhiHiHhHhSo......",
+    ".....oShHHHHHHhSo.......",
+    "......ooShhhhSoo........",
 ]
 
-# ── Left frames ──────────────────────────────────────────────────
+# ── Left frames ──────────────────────────────────────────────────────
 _LEFT_0 = [
-    "......oooooooo..........",
-    "....oocCCCCcoo..........",
-    "...odDDbbBBDdo..........",
-    "...odDEebeEDdo..........",
-    "..odDDbbbbDDdoo.........",
-    "..odDbbccbDDdwWo........",
-    ".odDDbbbbDDdwwWo........",
-    ".odDDbBBbDDdwwWo........",
-    "odDDDbbbDDddwwWo........",
-    "odDDDDDDDddowWo.........",
-    ".oddddddddoowWo.........",
-    "..oTtttttdwWo...........",
-    "...oTtttTTo.............",
-    "....oTtTTo..............",
-    ".....oTTo...............",
-    "......oo................",
-    "........................",
-    "........................",
-    "........................",
-    "........................",
-    "........................",
-    "........................",
-    "........................",
-    "........................",
+    ".....ooShhhhooo.........",
+    "....oShHHHHhSo..........",
+    "...oShHhsHshSo..........",
+    "..odDhHhiiihDo..........",
+    "..odDDEebbeEDdoo........",
+    ".odDddbbbbdddWWo........",
+    ".odDbpfbbfpbdwwWo.......",
+    "odDbpcCCCcpbdwwWo.......",
+    "odDbCsSsSCbddwwWo.......",
+    "odDbcCCCCcbddowWo.......",
+    ".oddpbBBBbpddoowWo......",
+    "..oddpbbpDdoowWo........",
+    "...oddDdDdoowWo.........",
+    "....oddddoowWo..........",
+    ".....oddPoWWo...........",
+    "......oPPPo.............",
+    ".......oTitTo...........",
+    "........oTtTo...........",
+    "........oTtTo...........",
+    ".......oTTsTTo..........",
+    "......oTTo.oTTo.........",
+    ".....oTTo...oTTo........",
+    ".....oTo.....oTo........",
+    "......o.......o.........",
 ]
 
 _LEFT_1 = [
-    "......oooooooo..........",
-    "....oocCCCCcoo..........",
-    "...odDDbbBBDdo..........",
-    "...odDEebeEDdo..........",
-    "..odDDbbbbDDdoo.........",
-    "..odDbbccbDDdwWo........",
-    ".odDDbbbbDDdwwWo........",
-    ".odDDbBBbDDdwwWo........",
-    "odDDDbbbDDddwwWo........",
-    "odDDDDDDDddowWo.........",
-    ".oddddddddoowWo.........",
-    "..oTtttttdwWo...........",
-    "...oTtttTTo.............",
-    "....oTtTTo..............",
-    ".....oTTo...............",
-    "......oo................",
-    "........................",
-    "........................",
-    "........................",
-    "........................",
-    "........................",
-    "........................",
-    "........................",
-    "........................",
+    ".....ooShhhhSoo.........",
+    "....oShHHHHhSo..........",
+    "...oShHhiHihSo..........",
+    "..odDhHhssshDo..........",
+    "..odDDEebbeEDdoo........",
+    ".odDddbbbbdddWWo........",
+    ".odDbpfbbfpbdwwWo.......",
+    "odDbpCcsCcpbdwwWo.......",
+    "odDbcCCCCcbddwwWo.......",
+    "odDbCsSsSCbddowWo.......",
+    ".oddpbBBBbpddoowWo......",
+    "..oddpbbpDdoowWo........",
+    "...oddDdDdoowWo.........",
+    "....odddPoowWo..........",
+    ".....oddoWWo............",
+    "......oPPPo.............",
+    ".......oTtTio...........",
+    "........oTtTo...........",
+    "........oTtTo...........",
+    ".......oTsTTTo..........",
+    "......oTTo.oTTo.........",
+    ".....oTTo...oTTo........",
+    "......oTo....oTo........",
+    "......o.......o.........",
 ]
 
-# ── Right frames ─────────────────────────────────────────────────
+# ── Right frames ─────────────────────────────────────────────────────
 _RIGHT_0 = [
-    "..........oooooooo......",
-    "..........oocCCCCcoo....",
-    "..........odDBBbbDDdo...",
-    "..........odDEebeEDdo...",
-    ".........oodDDbbbbDDdo..",
-    "........oWwdDDbbccbDdo..",
-    "........oWwwdDDbbbbDDdo.",
-    "........oWwwdDDbBBbDDdo.",
-    "........oWwwddDDbbDDDdo.",
-    ".........oWwodddDDDDDdo.",
-    ".........oWwooddddddddo.",
-    "...........oWwdtttttTo..",
-    ".............oTtttTTo...",
-    "..............oTTtTo....",
-    "...............oTTo.....",
-    "................oo......",
-    "........................",
-    "........................",
-    "........................",
-    "........................",
-    "........................",
-    "........................",
-    "........................",
-    "........................",
+    ".........oooShhhhooo....",
+    "..........oShHHHHHhSo...",
+    "..........oSshHshHhSo...",
+    "..........oDhiiihHhDdo..",
+    "........oodDEebbEEDDdo..",
+    "........oWWdddbbbbdddDdo",
+    ".......oWwwdbpfbbfpbDdo.",
+    ".......oWwwdbpcCCCcpbDdo",
+    ".......oWwwddbCsSsSCbDdo",
+    ".......oWwoddcCCCCcbDdo.",
+    "......oWwooddpbBBBbpddo.",
+    "........oWwoodDpbbpddo..",
+    ".........oWwoodDdDddo...",
+    "..........oWwoodddddo...",
+    "...........oWWoPodddo...",
+    ".............oPPPo......",
+    "...........oTitTo.......",
+    "...........oTtTo........",
+    "...........oTtTo........",
+    "..........oTTsTTo.......",
+    ".........oTTo.oTTo......",
+    "........oTTo...oTTo.....",
+    "........oTo.....oTo.....",
+    ".........o.......o......",
 ]
 
 _RIGHT_1 = [
-    "..........oooooooo......",
-    "..........oocCCCCcoo....",
-    "..........odDBBbbDDdo...",
-    "..........odDEebeEDdo...",
-    ".........oodDDbbbbDDdo..",
-    "........oWwdDDbbccbDdo..",
-    "........oWwwdDDbbbbDDdo.",
-    "........oWwwdDDbBBbDDdo.",
-    "........oWwwddDDbbDDDdo.",
-    ".........oWwodddDDDDDdo.",
-    ".........oWwooddddddddo.",
-    "...........oWwdtttttTo..",
-    ".............oTtttTTo...",
-    "..............oTTtTo....",
-    "...............oTTo.....",
-    "................oo......",
-    "........................",
-    "........................",
-    "........................",
-    "........................",
-    "........................",
-    "........................",
-    "........................",
-    "........................",
+    ".........ooShhhhSoo.....",
+    "..........oShHHHHHhSo...",
+    "..........oShiHiHhHhSo..",
+    "..........odhsssHhHhDdo.",
+    "........oodDEebbEEDDdo..",
+    "........oWWdddbbbbdddDdo",
+    ".......oWwwdbpfbbfpbDdo.",
+    ".......oWwwdbpcCsCcpbDdo",
+    ".......oWwwddbcCCCCcbDdo",
+    ".......oWwoddCsSsSCbDdo.",
+    "......oWwooddpbBBBbpddo.",
+    "........oWwoodDpbbpddo..",
+    ".........oWwoodDdDddo...",
+    "..........oWwooPdddo....",
+    "............oWWoddo.....",
+    ".............oPPPo......",
+    "...........oiTtTo.......",
+    "...........oTtTo........",
+    "...........oTtTo........",
+    "..........oTTTsTo.......",
+    ".........oTTo.oTTo......",
+    "........oTTo...oTTo.....",
+    "........oTo....oTo......",
+    ".........o.......o......",
 ]
 
-# ── Build surfaces ───────────────────────────────────────────────
+# ── Build surfaces ───────────────────────────────────────────────────
 _cache_p1 = None
 _cache_p2 = None
 
