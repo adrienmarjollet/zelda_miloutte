@@ -1,6 +1,6 @@
 """Pixel art sprites for HUD elements (hearts, key icon)."""
 
-from zelda_miloutte.sprites.pixel_art import surface_from_grid
+from .pixel_art import surface_from_grid
 
 # ── Heart palettes ────────────────────────────────────────────────
 _FULL_PAL = {

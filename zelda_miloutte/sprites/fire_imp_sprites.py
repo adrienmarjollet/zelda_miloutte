@@ -1,6 +1,6 @@
 """Pixel art sprites for Fire Imp (fast melee enemy with fire trail)."""
 
-from zelda_miloutte.sprites.pixel_art import surface_from_grid
+from .pixel_art import surface_from_grid
 
 # ── Palette ───────────────────────────────────────────────────────
 _PAL = {

@@ -3,16 +3,16 @@
 import math
 import random
 import pygame
-from zelda_miloutte.entities.entity import Entity
-from zelda_miloutte.settings import (
+from .entity import Entity
+from ..settings import (
     FROST_GOLEM_SIZE, FROST_GOLEM_SPEED, FROST_GOLEM_HP,
     FROST_GOLEM_DAMAGE, FROST_GOLEM_CHASE_RANGE,
     FROST_GOLEM_SLAM_COOLDOWN, FROST_GOLEM_SLAM_RADIUS,
 )
-from zelda_miloutte.sounds import get_sound_manager
-from zelda_miloutte.sprites import AnimatedSprite
-from zelda_miloutte.sprites.frost_golem_sprites import get_frost_golem_frames
-from zelda_miloutte.sprites.effects import flash_white, scale_shrink
+from ..sounds import get_sound_manager
+from ..sprites import AnimatedSprite
+from ..sprites.frost_golem_sprites import get_frost_golem_frames
+from ..sprites.effects import flash_white, scale_shrink
 
 
 class FrostGolem(Entity):

@@ -1,5 +1,5 @@
 import pygame
-from zelda_miloutte.settings import SCREEN_WIDTH, SCREEN_HEIGHT, TILE_SIZE
+from .settings import SCREEN_WIDTH, SCREEN_HEIGHT, TILE_SIZE
 
 # Room dimensions in tiles (screen-sized rooms)
 ROOM_WIDTH_TILES = 25   # 25 * 32 = 800 pixels

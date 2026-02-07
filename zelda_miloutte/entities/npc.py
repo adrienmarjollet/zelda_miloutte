@@ -1,8 +1,8 @@
 """NPC entity that can talk, give quests, and react to game state."""
 
 import pygame
-from zelda_miloutte.entities.entity import Entity
-from zelda_miloutte.settings import ENEMY_SIZE, BROWN
+from .entity import Entity
+from ..settings import ENEMY_SIZE, BROWN
 
 
 class NPC(Entity):
@@ -32,8 +32,8 @@ class NPC(Entity):
         self._load_sprites()
 
     def _load_sprites(self):
-        from zelda_miloutte.sprites import AnimatedSprite
-        from zelda_miloutte.sprites.npc_sprites import (
+        from ..sprites import AnimatedSprite
+        from ..sprites.npc_sprites import (
             get_elder_frames, get_villager_frames, get_merchant_frames, get_guard_frames,
         )
         frame_fns = {

@@ -1,6 +1,6 @@
 """Pixel art sprites for the player character (Miloutte -- cat-eared adventurer)."""
 
-from zelda_miloutte.sprites.pixel_art import surface_from_grid
+from .pixel_art import surface_from_grid
 
 # ── Palette ───────────────────────────────────────────────────────
 _PAL = {

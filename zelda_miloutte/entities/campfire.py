@@ -3,8 +3,8 @@
 import math
 import random
 import pygame
-from zelda_miloutte.entities.entity import Entity
-from zelda_miloutte.sprites.pixel_art import surface_from_grid
+from .entity import Entity
+from ..sprites.pixel_art import surface_from_grid
 
 
 # Campfire size in pixels

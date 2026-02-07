@@ -1,6 +1,6 @@
 """Pixel art sprites for the Inferno Drake boss (dragon, two phases)."""
 
-from zelda_miloutte.sprites.pixel_art import surface_from_grid
+from .pixel_art import surface_from_grid
 
 # ── Phase 1 Palette (red dragon) ──────────────────────────────────────
 _PAL1 = {

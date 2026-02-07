@@ -1,6 +1,6 @@
 """Pixel art sprites for companion entities (Cat, Fox, Fairy)."""
 
-from zelda_miloutte.sprites.pixel_art import surface_from_grid
+from .pixel_art import surface_from_grid
 
 # ======================================================================
 # CAT (Miloutte) - orange/brown tabby cat

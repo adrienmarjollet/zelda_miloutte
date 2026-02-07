@@ -2,9 +2,9 @@
 
 import math
 import pygame
-from zelda_miloutte.settings import TILE_SIZE, PLAYER_SPEED, PROJECTILE_SPEED
-from zelda_miloutte.entities.projectile import Projectile
-from zelda_miloutte.sprites.ability_sprites import (
+from .settings import TILE_SIZE, PLAYER_SPEED, PROJECTILE_SPEED
+from .entities.projectile import Projectile
+from .sprites.ability_sprites import (
     create_spin_arc_surface,
     create_fireball_surface,
     create_shield_bubble_surface,
@@ -108,7 +108,7 @@ class SpinAttack(Ability):
         # Camera shake
         camera.shake(4, 0.3)
         # Play sound
-        from zelda_miloutte.sounds import get_sound_manager
+        from .sounds import get_sound_manager
         get_sound_manager().play_ability_spin()
 
     def _update_active(self, dt, player, enemies, projectiles, particles):
@@ -189,7 +189,7 @@ class Dash(Ability):
             gravity=0,
         )
         # Play sound
-        from zelda_miloutte.sounds import get_sound_manager
+        from .sounds import get_sound_manager
         get_sound_manager().play_ability_dash()
 
     def _update_active(self, dt, player, enemies, projectiles, particles):
@@ -297,7 +297,7 @@ class FireBlast(Ability):
             gravity=0,
         )
         # Play sound
-        from zelda_miloutte.sounds import get_sound_manager
+        from .sounds import get_sound_manager
         get_sound_manager().play_ability_fire()
 
 
@@ -337,7 +337,7 @@ class ShieldBarrier(Ability):
             gravity=-20,
         )
         # Play sound
-        from zelda_miloutte.sounds import get_sound_manager
+        from .sounds import get_sound_manager
         get_sound_manager().play_ability_shield()
 
     def _update_active(self, dt, player, enemies, projectiles, particles):

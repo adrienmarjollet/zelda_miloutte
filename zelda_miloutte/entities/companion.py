@@ -3,7 +3,7 @@
 import math
 import random
 import pygame
-from zelda_miloutte.entities.entity import Entity
+from .entity import Entity
 
 
 # Companion constants
@@ -243,7 +243,7 @@ class Cat(Companion):
         self.color = (220, 140, 50)
 
     def _load_frames(self):
-        from zelda_miloutte.sprites.companion_sprites import get_cat_frames
+        from ..sprites.companion_sprites import get_cat_frames
         self._frames = get_cat_frames()
 
     def get_stealth_factor(self):
@@ -262,7 +262,7 @@ class Fox(Companion):
         self.color = (200, 70, 30)
 
     def _load_frames(self):
-        from zelda_miloutte.sprites.companion_sprites import get_fox_frames
+        from ..sprites.companion_sprites import get_fox_frames
         self._frames = get_fox_frames()
 
     def get_perk_speed_bonus(self):
@@ -282,7 +282,7 @@ class Fairy(Companion):
         self._glow_timer = 0.0
 
     def _load_frames(self):
-        from zelda_miloutte.sprites.companion_sprites import get_fairy_frames
+        from ..sprites.companion_sprites import get_fairy_frames
         self._frames = get_fairy_frames()
 
     def get_mp_regen_bonus(self):

@@ -2,8 +2,8 @@
 
 import heapq
 import math
-from zelda_miloutte.settings import TILE_SIZE
-from zelda_miloutte.world.tile import TileType
+from .settings import TILE_SIZE
+from .world.tile import TileType
 
 
 # Tiles that enemies should avoid (hazards they are aware of)

@@ -1,6 +1,6 @@
 import asyncio
-from zelda_miloutte.game import Game
-from zelda_miloutte.states.cinematic_state import CinematicState
+from .game import Game
+from .states.cinematic_state import CinematicState
 
 
 async def main():

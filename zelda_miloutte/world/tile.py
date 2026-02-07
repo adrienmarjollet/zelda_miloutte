@@ -1,5 +1,5 @@
 from enum import Enum
-from zelda_miloutte.settings import (
+from ..settings import (
     GREEN, DARK_GREEN, GRAY, DARK_GRAY, BROWN, BLUE, FLOOR_COLOR,
     LIGHT_BROWN, BOSS_PURPLE, WATER_BLUE, ICE_BLUE, FOREST_GREEN,
     SAND_TAN, LAVA_ORANGE, SNOW_WHITE, FROZEN_WALL_BLUE,

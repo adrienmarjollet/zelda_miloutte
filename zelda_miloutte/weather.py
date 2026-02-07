@@ -10,7 +10,7 @@ import math
 import pygame
 from enum import Enum
 
-from zelda_miloutte.settings import SCREEN_WIDTH, SCREEN_HEIGHT, TILE_SIZE
+from .settings import SCREEN_WIDTH, SCREEN_HEIGHT, TILE_SIZE
 
 
 class WeatherType(Enum):
@@ -358,7 +358,7 @@ class WeatherManager:
             self._thunder_delay -= dt
             if self._thunder_delay <= 0:
                 self._thunder_pending = False
-                from zelda_miloutte.sounds import get_sound_manager
+                from .sounds import get_sound_manager
                 get_sound_manager().play_thunder()
 
         # Lightning strike hazard

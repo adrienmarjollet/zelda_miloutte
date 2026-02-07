@@ -1,15 +1,15 @@
 import pygame
-from zelda_miloutte.settings import (
+from .settings import (
     SCREEN_WIDTH, HUD_HEIGHT, HUD_HEART_SIZE, HUD_HEART_SPACING,
     HUD_MARGIN, HEART_RED, KEY_YELLOW, BLACK, WHITE, DARK_RED,
     BOSS_BAR_WIDTH, BOSS_BAR_HEIGHT, BOSS_PURPLE, RED,
     MANA_BLUE, MANA_DARK,
 )
-from zelda_miloutte.sprites.hud_sprites import (
+from .sprites.hud_sprites import (
     get_hud_heart_full, get_hud_heart_half, get_hud_heart_empty,
     get_hud_key_icon,
 )
-from zelda_miloutte.sprites.gold_sprites import get_hud_coin_icon
+from .sprites.gold_sprites import get_hud_coin_icon
 
 
 class HUD:
@@ -147,7 +147,7 @@ class HUD:
         if ability is None:
             return
 
-        from zelda_miloutte.sprites.ability_sprites import get_ability_icon
+        from .sprites.ability_sprites import get_ability_icon
         icon = get_ability_icon(ability.name)
         if icon is None:
             return

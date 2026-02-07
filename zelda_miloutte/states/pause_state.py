@@ -1,7 +1,7 @@
 import time
 import pygame
-from zelda_miloutte.states.state import State
-from zelda_miloutte.settings import SCREEN_WIDTH, SCREEN_HEIGHT, WHITE, GOLD, GRAY, GREEN
+from .state import State
+from ..settings import SCREEN_WIDTH, SCREEN_HEIGHT, WHITE, GOLD, GRAY, GREEN
 
 
 class PauseState(State):
@@ -27,7 +27,7 @@ class PauseState(State):
         # Find the play state in the stack
         play_state = None
         for state in self.game.states:
-            from zelda_miloutte.states.play_state import PlayState
+            from .play_state import PlayState
             if isinstance(state, PlayState):
                 play_state = state
                 break
@@ -109,7 +109,7 @@ class PauseState(State):
             self.mode = "save_slots"
             self.selected_index = 0
         elif self.selected_index == 2:  # Quit to Title
-            from zelda_miloutte.states.title_state import TitleState
+            from .title_state import TitleState
             while len(self.game.states) > 0:
                 self.game.pop_state()
             self.game.push_state(TitleState(self.game))

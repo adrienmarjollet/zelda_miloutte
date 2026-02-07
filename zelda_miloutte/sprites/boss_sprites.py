@@ -1,6 +1,6 @@
 """Pixel art sprites for the boss (horned demon, two phases)."""
 
-from zelda_miloutte.sprites.pixel_art import surface_from_grid
+from .pixel_art import surface_from_grid
 
 # ── Phase 1 Palette (purple demon) ───────────────────────────────
 _PAL1 = {

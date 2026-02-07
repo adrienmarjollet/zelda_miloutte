@@ -1,6 +1,6 @@
 """Pixel art sprites for Crystal Dragon boss (large icy dragon, three phases)."""
 
-from zelda_miloutte.sprites.pixel_art import surface_from_grid
+from .pixel_art import surface_from_grid
 
 # ── Phase 1 Palette (icy blue crystal dragon) ────────────────────
 _PAL1 = {

@@ -1,6 +1,6 @@
 """Pixel art sprites for Mummy (slow tank enemy)."""
 
-from zelda_miloutte.sprites.pixel_art import surface_from_grid
+from .pixel_art import surface_from_grid
 
 # ── Palette ───────────────────────────────────────────────────────
 _PAL = {

@@ -1,7 +1,7 @@
 """Enhanced dialogue box with NPC names, sequential messages, and choices."""
 
 import pygame
-from zelda_miloutte.settings import SCREEN_WIDTH, SCREEN_HEIGHT, WHITE, GOLD, GRAY
+from ..settings import SCREEN_WIDTH, SCREEN_HEIGHT, WHITE, GOLD, GRAY
 
 
 class DialogueBox:

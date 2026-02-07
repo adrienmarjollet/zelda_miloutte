@@ -1,6 +1,6 @@
 """Pixel art sprites for gold coins (pickup item and HUD icon)."""
 
-from zelda_miloutte.sprites.pixel_art import surface_from_grid
+from .pixel_art import surface_from_grid
 
 # ── Gold coin palette ────────────────────────────────────────────────
 _GOLD_PAL = {

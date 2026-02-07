@@ -1,8 +1,8 @@
 """Full-screen world map overlay showing area nodes, connections, and progress."""
 
 import pygame
-from zelda_miloutte.settings import SCREEN_WIDTH, SCREEN_HEIGHT, WHITE, GOLD, GRAY, BLACK
-from zelda_miloutte.world.maps import AREAS
+from ..settings import SCREEN_WIDTH, SCREEN_HEIGHT, WHITE, GOLD, GRAY, BLACK
+from ..world.maps import AREAS
 
 
 # Area node positions on the world map (hand-placed for visual layout)

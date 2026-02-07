@@ -1,4 +1,4 @@
 import asyncio
-from zelda_miloutte.main import main
+from .main import main
 
 asyncio.run(main())

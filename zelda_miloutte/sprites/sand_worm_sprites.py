@@ -1,6 +1,6 @@
 """Pixel art sprites for the Sand Worm boss (segmented worm, two phases)."""
 
-from zelda_miloutte.sprites.pixel_art import surface_from_grid
+from .pixel_art import surface_from_grid
 
 # ── Phase 1 Palette (tan/sandy worm) ──────────────────────────────────
 _PAL1 = {

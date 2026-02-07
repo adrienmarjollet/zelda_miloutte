@@ -1,17 +1,17 @@
 import math
 import pygame
-from zelda_miloutte.entities.enemy import Enemy
-from zelda_miloutte.entities.projectile import Projectile
-from zelda_miloutte.settings import (
+from .enemy import Enemy
+from .projectile import Projectile
+from ..settings import (
     ARCHER_SIZE, ARCHER_SPEED, ARCHER_HP, ARCHER_DAMAGE,
     ARCHER_SHOOT_RANGE, ARCHER_SHOOT_COOLDOWN, ARCHER_FLEE_RANGE,
     RED, TILE_SIZE,
 )
-from zelda_miloutte.sprites import AnimatedSprite
-from zelda_miloutte.sprites.archer_sprites import get_archer_frames, get_projectile_sprite
-from zelda_miloutte.sprites.effects import flash_white
-from zelda_miloutte.ai_state import AlertState
-from zelda_miloutte.pathfinding import find_path, find_cover_position, has_line_of_sight, can_pathfind
+from ..sprites import AnimatedSprite
+from ..sprites.archer_sprites import get_archer_frames, get_projectile_sprite
+from ..sprites.effects import flash_white
+from ..ai_state import AlertState
+from ..pathfinding import find_path, find_cover_position, has_line_of_sight, can_pathfind
 
 
 class Archer(Enemy):
@@ -19,7 +19,7 @@ class Archer(Enemy):
 
     def __init__(self, x, y, patrol_points=None):
         # Call Entity.__init__ directly to avoid Enemy's __init__
-        from zelda_miloutte.entities.entity import Entity
+        from .entity import Entity
         Entity.__init__(self, x, y, ARCHER_SIZE, ARCHER_SIZE, RED)
 
         self.hp = ARCHER_HP

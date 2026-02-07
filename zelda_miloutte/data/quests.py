@@ -1,6 +1,6 @@
 """Quest definitions for story and side quests."""
 
-from zelda_miloutte.quest_manager import Quest
+from ..quest_manager import Quest
 
 
 def get_all_quests():

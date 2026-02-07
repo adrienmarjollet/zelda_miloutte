@@ -1,6 +1,6 @@
 import pygame
-from zelda_miloutte.touch_controls import TouchControls
-from zelda_miloutte.settings import DODGE_DOUBLE_TAP_WINDOW
+from .touch_controls import TouchControls
+from .settings import DODGE_DOUBLE_TAP_WINDOW
 
 
 class InputHandler:

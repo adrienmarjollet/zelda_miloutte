@@ -1,16 +1,16 @@
 import math
 import random
 import pygame
-from zelda_miloutte.entities.entity import Entity
-from zelda_miloutte.settings import (
+from .entity import Entity
+from ..settings import (
     ENEMY_SIZE, ENEMY_SPEED, ENEMY_CHASE_SPEED, ENEMY_CHASE_RANGE,
     ENEMY_HP, ENEMY_DAMAGE, ENEMY_PATROL_PAUSE, RED, TILE_SIZE,
 )
-from zelda_miloutte.sounds import get_sound_manager
-from zelda_miloutte.sprites import AnimatedSprite
-from zelda_miloutte.sprites.enemy_sprites import get_enemy_frames
-from zelda_miloutte.sprites.effects import flash_white, scale_shrink
-from zelda_miloutte.ai_state import EnemyAI
+from ..sounds import get_sound_manager
+from ..sprites import AnimatedSprite
+from ..sprites.enemy_sprites import get_enemy_frames
+from ..sprites.effects import flash_white, scale_shrink
+from ..ai_state import EnemyAI
 
 
 class Enemy(Entity, EnemyAI):

@@ -1,16 +1,16 @@
 import pygame
-from zelda_miloutte.states.gameplay_state import GameplayState
-from zelda_miloutte.entities.player import Player
-from zelda_miloutte.camera import Camera
-from zelda_miloutte.world.tilemap import TileMap
-from zelda_miloutte.world.maps import AREAS, DUNGEON2, DUNGEON2_SPAWNS
-from zelda_miloutte.world.tile import TileType
-from zelda_miloutte.hud import HUD
-from zelda_miloutte.settings import (
+from .gameplay_state import GameplayState
+from ..entities.player import Player
+from ..camera import Camera
+from ..world.tilemap import TileMap
+from ..world.maps import AREAS, DUNGEON2, DUNGEON2_SPAWNS
+from ..world.tile import TileType
+from ..hud import HUD
+from ..settings import (
     TILE_SIZE, BOSS2_HP, BOSS2_SPEED, BOSS2_CHASE_SPEED, BOSS2_CHARGE_SPEED, BOSS2_DAMAGE, ICE_BLUE, WHITE,
 )
-from zelda_miloutte.sounds import get_sound_manager
-from zelda_miloutte.particles import ParticleSystem
+from ..sounds import get_sound_manager
+from ..particles import ParticleSystem
 
 
 class PlayState(GameplayState):
@@ -32,7 +32,7 @@ class PlayState(GameplayState):
         self.particles = ParticleSystem()
 
         # World map
-        from zelda_miloutte.ui.world_map import WorldMap
+        from ..ui.world_map import WorldMap
         self.world_map = WorldMap()
 
         # Area name banner
@@ -67,13 +67,13 @@ class PlayState(GameplayState):
             self.player.gold = pdata.get("gold", 0)
             # Restore inventory
             if "inventory" in pdata:
-                from zelda_miloutte.data.inventory import Inventory
+                from ..data.inventory import Inventory
                 self.player.inventory = Inventory.from_dict(pdata["inventory"])
             # Restore unlocked abilities
             if "unlocked_abilities" in pdata:
                 self.player.unlocked_abilities = pdata["unlocked_abilities"]
                 # Recreate ability instances from unlocked names
-                from zelda_miloutte.abilities import create_ability
+                from ..abilities import create_ability
                 self.player.abilities = []
                 for ability_name in self.player.unlocked_abilities:
                     ability = create_ability(ability_name)
@@ -85,7 +85,7 @@ class PlayState(GameplayState):
                 self.minimap.load_save_data(visited)
             # Restore companion
             if "companion" in load_data:
-                from zelda_miloutte.entities.companion import create_companion
+                from ..entities.companion import create_companion
                 companion_data = load_data["companion"]
                 companion_type = companion_data.get("type", "cat")
                 self.companion = create_companion(companion_type, self.player.x - 30, self.player.y)
@@ -106,17 +106,17 @@ class PlayState(GameplayState):
         self.fire_trails = []
 
     def _spawn_enemies(self):
-        from zelda_miloutte.entities.enemy import Enemy
-        from zelda_miloutte.entities.archer import Archer
-        from zelda_miloutte.entities.shadow_stalker import ShadowStalker
-        from zelda_miloutte.entities.vine_snapper import VineSnapper
-        from zelda_miloutte.entities.scorpion import Scorpion
-        from zelda_miloutte.entities.mummy import Mummy
-        from zelda_miloutte.entities.fire_imp import FireImp
-        from zelda_miloutte.entities.magma_golem import MagmaGolem
-        from zelda_miloutte.entities.ice_wraith import IceWraith
-        from zelda_miloutte.entities.frost_golem import FrostGolem
-        from zelda_miloutte.ng_plus import scale_enemy_stats
+        from ..entities.enemy import Enemy
+        from ..entities.archer import Archer
+        from ..entities.shadow_stalker import ShadowStalker
+        from ..entities.vine_snapper import VineSnapper
+        from ..entities.scorpion import Scorpion
+        from ..entities.mummy import Mummy
+        from ..entities.fire_imp import FireImp
+        from ..entities.magma_golem import MagmaGolem
+        from ..entities.ice_wraith import IceWraith
+        from ..entities.frost_golem import FrostGolem
+        from ..ng_plus import scale_enemy_stats
         self.enemies = []
         area_spawns = AREAS[self.area_id]["spawns"]
         for edata in area_spawns.get("enemies", []):
@@ -167,7 +167,7 @@ class PlayState(GameplayState):
             self.enemies.append(e)
 
     def _spawn_items(self):
-        from zelda_miloutte.entities.item import Item
+        from ..entities.item import Item
         self.items = []
         area_spawns = AREAS[self.area_id]["spawns"]
         for idata in area_spawns.get("items", []):
@@ -178,7 +178,7 @@ class PlayState(GameplayState):
             self.items.append(item)
 
     def _spawn_chests(self):
-        from zelda_miloutte.entities.chest import Chest
+        from ..entities.chest import Chest
         self.chests = []
         area_spawns = AREAS[self.area_id]["spawns"]
         for cdata in area_spawns.get("chests", []):
@@ -189,7 +189,7 @@ class PlayState(GameplayState):
             self.chests.append(chest)
 
     def _spawn_signs(self):
-        from zelda_miloutte.entities.sign import Sign
+        from ..entities.sign import Sign
         self.signs = []
         area_spawns = AREAS[self.area_id]["spawns"]
         for sdata in area_spawns.get("signs", []):
@@ -200,7 +200,7 @@ class PlayState(GameplayState):
             self.signs.append(sign)
 
     def _spawn_npcs(self):
-        from zelda_miloutte.entities.npc import NPC
+        from ..entities.npc import NPC
         self.npcs = []
         area_spawns = AREAS[self.area_id]["spawns"]
         for ndata in area_spawns.get("npcs", []):
@@ -378,7 +378,7 @@ class PlayState(GameplayState):
 
         # Check for pause
         if self.game.input.pause:
-            from zelda_miloutte.states.pause_state import PauseState
+            from .pause_state import PauseState
             self.game.push_state(PauseState(self.game))
             return
 
@@ -444,9 +444,9 @@ class PlayState(GameplayState):
                 # Check which area we're in to determine which dungeon
                 if self.area_id == "forest":
                     def enter_forest_dungeon():
-                        from zelda_miloutte.states.dungeon_state import DungeonState
-                        from zelda_miloutte.world.maps import FOREST_DUNGEON, FOREST_DUNGEON_SPAWNS
-                        from zelda_miloutte.entities.forest_guardian import ForestGuardian
+                        from .dungeon_state import DungeonState
+                        from ..world.maps import FOREST_DUNGEON, FOREST_DUNGEON_SPAWNS
+                        from ..entities.forest_guardian import ForestGuardian
                         self.game.push_state(DungeonState(
                             self.game, self,
                             dungeon_map=FOREST_DUNGEON,
@@ -457,9 +457,9 @@ class PlayState(GameplayState):
                     self.game.transition_to(enter_forest_dungeon)
                 elif self.area_id == "desert":
                     def enter_desert_dungeon():
-                        from zelda_miloutte.states.dungeon_state import DungeonState
-                        from zelda_miloutte.world.maps import DESERT_DUNGEON, DESERT_DUNGEON_SPAWNS
-                        from zelda_miloutte.entities.sand_worm import SandWorm
+                        from .dungeon_state import DungeonState
+                        from ..world.maps import DESERT_DUNGEON, DESERT_DUNGEON_SPAWNS
+                        from ..entities.sand_worm import SandWorm
                         self.game.push_state(DungeonState(
                             self.game, self,
                             dungeon_map=DESERT_DUNGEON,
@@ -470,9 +470,9 @@ class PlayState(GameplayState):
                     self.game.transition_to(enter_desert_dungeon)
                 elif self.area_id == "volcano":
                     def enter_volcano_dungeon():
-                        from zelda_miloutte.states.dungeon_state import DungeonState
-                        from zelda_miloutte.world.maps import VOLCANO_DUNGEON, VOLCANO_DUNGEON_SPAWNS
-                        from zelda_miloutte.entities.inferno_drake import InfernoDrake
+                        from .dungeon_state import DungeonState
+                        from ..world.maps import VOLCANO_DUNGEON, VOLCANO_DUNGEON_SPAWNS
+                        from ..entities.inferno_drake import InfernoDrake
                         self.game.push_state(DungeonState(
                             self.game, self,
                             dungeon_map=VOLCANO_DUNGEON,
@@ -483,9 +483,9 @@ class PlayState(GameplayState):
                     self.game.transition_to(enter_volcano_dungeon)
                 elif self.area_id == "frozen_peaks":
                     def enter_ice_cavern():
-                        from zelda_miloutte.states.dungeon_state import DungeonState
-                        from zelda_miloutte.world.maps import ICE_CAVERN, ICE_CAVERN_SPAWNS
-                        from zelda_miloutte.sprites.boss_sprites import get_boss2_frames_phase1, get_boss2_frames_phase2
+                        from .dungeon_state import DungeonState
+                        from ..world.maps import ICE_CAVERN, ICE_CAVERN_SPAWNS
+                        from ..sprites.boss_sprites import get_boss2_frames_phase1, get_boss2_frames_phase2
                         # Configure Ice Cavern boss (Crystal Dragon variant of Boss)
                         ice_boss_config = {
                             'hp': BOSS2_HP,
@@ -508,7 +508,7 @@ class PlayState(GameplayState):
                 else:
                     # Default dungeon (overworld)
                     def enter_dungeon():
-                        from zelda_miloutte.states.dungeon_state import DungeonState
+                        from .dungeon_state import DungeonState
                         self.game.push_state(DungeonState(self.game, self))
 
                     self.game.transition_to(enter_dungeon)
@@ -518,8 +518,8 @@ class PlayState(GameplayState):
                 get_sound_manager().play_dungeon_enter()
 
                 def enter_dungeon2():
-                    from zelda_miloutte.states.dungeon_state import DungeonState
-                    from zelda_miloutte.sprites.boss_sprites import get_boss2_frames_phase1, get_boss2_frames_phase2
+                    from .dungeon_state import DungeonState
+                    from ..sprites.boss_sprites import get_boss2_frames_phase1, get_boss2_frames_phase2
                     # Configure Boss 2 (Ice Demon)
                     boss2_config = {
                         'hp': BOSS2_HP,
@@ -604,7 +604,7 @@ class PlayState(GameplayState):
         """Apply quest rewards to the player."""
         if rewards is None:
             return
-        from zelda_miloutte.ui.floating_text import FloatingText
+        from ..ui.floating_text import FloatingText
         if "xp" in rewards:
             leveled = self.player.gain_xp(rewards["xp"])
             self.floating_texts.append(FloatingText(

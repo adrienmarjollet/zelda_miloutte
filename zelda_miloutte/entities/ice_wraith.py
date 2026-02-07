@@ -3,15 +3,15 @@
 import math
 import random
 import pygame
-from zelda_miloutte.entities.entity import Entity
-from zelda_miloutte.settings import (
+from .entity import Entity
+from ..settings import (
     ICE_WRAITH_SIZE, ICE_WRAITH_SPEED, ICE_WRAITH_HP,
     ICE_WRAITH_DAMAGE, ICE_WRAITH_CHASE_RANGE, ICE_WRAITH_PHASE_COOLDOWN,
 )
-from zelda_miloutte.sounds import get_sound_manager
-from zelda_miloutte.sprites import AnimatedSprite
-from zelda_miloutte.sprites.ice_wraith_sprites import get_ice_wraith_frames
-from zelda_miloutte.sprites.effects import flash_white, scale_shrink
+from ..sounds import get_sound_manager
+from ..sprites import AnimatedSprite
+from ..sprites.ice_wraith_sprites import get_ice_wraith_frames
+from ..sprites.effects import flash_white, scale_shrink
 
 
 class IceWraith(Entity):

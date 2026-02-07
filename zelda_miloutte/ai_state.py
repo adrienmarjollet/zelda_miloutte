@@ -3,8 +3,8 @@
 import math
 import pygame
 from enum import Enum
-from zelda_miloutte.settings import TILE_SIZE
-from zelda_miloutte.pathfinding import (
+from .settings import TILE_SIZE
+from .pathfinding import (
     find_path, has_line_of_sight, can_pathfind,
 )
 
@@ -27,7 +27,7 @@ def _get_question_icon():
     global _question_icon
     if _question_icon is not None:
         return _question_icon
-    from zelda_miloutte.sprites.pixel_art import surface_from_grid
+    from .sprites.pixel_art import surface_from_grid
     grid = [
         " yyy ",
         "y   y",
@@ -50,7 +50,7 @@ def _get_exclamation_icon():
     global _exclamation_icon
     if _exclamation_icon is not None:
         return _exclamation_icon
-    from zelda_miloutte.sprites.pixel_art import surface_from_grid
+    from .sprites.pixel_art import surface_from_grid
     grid = [
         " r ",
         " r ",

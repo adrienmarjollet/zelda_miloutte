@@ -1,8 +1,8 @@
 import pygame
-from zelda_miloutte.entities.entity import Entity
-from zelda_miloutte.settings import ITEM_SIZE, HEART_RED, KEY_YELLOW, HEART_HEAL
-from zelda_miloutte.sounds import get_sound_manager
-from zelda_miloutte.sprites.item_sprites import get_heart_frames, get_key_frames
+from .entity import Entity
+from ..settings import ITEM_SIZE, HEART_RED, KEY_YELLOW, HEART_HEAL
+from ..sounds import get_sound_manager
+from ..sprites.item_sprites import get_heart_frames, get_key_frames
 
 
 class Item(Entity):

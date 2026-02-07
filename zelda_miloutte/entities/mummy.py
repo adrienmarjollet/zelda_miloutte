@@ -3,16 +3,16 @@
 import math
 import random
 import pygame
-from zelda_miloutte.entities.entity import Entity
-from zelda_miloutte.settings import (
+from .entity import Entity
+from ..settings import (
     MUMMY_SIZE, MUMMY_SPEED, MUMMY_HP,
     MUMMY_DAMAGE, MUMMY_CHASE_RANGE,
 )
-from zelda_miloutte.sounds import get_sound_manager
-from zelda_miloutte.sprites import AnimatedSprite
-from zelda_miloutte.sprites.mummy_sprites import get_mummy_frames
-from zelda_miloutte.sprites.effects import flash_white, scale_shrink
-from zelda_miloutte.ai_state import EnemyAI, AlertState
+from ..sounds import get_sound_manager
+from ..sprites import AnimatedSprite
+from ..sprites.mummy_sprites import get_mummy_frames
+from ..sprites.effects import flash_white, scale_shrink
+from ..ai_state import EnemyAI, AlertState
 
 
 class Mummy(Entity, EnemyAI):

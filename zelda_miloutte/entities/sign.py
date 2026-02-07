@@ -1,9 +1,9 @@
 """Sign entity that displays text when interacted with."""
 
 import pygame
-from zelda_miloutte.entities.entity import Entity
-from zelda_miloutte.sprites.sign_sprites import get_sign_sprite
-from zelda_miloutte.settings import BROWN
+from .entity import Entity
+from ..sprites.sign_sprites import get_sign_sprite
+from ..settings import BROWN
 
 
 class Sign(Entity):

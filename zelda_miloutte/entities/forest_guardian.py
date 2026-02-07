@@ -3,18 +3,18 @@
 import math
 import random
 import pygame
-from zelda_miloutte.entities.entity import Entity
-from zelda_miloutte.settings import (
+from .entity import Entity
+from ..settings import (
     FOREST_GUARDIAN_HP, FOREST_GUARDIAN_SPEED, FOREST_GUARDIAN_CHASE_SPEED,
     FOREST_GUARDIAN_DAMAGE, FOREST_GUARDIAN_SIZE, TILE_SIZE,
 )
-from zelda_miloutte.sounds import get_sound_manager
-from zelda_miloutte.sprites import AnimatedSprite
-from zelda_miloutte.sprites.forest_guardian_sprites import (
+from ..sounds import get_sound_manager
+from ..sprites import AnimatedSprite
+from ..sprites.forest_guardian_sprites import (
     get_forest_guardian_frames_phase1,
     get_forest_guardian_frames_phase2,
 )
-from zelda_miloutte.sprites.effects import flash_white, scale_shrink
+from ..sprites.effects import flash_white, scale_shrink
 
 
 class ForestGuardian(Entity):

@@ -1,6 +1,6 @@
 """Pixel art sprites for the day/night HUD indicator (sun / moon icons)."""
 
-from zelda_miloutte.sprites.pixel_art import surface_from_grid
+from .pixel_art import surface_from_grid
 
 _SUN_PAL = {
     'y': (255, 220, 60),     # sun body

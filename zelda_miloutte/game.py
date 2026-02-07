@@ -1,14 +1,14 @@
 import asyncio
 import pygame
-from zelda_miloutte.settings import SCREEN_WIDTH, SCREEN_HEIGHT, FPS, TITLE, BLACK
-from zelda_miloutte.input_handler import InputHandler
-from zelda_miloutte.transition import Transition
-from zelda_miloutte.save_manager import SaveManager
-from zelda_miloutte.quest_manager import QuestManager
-from zelda_miloutte.data.quests import get_all_quests
-from zelda_miloutte.time_system import TimeSystem
-from zelda_miloutte.achievements import AchievementManager
-from zelda_miloutte.bestiary import BestiaryManager
+from .settings import SCREEN_WIDTH, SCREEN_HEIGHT, FPS, TITLE, BLACK
+from .input_handler import InputHandler
+from .transition import Transition
+from .save_manager import SaveManager
+from .quest_manager import QuestManager
+from .data.quests import get_all_quests
+from .time_system import TimeSystem
+from .achievements import AchievementManager
+from .bestiary import BestiaryManager
 
 
 class Game:

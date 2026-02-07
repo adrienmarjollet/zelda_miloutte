@@ -1,6 +1,6 @@
 """Procedural pixel art sprites for fish (16x16 each)."""
 
-from zelda_miloutte.sprites.pixel_art import surface_from_grid
+from .pixel_art import surface_from_grid
 
 # ── Palettes ──────────────────────────────────────────────────────
 

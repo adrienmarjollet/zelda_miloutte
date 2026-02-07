@@ -1,7 +1,7 @@
 import math
 import pygame
-from zelda_miloutte.entities.entity import Entity
-from zelda_miloutte.settings import PROJECTILE_SIZE, PROJECTILE_SPEED, TILE_SIZE
+from .entity import Entity
+from ..settings import PROJECTILE_SIZE, PROJECTILE_SPEED, TILE_SIZE
 
 
 class Projectile(Entity):

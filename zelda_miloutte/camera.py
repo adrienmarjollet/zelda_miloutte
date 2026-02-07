@@ -1,6 +1,6 @@
 import random
 import math
-from zelda_miloutte.settings import SCREEN_WIDTH, SCREEN_HEIGHT
+from .settings import SCREEN_WIDTH, SCREEN_HEIGHT
 
 
 class Camera:

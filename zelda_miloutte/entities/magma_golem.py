@@ -3,19 +3,19 @@
 import math
 import random
 import pygame
-from zelda_miloutte.entities.entity import Entity
-from zelda_miloutte.entities.projectile import Projectile
-from zelda_miloutte.settings import (
+from .entity import Entity
+from .projectile import Projectile
+from ..settings import (
     MAGMA_GOLEM_SIZE, MAGMA_GOLEM_SPEED, MAGMA_GOLEM_HP,
     MAGMA_GOLEM_DAMAGE, MAGMA_GOLEM_CHASE_RANGE,
     MAGMA_GOLEM_SHOOT_COOLDOWN, MAGMA_GOLEM_PROJECTILE_SPEED,
 )
-from zelda_miloutte.sounds import get_sound_manager
-from zelda_miloutte.sprites import AnimatedSprite
-from zelda_miloutte.sprites.magma_golem_sprites import get_magma_golem_frames, get_magma_projectile_sprite
-from zelda_miloutte.sprites.effects import flash_white, scale_shrink
-from zelda_miloutte.ai_state import EnemyAI, AlertState
-from zelda_miloutte.pathfinding import has_line_of_sight
+from ..sounds import get_sound_manager
+from ..sprites import AnimatedSprite
+from ..sprites.magma_golem_sprites import get_magma_golem_frames, get_magma_projectile_sprite
+from ..sprites.effects import flash_white, scale_shrink
+from ..ai_state import EnemyAI, AlertState
+from ..pathfinding import has_line_of_sight
 
 
 class MagmaGolem(Entity, EnemyAI):

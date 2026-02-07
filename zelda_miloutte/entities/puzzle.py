@@ -1,14 +1,14 @@
 """Puzzle entities: push blocks, pressure plates, crystal switches, and torches."""
 
 import pygame
-from zelda_miloutte.entities.entity import Entity
-from zelda_miloutte.settings import TILE_SIZE, GRAY, BROWN, DARK_GRAY
-from zelda_miloutte.sprites.puzzle_sprites import (
+from .entity import Entity
+from ..settings import TILE_SIZE, GRAY, BROWN, DARK_GRAY
+from ..sprites.puzzle_sprites import (
     get_push_block, get_pressure_plate_up, get_pressure_plate_down,
     get_crystal_switch_on, get_crystal_switch_off,
     get_torch_unlit, get_torch_lit,
 )
-from zelda_miloutte.sounds import get_sound_manager
+from ..sounds import get_sound_manager
 
 
 class PushBlock(Entity):

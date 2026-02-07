@@ -1,6 +1,6 @@
 """Pixel art sprites for NPCs (Elder, Villager, Merchant, Guard)."""
 
-from zelda_miloutte.sprites.pixel_art import surface_from_grid
+from .pixel_art import surface_from_grid
 
 # ══════════════════════════════════════════════════════════════════════
 # ELDER - wise old figure, white hair/beard, blue robes

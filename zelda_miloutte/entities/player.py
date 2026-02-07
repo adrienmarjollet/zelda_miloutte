@@ -1,16 +1,16 @@
 import pygame
-from zelda_miloutte.entities.entity import Entity
-from zelda_miloutte.settings import (
+from .entity import Entity
+from ..settings import (
     PLAYER_SIZE, PLAYER_SPEED, PLAYER_MAX_HP, PLAYER_INVINCIBILITY_TIME,
     PLAYER_BLINK_RATE, GOLD, SWORD_LENGTH, SWORD_WIDTH, SWORD_DURATION,
     SWORD_COOLDOWN, SWORD_DAMAGE, WHITE, TILE_SIZE,
     XP_BASE, XP_EXPONENT, LEVEL_HP_INTERVAL, LEVEL_ATTACK_INTERVAL, LEVEL_DEFENSE_INTERVAL,
     PLAYER_MAX_MP, PLAYER_MP_REGEN,
 )
-from zelda_miloutte.sounds import get_sound_manager
-from zelda_miloutte.sprites import AnimatedSprite
-from zelda_miloutte.sprites.player_sprites import get_player_frames, get_sword_surfaces
-from zelda_miloutte.data.inventory import Inventory
+from ..sounds import get_sound_manager
+from ..sprites import AnimatedSprite
+from ..sprites.player_sprites import get_player_frames, get_sword_surfaces
+from ..data.inventory import Inventory
 
 
 class Player(Entity):
@@ -85,7 +85,7 @@ class Player(Entity):
         """Unlock an ability by name. Returns True if newly unlocked."""
         if ability_name in self.unlocked_abilities:
             return False
-        from zelda_miloutte.abilities import create_ability
+        from ..abilities import create_ability
         ability = create_ability(ability_name)
         if ability is None:
             return False

@@ -2,7 +2,7 @@
 
 import pygame
 import math
-from zelda_miloutte.sprites.pixel_art import surface_from_grid
+from .pixel_art import surface_from_grid
 
 
 # ── Palette for ability icons ────────────────────────────────────────

@@ -1,10 +1,10 @@
 """Options menu accessible from title screen and pause menu."""
 
 import pygame
-from zelda_miloutte.states.state import State
-from zelda_miloutte.settings import SCREEN_WIDTH, SCREEN_HEIGHT, WHITE, GOLD, GRAY, BLACK
-from zelda_miloutte.sounds import get_sound_manager
-from zelda_miloutte.user_settings import load_settings, save_settings
+from .state import State
+from ..settings import SCREEN_WIDTH, SCREEN_HEIGHT, WHITE, GOLD, GRAY, BLACK
+from ..sounds import get_sound_manager
+from ..user_settings import load_settings, save_settings
 
 
 class OptionsState(State):

@@ -1,17 +1,17 @@
 import math
 import random
 import pygame
-from zelda_miloutte.entities.entity import Entity
-from zelda_miloutte.settings import (
+from .entity import Entity
+from ..settings import (
     SHADOW_STALKER_SIZE, SHADOW_STALKER_SPEED, SHADOW_STALKER_HP,
     SHADOW_STALKER_DAMAGE, SHADOW_STALKER_TELEPORT_COOLDOWN,
     SHADOW_STALKER_CHASE_RANGE, TILE_SIZE,
 )
-from zelda_miloutte.sounds import get_sound_manager
-from zelda_miloutte.sprites import AnimatedSprite
-from zelda_miloutte.sprites.shadow_stalker_sprites import get_shadow_stalker_frames
-from zelda_miloutte.sprites.effects import flash_white, scale_shrink
-from zelda_miloutte.ai_state import EnemyAI, AlertState
+from ..sounds import get_sound_manager
+from ..sprites import AnimatedSprite
+from ..sprites.shadow_stalker_sprites import get_shadow_stalker_frames
+from ..sprites.effects import flash_white, scale_shrink
+from ..ai_state import EnemyAI, AlertState
 
 
 class ShadowStalker(Entity, EnemyAI):

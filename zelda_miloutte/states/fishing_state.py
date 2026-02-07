@@ -8,11 +8,11 @@ import random
 import math
 import pygame
 
-from zelda_miloutte.states.state import State
-from zelda_miloutte.settings import SCREEN_WIDTH, SCREEN_HEIGHT, WHITE, BLACK, GOLD
-from zelda_miloutte.data.fish import pick_random_fish
-from zelda_miloutte.sprites.fish_sprites import get_fish_sprite
-from zelda_miloutte.sounds import get_sound_manager
+from .state import State
+from ..settings import SCREEN_WIDTH, SCREEN_HEIGHT, WHITE, BLACK, GOLD
+from ..data.fish import pick_random_fish
+from ..sprites.fish_sprites import get_fish_sprite
+from ..sounds import get_sound_manager
 
 
 # Fishing phase constants

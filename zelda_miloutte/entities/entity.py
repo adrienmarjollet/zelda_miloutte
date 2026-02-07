@@ -1,6 +1,6 @@
 import pygame
 import math
-from zelda_miloutte.settings import TILE_SIZE
+from ..settings import TILE_SIZE
 
 
 class Entity:

@@ -1,19 +1,19 @@
 import pygame
-from zelda_miloutte.states.gameplay_state import GameplayState
-from zelda_miloutte.entities.player import Player
-from zelda_miloutte.entities.enemy import Enemy
-from zelda_miloutte.entities.boss import Boss
-from zelda_miloutte.entities.item import Item
-from zelda_miloutte.camera import Camera
-from zelda_miloutte.world.tilemap import TileMap
-from zelda_miloutte.world.maps import DUNGEON, DUNGEON_SPAWNS, DUNGEON2, DUNGEON2_SPAWNS
-from zelda_miloutte.hud import HUD
-from zelda_miloutte.settings import (
+from .gameplay_state import GameplayState
+from ..entities.player import Player
+from ..entities.enemy import Enemy
+from ..entities.boss import Boss
+from ..entities.item import Item
+from ..camera import Camera
+from ..world.tilemap import TileMap
+from ..world.maps import DUNGEON, DUNGEON_SPAWNS, DUNGEON2, DUNGEON2_SPAWNS
+from ..hud import HUD
+from ..settings import (
     TILE_SIZE, SCREEN_WIDTH, SCREEN_HEIGHT, WHITE, GOLD,
     BOSS2_HP, BOSS2_SPEED, BOSS2_CHASE_SPEED, BOSS2_CHARGE_SPEED, BOSS2_DAMAGE, ICE_BLUE,
 )
-from zelda_miloutte.particles import ParticleSystem
-from zelda_miloutte.sounds import get_sound_manager
+from ..particles import ParticleSystem
+from ..sounds import get_sound_manager
 
 
 class DungeonState(GameplayState):
@@ -67,11 +67,11 @@ class DungeonState(GameplayState):
         self.hud = HUD()
 
         # Enemies
-        from zelda_miloutte.entities.archer import Archer
-        from zelda_miloutte.entities.vine_snapper import VineSnapper
-        from zelda_miloutte.entities.ice_wraith import IceWraith
-        from zelda_miloutte.entities.frost_golem import FrostGolem
-        from zelda_miloutte.ng_plus import scale_enemy_stats
+        from ..entities.archer import Archer
+        from ..entities.vine_snapper import VineSnapper
+        from ..entities.ice_wraith import IceWraith
+        from ..entities.frost_golem import FrostGolem
+        from ..ng_plus import scale_enemy_stats
         self.enemies = []
         for edata in dungeon_spawns.get("enemies", []):
             # Check enemy type
@@ -117,7 +117,7 @@ class DungeonState(GameplayState):
             self.enemies.append(e)
 
         # Boss - use custom class if provided, otherwise default Boss
-        from zelda_miloutte.ng_plus import scale_boss_stats, get_boss_cooldown_scale
+        from ..ng_plus import scale_boss_stats, get_boss_cooldown_scale
         bdata = dungeon_spawns["boss"]
         if boss_class is not None:
             # Use custom boss class (e.g., ForestGuardian)
@@ -152,7 +152,7 @@ class DungeonState(GameplayState):
             # Standard Boss charge attack
             if hasattr(self.boss, 'charge_cooldown'):
                 if not hasattr(self.boss, '_base_charge_cooldown'):
-                    from zelda_miloutte.settings import BOSS_CHARGE_COOLDOWN
+                    from ..settings import BOSS_CHARGE_COOLDOWN
                     self.boss._base_charge_cooldown = BOSS_CHARGE_COOLDOWN
                 self.boss.charge_cooldown = self.boss._base_charge_cooldown * cooldown_scale
             # Forest Guardian root slam
@@ -184,7 +184,7 @@ class DungeonState(GameplayState):
             self.items.append(item)
 
         # Chests
-        from zelda_miloutte.entities.chest import Chest
+        from ..entities.chest import Chest
         self.chests = []
         for cdata in dungeon_spawns.get("chests", []):
             chest = Chest(
@@ -225,7 +225,7 @@ class DungeonState(GameplayState):
         self.fire_trails = []
 
     def _spawn_signs(self):
-        from zelda_miloutte.entities.sign import Sign
+        from ..entities.sign import Sign
         self.signs = []
         for sdata in self.dungeon_spawns.get("signs", []):
             sign = Sign(
@@ -269,7 +269,7 @@ class DungeonState(GameplayState):
     def update(self, dt):
         # Check for pause
         if self.game.input.pause:
-            from zelda_miloutte.states.pause_state import PauseState
+            from .pause_state import PauseState
             self.game.push_state(PauseState(self.game))
             return
 
@@ -289,7 +289,7 @@ class DungeonState(GameplayState):
                     def show_midgame_cutscene():
                         self._copy_stats_back()
                         self.game.pop_state()  # pop dungeon
-                        from zelda_miloutte.states.cinematic_state import CinematicState
+                        from .cinematic_state import CinematicState
                         self.game.push_state(CinematicState(
                             self.game, cutscene_type="midgame",
                             on_complete=lambda: self.game.pop_state()
@@ -303,11 +303,11 @@ class DungeonState(GameplayState):
                     def show_ending():
                         self._copy_stats_back()
                         self.game.pop_state()  # pop dungeon
-                        from zelda_miloutte.states.cinematic_state import CinematicState
+                        from .cinematic_state import CinematicState
 
                         def on_cinematic_complete():
                             self.game.pop_state()  # pop cinematic
-                            from zelda_miloutte.states.ng_plus_choice_state import NGPlusChoiceState
+                            from .ng_plus_choice_state import NGPlusChoiceState
                             self.game.change_state(NGPlusChoiceState(
                                 self.game, player_ref=player_ref
                             ))
@@ -379,7 +379,7 @@ class DungeonState(GameplayState):
 
         # Handle vine summons from Forest Guardian
         if hasattr(self.boss, 'pending_summons') and self.boss.pending_summons:
-            from zelda_miloutte.entities.vine_snapper import VineSnapper
+            from ..entities.vine_snapper import VineSnapper
             for summon_data in self.boss.pending_summons:
                 vs = VineSnapper(summon_data['x'], summon_data['y'])
                 self.enemies.append(vs)
@@ -510,7 +510,7 @@ class DungeonState(GameplayState):
                     item = Item(self.boss.rect.centerx, self.boss.rect.centery, drop)
                     self.items.append(item)
                 # Grant boss XP
-                from zelda_miloutte.ui.floating_text import FloatingText
+                from ..ui.floating_text import FloatingText
                 xp_val = getattr(self.boss, 'xp_value', 50)
                 leveled = self.player.gain_xp(xp_val)
                 self.floating_texts.append(FloatingText(
@@ -540,13 +540,13 @@ class DungeonState(GameplayState):
                     self.game.world_state["defeated_bosses"].append(boss_id)
                 self.game.quest_manager.update_objective("defeat_boss", boss_id)
                 # Unlock ability if this boss grants one
-                from zelda_miloutte.abilities import BOSS_ABILITY_UNLOCKS
+                from ..abilities import BOSS_ABILITY_UNLOCKS
                 if boss_id in BOSS_ABILITY_UNLOCKS:
                     ability_name = BOSS_ABILITY_UNLOCKS[boss_id]
                     if self.player.unlock_ability(ability_name):
                         # Show notification for new ability
-                        from zelda_miloutte.ui.floating_text import FloatingText
-                        from zelda_miloutte.abilities import create_ability
+                        from ..ui.floating_text import FloatingText
+                        from ..abilities import create_ability
                         ability = create_ability(ability_name)
                         if ability:
                             self.floating_texts.append(FloatingText(

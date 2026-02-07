@@ -2,10 +2,10 @@ import math
 import time
 import random
 import pygame
-from zelda_miloutte.states.state import State
-from zelda_miloutte.settings import SCREEN_WIDTH, SCREEN_HEIGHT, WHITE, GOLD, BLACK, GREEN, GRAY
-from zelda_miloutte.sounds import get_sound_manager
-from zelda_miloutte.sprites.pixel_art import surface_from_grid
+from .state import State
+from ..settings import SCREEN_WIDTH, SCREEN_HEIGHT, WHITE, GOLD, BLACK, GREEN, GRAY
+from ..sounds import get_sound_manager
+from ..sprites.pixel_art import surface_from_grid
 
 
 # ── Big Sword pixel art (32 wide x 64 tall, scale 4 = 128x256 on screen) ──
@@ -153,7 +153,7 @@ class TitleState(State):
         return any(v is not None for v in self.saves.values())
 
     def _start_new_game(self):
-        from zelda_miloutte.states.play_state import PlayState
+        from .play_state import PlayState
         self.game.world_state = {
             "defeated_bosses": [],
             "opened_chests": [],
@@ -176,7 +176,7 @@ class TitleState(State):
             "story_progress": data.get("story_progress", 0),
         }
 
-        from zelda_miloutte.states.play_state import PlayState
+        from .play_state import PlayState
         play = PlayState(self.game, load_data=data)
         self.game.change_state(play)
 

@@ -1,9 +1,9 @@
 """State presented after the ending cinematic to offer New Game+ choice."""
 
 import pygame
-from zelda_miloutte.states.state import State
-from zelda_miloutte.settings import SCREEN_WIDTH, SCREEN_HEIGHT, WHITE, GOLD, BLACK, GRAY
-from zelda_miloutte.ng_plus import (
+from .state import State
+from ..settings import SCREEN_WIDTH, SCREEN_HEIGHT, WHITE, GOLD, BLACK, GRAY
+from ..ng_plus import (
     init_ng_plus_save_data, get_ng_plus_label, format_play_time,
     check_speedrun_achievement,
 )
@@ -62,8 +62,8 @@ class NGPlusChoiceState(State):
 
         # Reset quests
         self.game.quest_manager = None
-        from zelda_miloutte.quest_manager import QuestManager
-        from zelda_miloutte.data.quests import get_all_quests
+        from ..quest_manager import QuestManager
+        from ..data.quests import get_all_quests
         self.game.quest_manager = QuestManager()
         for quest in get_all_quests():
             self.game.quest_manager.register_quest(quest)
@@ -72,7 +72,7 @@ class NGPlusChoiceState(State):
         unlocked = ng_data.get("unlocked_abilities", [])
 
         def do_ng_plus():
-            from zelda_miloutte.states.play_state import PlayState
+            from .play_state import PlayState
             play = PlayState(self.game, area_id="overworld", load_data=ng_data)
             # Restore unlocked abilities
             for ability_name in unlocked:
@@ -89,7 +89,7 @@ class NGPlusChoiceState(State):
     def _return_to_village(self):
         """Return to title screen."""
         def go_title():
-            from zelda_miloutte.states.title_state import TitleState
+            from .title_state import TitleState
             self.game.change_state(TitleState(self.game))
         self.game.transition_to(go_title)
 

@@ -3,16 +3,16 @@
 import math
 import random
 import pygame
-from zelda_miloutte.entities.entity import Entity
-from zelda_miloutte.settings import (
+from .entity import Entity
+from ..settings import (
     SCORPION_SIZE, SCORPION_SPEED, SCORPION_HP,
     SCORPION_DAMAGE, SCORPION_CHASE_RANGE,
 )
-from zelda_miloutte.sounds import get_sound_manager
-from zelda_miloutte.sprites import AnimatedSprite
-from zelda_miloutte.sprites.scorpion_sprites import get_scorpion_frames
-from zelda_miloutte.sprites.effects import flash_white, scale_shrink
-from zelda_miloutte.ai_state import EnemyAI, AlertState
+from ..sounds import get_sound_manager
+from ..sprites import AnimatedSprite
+from ..sprites.scorpion_sprites import get_scorpion_frames
+from ..sprites.effects import flash_white, scale_shrink
+from ..ai_state import EnemyAI, AlertState
 
 
 class Scorpion(Entity, EnemyAI):

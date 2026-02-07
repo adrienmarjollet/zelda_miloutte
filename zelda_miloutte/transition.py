@@ -1,5 +1,5 @@
 import pygame
-from zelda_miloutte.settings import SCREEN_WIDTH, SCREEN_HEIGHT
+from .settings import SCREEN_WIDTH, SCREEN_HEIGHT
 
 
 class Transition:

@@ -1,6 +1,6 @@
 import pygame
-from zelda_miloutte.states.state import State
-from zelda_miloutte.settings import SCREEN_WIDTH, SCREEN_HEIGHT, WHITE, RED, BLACK
+from .state import State
+from ..settings import SCREEN_WIDTH, SCREEN_HEIGHT, WHITE, RED, BLACK
 
 
 class GameOverState(State):
@@ -18,7 +18,7 @@ class GameOverState(State):
 
     def _return_to_title(self):
         """Callback to return to title screen (called during transition)."""
-        from zelda_miloutte.states.title_state import TitleState
+        from .title_state import TitleState
         self.game.change_state(TitleState(self.game))
 
     def handle_event(self, event):

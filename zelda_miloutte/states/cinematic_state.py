@@ -3,9 +3,9 @@ import random
 
 import pygame
 
-from zelda_miloutte.states.state import State
-from zelda_miloutte.settings import SCREEN_WIDTH, SCREEN_HEIGHT, BLACK, GOLD
-from zelda_miloutte.sounds import get_sound_manager
+from .state import State
+from ..settings import SCREEN_WIDTH, SCREEN_HEIGHT, BLACK, GOLD
+from ..sounds import get_sound_manager
 
 
 class CinematicState(State):
@@ -115,7 +115,7 @@ class CinematicState(State):
 
     def _get_player_surf(self):
         if self._player_surf is None:
-            from zelda_miloutte.sprites.player_sprites import get_player_frames
+            from ..sprites.player_sprites import get_player_frames
             frames = get_player_frames()
             base = frames["down"][0]
             w, h = base.get_size()
@@ -124,7 +124,7 @@ class CinematicState(State):
 
     def _get_player_right_frames(self):
         if self._player_right_frames is None:
-            from zelda_miloutte.sprites.player_sprites import get_player_frames
+            from ..sprites.player_sprites import get_player_frames
             frames = get_player_frames()
             result = []
             for f in frames["right"]:
@@ -135,7 +135,7 @@ class CinematicState(State):
 
     def _get_boss_surf(self):
         if self._boss_surf is None:
-            from zelda_miloutte.sprites.boss_sprites import get_boss_frames_phase1
+            from ..sprites.boss_sprites import get_boss_frames_phase1
             frames = get_boss_frames_phase1()
             base = frames["down"][0]
             w, h = base.get_size()
@@ -144,7 +144,7 @@ class CinematicState(State):
 
     def _get_enemy_surfs(self):
         if self._enemy_surfs is None:
-            from zelda_miloutte.sprites.enemy_sprites import get_enemy_frames
+            from ..sprites.enemy_sprites import get_enemy_frames
             frames = get_enemy_frames()
             result = []
             for f in frames["right"]:
@@ -155,7 +155,7 @@ class CinematicState(State):
 
     def _get_archer_surfs(self):
         if self._archer_surfs is None:
-            from zelda_miloutte.sprites.archer_sprites import get_archer_frames
+            from ..sprites.archer_sprites import get_archer_frames
             frames = get_archer_frames()
             result = []
             for f in frames["right"]:
@@ -166,7 +166,7 @@ class CinematicState(State):
 
     def _get_sword_surf(self):
         if self._sword_surf is None:
-            from zelda_miloutte.sprites.player_sprites import get_sword_surfaces
+            from ..sprites.player_sprites import get_sword_surfaces
             swords = get_sword_surfaces()
             base = swords["right"]
             w, h = base.get_size()
@@ -177,7 +177,7 @@ class CinematicState(State):
         if self._on_complete:
             self._on_complete()
         else:
-            from zelda_miloutte.states.title_state import TitleState
+            from .title_state import TitleState
             self.game.change_state(TitleState(self.game))
 
     def handle_event(self, event):

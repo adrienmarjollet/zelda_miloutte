@@ -1,6 +1,6 @@
 """Pixel art sprites for treasure chests."""
 
-from zelda_miloutte.sprites.pixel_art import surface_from_grid
+from .pixel_art import surface_from_grid
 
 # Chest palette - wooden box with metallic clasp
 _CHEST_PAL = {

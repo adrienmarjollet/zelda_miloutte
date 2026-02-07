@@ -1,6 +1,6 @@
 """16x16 icon sprites for achievements using surface_from_grid()."""
 
-from zelda_miloutte.sprites.pixel_art import surface_from_grid
+from .pixel_art import surface_from_grid
 
 # ── Palettes ─────────────────────────────────────────────────────
 

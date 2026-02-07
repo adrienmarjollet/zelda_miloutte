@@ -1,18 +1,18 @@
 import math
 import random
 import pygame
-from zelda_miloutte.entities.entity import Entity
-from zelda_miloutte.entities.projectile import Projectile
-from zelda_miloutte.settings import (
+from .entity import Entity
+from .projectile import Projectile
+from ..settings import (
     VINE_SNAPPER_SIZE, VINE_SNAPPER_HP, VINE_SNAPPER_DAMAGE,
     VINE_SNAPPER_SHOOT_RANGE, VINE_SNAPPER_SHOOT_COOLDOWN,
     VINE_SNAPPER_PROJECTILE_SPEED,
 )
-from zelda_miloutte.sounds import get_sound_manager
-from zelda_miloutte.sprites import AnimatedSprite
-from zelda_miloutte.sprites.vine_snapper_sprites import get_vine_snapper_frames, get_thorn_sprite
-from zelda_miloutte.sprites.effects import flash_white, scale_shrink
-from zelda_miloutte.pathfinding import has_line_of_sight
+from ..sounds import get_sound_manager
+from ..sprites import AnimatedSprite
+from ..sprites.vine_snapper_sprites import get_vine_snapper_frames, get_thorn_sprite
+from ..sprites.effects import flash_white, scale_shrink
+from ..pathfinding import has_line_of_sight
 
 
 class VineSnapper(Entity):

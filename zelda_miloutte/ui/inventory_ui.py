@@ -1,9 +1,9 @@
 """Inventory overlay UI with grid-based item display and equipment slots."""
 
 import pygame
-from zelda_miloutte.settings import SCREEN_WIDTH, SCREEN_HEIGHT, WHITE, GOLD, GRAY
-from zelda_miloutte.data.inventory import EQUIP_SLOTS, get_item
-from zelda_miloutte.sprites.item_sprites import get_inventory_icon
+from ..settings import SCREEN_WIDTH, SCREEN_HEIGHT, WHITE, GOLD, GRAY
+from ..data.inventory import EQUIP_SLOTS, get_item
+from ..sprites.item_sprites import get_inventory_icon
 
 
 # Layout constants

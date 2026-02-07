@@ -1,7 +1,7 @@
 """Minimap overlay showing current area tile layout, entities, and fog of war."""
 
 import pygame
-from zelda_miloutte.settings import SCREEN_WIDTH, TILE_SIZE
+from ..settings import SCREEN_WIDTH, TILE_SIZE
 
 
 # Minimap dimensions

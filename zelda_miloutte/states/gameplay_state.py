@@ -1,12 +1,12 @@
 import random
 import pygame
-from zelda_miloutte.states.state import State
-from zelda_miloutte.settings import RED, SCREEN_WIDTH, SCREEN_HEIGHT
-from zelda_miloutte.entities.item import Item
-from zelda_miloutte.entities.gold import Gold
-from zelda_miloutte.world.tile import TileType
-from zelda_miloutte.ui.textbox import TextBox
-from zelda_miloutte.ui.shop_ui import ShopUI
+from .state import State
+from ..settings import RED, SCREEN_WIDTH, SCREEN_HEIGHT
+from ..entities.item import Item
+from ..entities.gold import Gold
+from ..world.tile import TileType
+from ..ui.textbox import TextBox
+from ..ui.shop_ui import ShopUI
 
 
 class GameplayState(State):
@@ -53,11 +53,11 @@ class GameplayState(State):
         self.torches = []
 
         # Minimap (shared across gameplay states)
-        from zelda_miloutte.ui.minimap import Minimap
+        from ..ui.minimap import Minimap
         self.minimap = Minimap()
 
     def _init_dialogue_box(self):
-        from zelda_miloutte.ui.dialogue_box import DialogueBox
+        from ..ui.dialogue_box import DialogueBox
         self.dialogue_box = DialogueBox()
 
     def _update_movement(self, dt):
@@ -76,7 +76,7 @@ class GameplayState(State):
 
         # Apply companion MP regen bonus (Fairy) before player.update()
         if self.companion is not None:
-            from zelda_miloutte.entities.companion import Fairy
+            from ..entities.companion import Fairy
             if isinstance(self.companion, Fairy):
                 player._companion_mp_bonus = 0.50  # +50% MP regen
             else:
@@ -100,13 +100,13 @@ class GameplayState(State):
 
     def _update_enemies(self, dt):
         """Update all enemies and collect projectiles from archers, vine snappers, and magma golems. Collect fire trails from fire imps."""
-        from zelda_miloutte.entities.archer import Archer
-        from zelda_miloutte.entities.vine_snapper import VineSnapper
-        from zelda_miloutte.entities.shadow_stalker import ShadowStalker
-        from zelda_miloutte.entities.fire_imp import FireImp
-        from zelda_miloutte.entities.magma_golem import MagmaGolem
-        from zelda_miloutte.pathfinding import reset_pathfind_budget
-        from zelda_miloutte.ai_state import update_group_behavior
+        from ..entities.archer import Archer
+        from ..entities.vine_snapper import VineSnapper
+        from ..entities.shadow_stalker import ShadowStalker
+        from ..entities.fire_imp import FireImp
+        from ..entities.magma_golem import MagmaGolem
+        from ..pathfinding import reset_pathfind_budget
+        from ..ai_state import update_group_behavior
 
         # Reset pathfinding budget each frame (max 3 pathfinds per frame)
         reset_pathfind_budget()
@@ -181,7 +181,7 @@ class GameplayState(State):
                     if item_type:
                         if item_type == "gold":
                             # Gold was already added directly to player in chest.open()
-                            from zelda_miloutte.ui.floating_text import FloatingText
+                            from ..ui.floating_text import FloatingText
                             self.floating_texts.append(FloatingText(
                                 f"+{chest.gold_amount}G", chest.center_x,
                                 chest.center_y - 10, (255, 200, 50), size=22, duration=1.0
@@ -231,7 +231,7 @@ class GameplayState(State):
         Args:
             spawn_dict: Dictionary containing puzzle spawn data with a "puzzles" key
         """
-        from zelda_miloutte.entities.puzzle import PushBlock, PressurePlate, CrystalSwitch, Torch
+        from ..entities.puzzle import PushBlock, PressurePlate, CrystalSwitch, Torch
 
         self.push_blocks = []
         self.pressure_plates = []
@@ -299,8 +299,8 @@ class GameplayState(State):
 
     def _on_crystal_switch_toggled(self, switch):
         """Update barrier tiles when crystal switch is toggled."""
-        from zelda_miloutte.sounds import get_sound_manager
-        from zelda_miloutte.world.tile import TileType
+        from ..sounds import get_sound_manager
+        from ..world.tile import TileType
         get_sound_manager().play_door_open()
         orig = getattr(self, '_original_map_data', None)
         for ri in range(self.tilemap.rows):
@@ -320,7 +320,7 @@ class GameplayState(State):
                     elif ov == TileType.BARRIER_BLUE.value and switch.state:
                         self.tilemap.tiles[ri][ci] = TileType.BARRIER_BLUE
                         self.tilemap.data[ri][ci] = TileType.BARRIER_BLUE.value
-        from zelda_miloutte.sprites.tile_sprites import get_tile_surface_variant
+        from ..sprites.tile_sprites import get_tile_surface_variant
         for ri in range(self.tilemap.rows):
             for ci in range(self.tilemap.cols):
                 self.tilemap._tile_surface_grid[ri][ci] = get_tile_surface_variant(
@@ -328,7 +328,7 @@ class GameplayState(State):
 
     def _on_pressure_plate_activated(self, plate):
         """Check if all linked plates pressed and trigger target."""
-        from zelda_miloutte.world.tile import TileType
+        from ..world.tile import TileType
         for tid in plate.linked_targets:
             if all(p.pressed for p in self.pressure_plates if tid in p.linked_targets):
                 self._trigger_puzzle_target(tid)
@@ -347,9 +347,9 @@ class GameplayState(State):
 
     def _trigger_puzzle_target(self, target_id):
         """Trigger puzzle target by ID - converts tagged tiles to floor."""
-        from zelda_miloutte.sounds import get_sound_manager
-        from zelda_miloutte.sprites.tile_sprites import get_tile_surface_variant
-        from zelda_miloutte.world.tile import TileType
+        from ..sounds import get_sound_manager
+        from ..sprites.tile_sprites import get_tile_surface_variant
+        from ..world.tile import TileType
         get_sound_manager().play_door_open()
         doors = getattr(self, '_puzzle_doors', {})
         if target_id in doors:
@@ -438,7 +438,7 @@ class GameplayState(State):
             gold.update(dt)
         for gold in self.gold_pickups:
             if gold.alive and player.collides_with(gold):
-                from zelda_miloutte.ui.floating_text import FloatingText
+                from ..ui.floating_text import FloatingText
                 amount = gold.amount
                 gold.pickup(player)
                 self.floating_texts.append(FloatingText(
@@ -529,7 +529,7 @@ class GameplayState(State):
 
     def _cleanup_dead(self):
         """Remove dead enemies/items and emit death particles. Spawn drops and XP from dead enemies."""
-        from zelda_miloutte.ui.floating_text import FloatingText
+        from ..ui.floating_text import FloatingText
         for enemy in self.enemies:
             if not enemy.alive:
                 self.particles.emit_death_burst_dramatic(enemy.center_x, enemy.center_y, enemy.color)
@@ -601,7 +601,7 @@ class GameplayState(State):
         """Check if player is dead and transition to game over."""
         if not self.player.alive:
             def show_game_over():
-                from zelda_miloutte.states.gameover_state import GameOverState
+                from .gameover_state import GameOverState
                 self.game.change_state(GameOverState(self.game))
 
             self.game.transition_to(show_game_over)
@@ -703,7 +703,7 @@ class GameplayState(State):
 
     def _update_ambient_particles(self, dt):
         """Spawn area-specific ambient particles."""
-        from zelda_miloutte.settings import SCREEN_WIDTH, SCREEN_HEIGHT
+        from ..settings import SCREEN_WIDTH, SCREEN_HEIGHT
         self._ambient_timer += dt
         area_id = getattr(self, 'area_id', None)
         # Spawn ~3 ambient particles per second
@@ -837,7 +837,7 @@ class GameplayState(State):
 
     def _draw_time_hud(self, surface):
         """Draw the time-of-day HUD element (sun/moon icon + clock)."""
-        from zelda_miloutte.sprites.time_hud_sprites import (
+        from ..sprites.time_hud_sprites import (
             get_sun_icon, get_moon_icon, get_dawn_icon, get_dusk_icon,
         )
         time_sys = self.game.time_system
@@ -891,7 +891,7 @@ class GameplayState(State):
         # Check for nearby secrets (hidden chests)
         self.companion.check_nearby_secrets(self.chests)
         # Fairy sparkle trail
-        from zelda_miloutte.entities.companion import Fairy
+        from ..entities.companion import Fairy
         if isinstance(self.companion, Fairy) and self.companion.state == "follow":
             if random.random() < dt * 4:
                 self.particles.emit_fairy_sparkle(self.companion.center_x, self.companion.center_y)
@@ -904,7 +904,7 @@ class GameplayState(State):
             return False
         if self.companion.try_pet(self.player):
             self.particles.emit_companion_happy(self.companion.center_x, self.companion.center_y)
-            from zelda_miloutte.ui.floating_text import FloatingText
+            from ..ui.floating_text import FloatingText
             self.floating_texts.append(FloatingText(
                 "+1 HP", self.player.center_x, self.player.center_y - 20,
                 (255, 100, 120), size=20
@@ -1027,7 +1027,7 @@ class GameplayState(State):
         """Draw achievement popup notifications sliding in from the top."""
         if not self._achievement_popups:
             return
-        from zelda_miloutte.sprites.achievement_sprites import get_achievement_icon
+        from ..sprites.achievement_sprites import get_achievement_icon
         font = pygame.font.Font(None, 24)
         small_font = pygame.font.Font(None, 18)
 

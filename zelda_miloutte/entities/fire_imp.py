@@ -3,16 +3,16 @@
 import math
 import random
 import pygame
-from zelda_miloutte.entities.entity import Entity
-from zelda_miloutte.settings import (
+from .entity import Entity
+from ..settings import (
     FIRE_IMP_SIZE, FIRE_IMP_SPEED, FIRE_IMP_HP,
     FIRE_IMP_DAMAGE, FIRE_IMP_CHASE_RANGE,
 )
-from zelda_miloutte.sounds import get_sound_manager
-from zelda_miloutte.sprites import AnimatedSprite
-from zelda_miloutte.sprites.fire_imp_sprites import get_fire_imp_frames
-from zelda_miloutte.sprites.effects import flash_white, scale_shrink
-from zelda_miloutte.ai_state import EnemyAI, AlertState
+from ..sounds import get_sound_manager
+from ..sprites import AnimatedSprite
+from ..sprites.fire_imp_sprites import get_fire_imp_frames
+from ..sprites.effects import flash_white, scale_shrink
+from ..ai_state import EnemyAI, AlertState
 
 
 class FireImp(Entity, EnemyAI):

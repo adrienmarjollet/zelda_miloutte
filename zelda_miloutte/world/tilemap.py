@@ -1,7 +1,7 @@
 import pygame
-from zelda_miloutte.settings import TILE_SIZE, SCREEN_WIDTH, SCREEN_HEIGHT
-from zelda_miloutte.world.tile import TileType
-from zelda_miloutte.sprites.tile_sprites import get_tile_surface, get_tile_surface_variant
+from ..settings import TILE_SIZE, SCREEN_WIDTH, SCREEN_HEIGHT
+from .tile import TileType
+from ..sprites.tile_sprites import get_tile_surface, get_tile_surface_variant
 
 
 class TileMap:

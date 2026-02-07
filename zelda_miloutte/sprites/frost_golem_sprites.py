@@ -1,6 +1,6 @@
 """Pixel art sprites for Frost Golem (slow, tanky ice enemy)."""
 
-from zelda_miloutte.sprites.pixel_art import surface_from_grid
+from .pixel_art import surface_from_grid
 
 # ── Palette ───────────────────────────────────────────────────────
 _PAL = {

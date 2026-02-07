@@ -1,6 +1,6 @@
 """Pixel art sprites for items (hearts, keys, and inventory items)."""
 
-from zelda_miloutte.sprites.pixel_art import surface_from_grid
+from .pixel_art import surface_from_grid
 
 # ── Heart palette ─────────────────────────────────────────────────
 _HEART_PAL = {

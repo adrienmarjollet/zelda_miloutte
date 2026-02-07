@@ -1,15 +1,15 @@
 import math
 import pygame
-from zelda_miloutte.entities.enemy import Enemy
-from zelda_miloutte.settings import (
+from .enemy import Enemy
+from ..settings import (
     BOSS_SIZE, BOSS_SPEED, BOSS_CHASE_SPEED, BOSS_CHARGE_SPEED,
     BOSS_HP, BOSS_DAMAGE, BOSS_CHARGE_DURATION, BOSS_CHARGE_COOLDOWN,
     BOSS_PHASE2_THRESHOLD, BOSS_PURPLE, TILE_SIZE,
 )
-from zelda_miloutte.sounds import get_sound_manager
-from zelda_miloutte.sprites import AnimatedSprite
-from zelda_miloutte.sprites.boss_sprites import get_boss_frames_phase1, get_boss_frames_phase2
-from zelda_miloutte.sprites.effects import flash_white, scale_shrink
+from ..sounds import get_sound_manager
+from ..sprites import AnimatedSprite
+from ..sprites.boss_sprites import get_boss_frames_phase1, get_boss_frames_phase2
+from ..sprites.effects import flash_white, scale_shrink
 
 
 class Boss(Enemy):

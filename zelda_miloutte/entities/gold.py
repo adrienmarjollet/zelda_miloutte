@@ -1,9 +1,9 @@
 """Gold pickup entity that the player can collect."""
 
-from zelda_miloutte.entities.entity import Entity
-from zelda_miloutte.settings import ITEM_SIZE, GOLD as GOLD_COLOR
-from zelda_miloutte.sounds import get_sound_manager
-from zelda_miloutte.sprites.gold_sprites import get_gold_frames
+from .entity import Entity
+from ..settings import ITEM_SIZE, GOLD as GOLD_COLOR
+from ..sounds import get_sound_manager
+from ..sprites.gold_sprites import get_gold_frames
 
 
 class Gold(Entity):

@@ -1,6 +1,6 @@
 """Pixel art sprites for archer enemies (hooded ranged attackers)."""
 
-from zelda_miloutte.sprites.pixel_art import surface_from_grid
+from .pixel_art import surface_from_grid
 
 # ── Archer Palette ────────────────────────────────────────────────
 _ARCHER_PAL = {

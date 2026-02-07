@@ -3,20 +3,20 @@
 import math
 import random
 import pygame
-from zelda_miloutte.entities.entity import Entity
-from zelda_miloutte.settings import (
+from .entity import Entity
+from ..settings import (
     SAND_WORM_HP, SAND_WORM_SPEED, SAND_WORM_CHASE_SPEED,
     SAND_WORM_DAMAGE, SAND_WORM_SIZE, TILE_SIZE,
 )
-from zelda_miloutte.sounds import get_sound_manager
-from zelda_miloutte.sprites import AnimatedSprite
-from zelda_miloutte.sprites.sand_worm_sprites import (
+from ..sounds import get_sound_manager
+from ..sprites import AnimatedSprite
+from ..sprites.sand_worm_sprites import (
     get_sand_worm_frames_surface,
     get_sand_worm_frames_burrowed,
     get_sand_worm_frames_surface_p2,
     get_sand_worm_frames_burrowed_p2,
 )
-from zelda_miloutte.sprites.effects import flash_white, scale_shrink
+from ..sprites.effects import flash_white, scale_shrink
 
 
 class SandWorm(Entity):

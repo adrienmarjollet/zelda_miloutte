@@ -1,7 +1,7 @@
 """Sign sprites using pixel art grid system."""
 
-from zelda_miloutte.sprites.pixel_art import surface_from_grid
-from zelda_miloutte.settings import BROWN, DARK_GRAY
+from .pixel_art import surface_from_grid
+from ..settings import BROWN, DARK_GRAY
 
 _sign_sprite_cache = None
 

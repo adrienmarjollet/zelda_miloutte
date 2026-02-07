@@ -2,10 +2,10 @@
 
 import random
 import pygame
-from zelda_miloutte.entities.entity import Entity
-from zelda_miloutte.settings import CHEST_SIZE, BROWN
-from zelda_miloutte.sprites.chest_sprites import get_chest_closed, get_chest_open
-from zelda_miloutte.sounds import get_sound_manager
+from .entity import Entity
+from ..settings import CHEST_SIZE, BROWN
+from ..sprites.chest_sprites import get_chest_closed, get_chest_open
+from ..sounds import get_sound_manager
 
 
 class Chest(Entity):

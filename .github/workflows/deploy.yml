@@ -28,6 +28,13 @@ jobs:
       - name: Build with pygbag
         run: python -m pygbag --build $GITHUB_WORKSPACE
 
+      - name: Cache-bust APK reference
+        run: |
+          # Append a version query param to the APK filename in the generated HTML
+          # so browsers don't serve a stale cached copy
+          HASH=$(date +%s)
+          sed -i "s/zelda_miloutte\.apk/zelda_miloutte.apk?v=${HASH}/g" build/web/index.html
+
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:

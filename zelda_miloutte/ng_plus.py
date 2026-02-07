@@ -1,7 +1,7 @@
 """New Game+ difficulty scaling and utility functions."""
 
 import pygame
-from zelda_miloutte.sprites.effects import tint_surface
+from .sprites.effects import tint_surface
 
 # Maximum NG+ cycle (cap at 5 to prevent absurdity)
 NG_PLUS_MAX = 5

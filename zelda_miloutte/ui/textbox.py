@@ -1,7 +1,7 @@
 """Classic Zelda-style textbox for displaying dialogue."""
 
 import pygame
-from zelda_miloutte.settings import SCREEN_WIDTH, SCREEN_HEIGHT, WHITE, BLACK
+from ..settings import SCREEN_WIDTH, SCREEN_HEIGHT, WHITE, BLACK
 
 
 class TextBox:

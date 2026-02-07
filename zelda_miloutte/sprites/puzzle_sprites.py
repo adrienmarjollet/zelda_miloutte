@@ -1,6 +1,6 @@
 """Pixel art sprites for puzzle entities: push block, pressure plate, crystal switch, torch, barriers."""
 
-from zelda_miloutte.sprites.pixel_art import surface_from_grid
+from .pixel_art import surface_from_grid
 
 # ── Push Block (16x16 grid at scale 2 = 32x32) ──────────────────
 

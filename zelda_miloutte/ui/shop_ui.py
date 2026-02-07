@@ -1,9 +1,9 @@
 """Shop buy/sell interface opened when interacting with merchant NPCs."""
 
 import pygame
-from zelda_miloutte.settings import SCREEN_WIDTH, SCREEN_HEIGHT, WHITE, GOLD, GRAY, BLACK
-from zelda_miloutte.data.inventory import get_item, ITEMS, CATEGORY_EQUIPMENT
-from zelda_miloutte.data.shops import get_shop
+from ..settings import SCREEN_WIDTH, SCREEN_HEIGHT, WHITE, GOLD, GRAY, BLACK
+from ..data.inventory import get_item, ITEMS, CATEGORY_EQUIPMENT
+from ..data.shops import get_shop
 
 
 # ── Layout constants ─────────────────────────────────────────────────

@@ -1,7 +1,7 @@
 import pygame
 import random
 import math
-from zelda_miloutte.settings import WHITE, GOLD, BROWN, LIGHT_BROWN, BOSS_PURPLE, RED
+from .settings import WHITE, GOLD, BROWN, LIGHT_BROWN, BOSS_PURPLE, RED
 
 
 class Particle:

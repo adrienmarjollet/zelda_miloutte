@@ -1,7 +1,7 @@
 """Pixel art tile surfaces for the tilemap."""
 
 import pygame
-from zelda_miloutte.sprites.pixel_art import surface_from_grid
+from .pixel_art import surface_from_grid
 
 # ── Palettes ──────────────────────────────────────────────────────
 _GRASS_PAL = {

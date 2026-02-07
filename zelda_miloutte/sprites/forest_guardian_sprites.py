@@ -1,6 +1,6 @@
 """Pixel art sprites for the Forest Guardian boss (tree creature, two phases)."""
 
-from zelda_miloutte.sprites.pixel_art import surface_from_grid
+from .pixel_art import surface_from_grid
 
 # ── Phase 1 Palette (green/brown tree) ───────────────────────────────
 _PAL1 = {
