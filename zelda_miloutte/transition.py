@@ -39,7 +39,12 @@ class Transition:
             if progress >= 1.0:
                 # Fade-out complete, call the callback and switch to fade-in
                 if self.callback:
-                    self.callback()
+                    try:
+                        self.callback()
+                    except Exception as e:
+                        import traceback
+                        print(f"TRANSITION CALLBACK ERROR: {e}")
+                        traceback.print_exc()
                 self.phase = "fade_in"
                 self.timer = 0.0
                 self.alpha = 255

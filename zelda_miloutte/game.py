@@ -121,43 +121,48 @@ class Game:
 
     async def run(self):
         while self.running:
-            dt = self.clock.tick(FPS) / 1000.0
-            dt = min(dt, 0.05)  # Cap delta time
+            try:
+                dt = self.clock.tick(FPS) / 1000.0
+                dt = min(dt, 0.05)  # Cap delta time
 
-            self.input.reset_actions()
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    self.running = False
-                    return
-                self.input.handle_event(event)
-                # Don't handle events during transitions
-                if self.current_state and not self.transition.active:
-                    self.current_state.handle_event(event)
+                self.input.reset_actions()
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        self.running = False
+                        return
+                    self.input.handle_event(event)
+                    # Don't handle events during transitions
+                    if self.current_state and not self.transition.active:
+                        self.current_state.handle_event(event)
 
-            self.input.update()
+                self.input.update()
 
-            # Track play time during gameplay states
-            if self.current_state and hasattr(self.current_state, 'player'):
-                self.play_time += dt
+                # Track play time during gameplay states
+                if self.current_state and hasattr(self.current_state, 'player'):
+                    self.play_time += dt
 
-            # Update transition if active, otherwise update game state
-            if self.transition.active:
-                self.transition.update(dt)
-            elif self.current_state:
-                self.current_state.update(dt)
+                # Update transition if active, otherwise update game state
+                if self.transition.active:
+                    self.transition.update(dt)
+                elif self.current_state:
+                    self.current_state.update(dt)
 
-            # Draw current state and transition overlay
-            if self.current_state:
-                self.screen.fill(BLACK)
-                self.current_state.draw(self.screen)
+                # Draw current state and transition overlay
+                if self.current_state:
+                    self.screen.fill(BLACK)
+                    self.current_state.draw(self.screen)
 
-            # Draw touch controls on top of game, under transitions
-            self.input.touch.draw(self.screen)
+                # Draw touch controls on top of game, under transitions
+                self.input.touch.draw(self.screen)
 
-            # Draw transition overlay on top
-            self.transition.draw(self.screen)
+                # Draw transition overlay on top
+                self.transition.draw(self.screen)
 
-            pygame.display.flip()
+                pygame.display.flip()
+            except Exception as e:
+                import traceback
+                print(f"GAME LOOP ERROR: {e}")
+                traceback.print_exc()
             await asyncio.sleep(0)
 
         pygame.quit()
