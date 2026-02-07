@@ -101,6 +101,34 @@ class ParticleSystem:
 
     # Convenience methods for specific effects
 
+    def emit_directional(self, x, y, angle, spread, count, color, speed_range,
+                         lifetime_range, size_range, gravity=0):
+        """Emit particles in a directional cone.
+
+        Args:
+            x, y: Spawn position
+            angle: Center angle in radians (0 = right, pi/2 = down)
+            spread: Half-spread angle in radians
+            count: Number of particles
+            color: RGB tuple or list of RGB tuples
+            speed_range: (min, max) speed
+            lifetime_range: (min, max) lifetime
+            size_range: (min, max) size
+            gravity: Downward acceleration
+        """
+        for _ in range(count):
+            a = angle + random.uniform(-spread, spread)
+            speed = random.uniform(speed_range[0], speed_range[1])
+            vx = math.cos(a) * speed
+            vy = math.sin(a) * speed
+            lifetime = random.uniform(lifetime_range[0], lifetime_range[1])
+            size = random.uniform(size_range[0], size_range[1])
+            if isinstance(color[0], (list, tuple)):
+                particle_color = random.choice(color)
+            else:
+                particle_color = color
+            self.particles.append(Particle(x, y, vx, vy, particle_color, lifetime, size, gravity))
+
     def emit_sword_sparks(self, x, y):
         """White/yellow sparks when sword hits enemy (fast, short-lived)."""
         colors = [WHITE, GOLD, (255, 255, 200)]
@@ -112,6 +140,29 @@ class ParticleSystem:
             lifetime_range=(0.15, 0.3),
             size_range=(2, 4),
             gravity=0
+        )
+
+    def emit_directional_hit(self, x, y, source_x, source_y, count=7, color=None,
+                             speed_range=(150, 250)):
+        """Emit directional sparks away from the attack source.
+
+        Args:
+            x, y: Hit position (on the enemy)
+            source_x, source_y: Position of the attacker
+            count: Number of particles (5-8 typical)
+            color: RGB tuple or list; defaults to white/yellow sword sparks
+            speed_range: Speed range for particles
+        """
+        if color is None:
+            color = [WHITE, GOLD, (255, 255, 200)]
+        # Angle from source to hit point
+        dx = x - source_x
+        dy = y - source_y
+        angle = math.atan2(dy, dx)
+        self.emit_directional(
+            x, y, angle, spread=0.5, count=count, color=color,
+            speed_range=speed_range, lifetime_range=(0.12, 0.25),
+            size_range=(2, 5), gravity=0
         )
 
     def emit_dust(self, x, y):
@@ -242,3 +293,17 @@ class ParticleSystem:
         self.emit(x, y, count=1, color=colors,
                   speed_range=(5, 15), lifetime_range=(0.5, 1.0),
                   size_range=(1, 3), gravity=-10)
+
+    def emit_fairy_sparkle(self, x, y):
+        """Small sparkle trail behind fairy companion."""
+        colors = [(150, 220, 255), (200, 240, 255), (255, 255, 255)]
+        self.emit(x, y, count=1, color=colors,
+                  speed_range=(5, 20), lifetime_range=(0.3, 0.7),
+                  size_range=(1, 2), gravity=-8)
+
+    def emit_companion_happy(self, x, y):
+        """Heart/sparkle burst when petting companion."""
+        colors = [(255, 100, 120), (255, 150, 170), (255, 200, 210)]
+        self.emit(x, y, count=8, color=colors,
+                  speed_range=(30, 60), lifetime_range=(0.4, 0.8),
+                  size_range=(2, 4), gravity=-20)

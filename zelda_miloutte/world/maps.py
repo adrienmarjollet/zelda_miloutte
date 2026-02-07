@@ -1,6 +1,7 @@
 # Tile types:
 # 0=GRASS, 1=WALL, 2=TREE, 3=ROCK, 4=WATER, 5=FLOOR, 6=DOOR, 7=DUNGEON_ENTRANCE, 8=BOSS_DOOR, 9=SPIKES, 10=PIT, 11=DUNGEON_ENTRANCE_2
 # 12=TRANSITION_N, 13=TRANSITION_S, 14=TRANSITION_E, 15=TRANSITION_W, 16=FOREST_FLOOR, 17=SAND, 18=LAVA
+# 19=BARRIER_RED, 20=BARRIER_BLUE, 21=BRIDGE, 22=ICE, 23=CRACKED_ICE, 24=FROZEN_WALL, 25=SNOW
 
 # Overworld: 30 columns x 20 rows
 # West half (cols 0-14): Cozy village with houses, paths, gardens. NO enemies.
@@ -165,6 +166,27 @@ OVERWORLD_SPAWNS = {
                 ],
             },
         },
+        {
+            "x": 10, "y": 8, "name": "Keeper Fauna", "variant": "villager",
+            "quest_id": "side_companion",
+            "dialogue": {
+                "default": [
+                    "Oh, hello there! I'm Fauna, the animal keeper.",
+                    "One of my little friends went missing in the forest...",
+                    "A small creature, very friendly. I'm so worried!",
+                    "Could you find them for me? They're somewhere in the Dark Forest.",
+                ],
+                "default_choices": ["I'll find them!", "Not now..."],
+                "quest_active": [
+                    "Please look for my little friend in the forest!",
+                    "They should be somewhere in the eastern part.",
+                ],
+                "quest_done": [
+                    "You found a companion! I'm so happy!",
+                    "Take good care of them. They'll be a loyal friend!",
+                ],
+            },
+        },
     ],
 }
 
@@ -254,7 +276,7 @@ DUNGEON2_SPAWNS = {
 # Forest: 30 columns x 20 rows
 # fmt: off
 FOREST_MAP = [
-    [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+    [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,12,12,12,12, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
     [2,16,16,16,16, 2,16,16,16,16,16,16, 2,16,16,16,16, 2,16,16,16,16,16, 2,16,16,16,16,16, 2],
     [2,16,16,16,16, 2,16,16,16,16,16,16, 2,16,16,16,16, 2,16,16,16,16,16, 2,16,16,16,16,16, 2],
     [2,16,16,16,16,16,16,16, 2, 2, 2,16,16,16,16,16,16,16,16, 2, 2,16,16,16,16,16, 2, 2, 2, 2],
@@ -325,6 +347,7 @@ FOREST_SPAWNS = {
             },
         },
     ],
+    "companion_spawn": {"x": 20, "y": 12},
 }
 
 # Desert: 30 columns x 20 rows
@@ -496,6 +519,7 @@ AREAS = {
         "connections": {
             "west": {"area": "overworld", "spawn_edge": "east"},
             "south": {"area": "desert", "spawn_edge": "north"},
+            "north": {"area": "frozen_peaks", "spawn_edge": "south"},
         },
     },
     "desert": {
@@ -515,6 +539,15 @@ AREAS = {
         "name": "Mount Inferno",
         "connections": {
             "west": {"area": "desert", "spawn_edge": "east"},
+        },
+    },
+    "frozen_peaks": {
+        "map": None,  # set below after FROZEN_PEAKS_MAP is defined
+        "spawns": None,
+        "music": "frozen_peaks",
+        "name": "Frozen Peaks",
+        "connections": {
+            "south": {"area": "forest", "spawn_edge": "north"},
         },
     },
 }
@@ -650,3 +683,129 @@ VOLCANO_DUNGEON_SPAWNS = {
         {"x": 10, "y": 7, "text": "Face the final trial!"},
     ],
 }
+
+# Frozen Peaks: 30 columns x 20 rows
+# 22=ICE, 23=CRACKED_ICE, 24=FROZEN_WALL, 25=SNOW
+# fmt: off
+FROZEN_PEAKS_MAP = [
+    [24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24],
+    [24,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,24],
+    [24,25,25,25,25,25,24,25,25,25,25,25,25,24,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,24],
+    [24,25,25,25,25,25,25,25,22,22,22,25,25,25,25,25,25,24,24,25,25,25,25,25,25, 3,25,25,25,24],
+    [24,25,25,24,24,25,25,25,22,22,22,25,25,25,25,25,25,24,25,25,25,25,25,25,25,25,25,25,25,24],
+    [24,25,25,24,24,25,25,25,22,22,22,25,25,25,25,25,25,25,25,25,25, 3,25,25,25,25,25, 7,25,24],
+    [24,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,24],
+    [24,25,25,25,25,25,25, 3,25,25,25,25,25,25,25,24,24,25,25,25,25,25,25,25,25,25,25,25,25,24],
+    [24,25,25,25,25,25,25,25,25,23,23,25,25,25,25,24,25,25,25,25,25,25,22,22,22,25,25,25,25,24],
+    [24,25,25, 3,25,25,25,25,25,23,23,25,25,25,25,25,25,25,25,25,25,25,22,22,22,25,25,25,25,24],
+    [24,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,22,22,22,25,25,25,25,24],
+    [24,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,24],
+    [24,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25, 3,25,25,25,25,24],
+    [24,25,25,25,25,25,24,24,25,25,25,25,25,25,25,25,25,25,25,25,25,24,24,25,25,25,25,25,25,24],
+    [24,25,25,24,24,25,24,25,25,25,25,25,25,25,25,25,25,25,25,25,25,24,25,25,25,25,25,25,25,24],
+    [24,25,25,24,24,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,24],
+    [24,25,25,25,25,25,25,25,25,25,25,25, 3,25,25,25,25,25,25,25,25,25,25,25,25,24,25,25,25,24],
+    [24,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,24,25,25,25,24],
+    [24,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,24],
+    [24,24,24,24,24,24,24,24,24,24,24,24,24,13,13,13,13,24,24,24,24,24,24,24,24,24,24,24,24,24],
+]
+# fmt: on
+
+FROZEN_PEAKS_SPAWNS = {
+    "player": (3, 3),
+    "enemies": [
+        {"x": 5, "y": 5, "type": "ice_wraith"},
+        {"x": 12, "y": 8, "type": "ice_wraith"},
+        {"x": 20, "y": 4, "type": "ice_wraith"},
+        {"x": 25, "y": 12, "type": "ice_wraith"},
+        {"x": 8, "y": 12, "type": "frost_golem"},
+        {"x": 18, "y": 10, "type": "frost_golem"},
+        {"x": 22, "y": 16, "type": "frost_golem"},
+        {"x": 15, "y": 3, "patrol": [(13, 3), (18, 3)]},
+    ],
+    "items": [
+        {"x": 10, "y": 10, "type": "heart"},
+        {"x": 25, "y": 5, "type": "key"},
+    ],
+    "chests": [
+        {"x": 4, "y": 4, "contents": "heart"},
+        {"x": 16, "y": 16, "contents": "key"},
+    ],
+    "signs": [
+        {"x": 5, "y": 8, "text": "The Frozen Peaks. Ice clings to every surface..."},
+        {"x": 26, "y": 5, "text": "A hidden cavern lies somewhere in this frozen wasteland."},
+    ],
+    "npcs": [
+        {
+            "x": 4, "y": 14, "name": "Frost Hermit", "variant": "elder",
+            "quest_id": "story_7",
+            "dialogue": {
+                "default": [
+                    "Brrr... you've made it to the Frozen Peaks, hero.",
+                    "I am the Frost Hermit, last keeper of the ice.",
+                    "A Crystal Dragon has awakened deep in the Ice Cavern.",
+                    "It guards a secret fourth seal, one lost to legend.",
+                    "You must enter the cavern and stop it!",
+                ],
+                "default_choices": ["I'll face it!", "Tell me more..."],
+                "quest_active": [
+                    "The Ice Cavern entrance is to the east.",
+                    "Beware the ice tiles... they are treacherous.",
+                ],
+                "quest_done": [
+                    "The Crystal Dragon is defeated! All four seals are restored!",
+                    "You are truly the hero of legend, Miloutte!",
+                ],
+            },
+        },
+    ],
+}
+
+# Ice Cavern Dungeon: 20 columns x 15 rows
+# Uses ICE(22), CRACKED_ICE(23), FROZEN_WALL(24) tiles
+# fmt: off
+ICE_CAVERN = [
+    [24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24],
+    [24,22,22,22,22,22,24,22,22,22,22,22,22,24,22,22,22,22,22,24],
+    [24,22,22,23,22,22,24,22,22,22,22,22,22,24,22,22,22,23,22,24],
+    [24,22,22,22,22,22,22,22,22,24,24,22,22,22,22,24,24,22,22,24],
+    [24,22,22,24,24,22,22,22,22,22,22,22,22,22,22,24,24,22,22,24],
+    [24,22,22,22,22,22,22,22,22,23,23,22,22,22,22,22,22,22,22,24],
+    [24,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,24],
+    [ 6,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,24],
+    [24,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,24],
+    [24,22,22,22,22,22,22,22,22,23,23,22,22,22,22,22,22,22,22,24],
+    [24,22,22,24,24,22,22,22,22,22,22,22,22,22,22,24,24,22,22,24],
+    [24,22,22,22,22,22,22,22,22,24,24,22,22,22,22,22,22,22,22,24],
+    [24,22,22,23,22,22,24,22,22,22,22,22,22,24,22,22,22,23,22,24],
+    [24,22,22,22,22,22,24,22,22,22,22,22,22,24,22,22,22,22,22,24],
+    [24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24],
+]
+# fmt: on
+
+ICE_CAVERN_SPAWNS = {
+    "player": (1, 7),
+    "enemies": [
+        {"x": 5, "y": 3, "type": "ice_wraith"},
+        {"x": 14, "y": 11, "type": "ice_wraith"},
+        {"x": 10, "y": 2, "type": "frost_golem"},
+        {"x": 10, "y": 12, "patrol": [(8, 12), (12, 12)]},
+    ],
+    "boss": {"x": 15, "y": 7},
+    "items": [
+        {"x": 10, "y": 1, "type": "heart"},
+        {"x": 3, "y": 7, "type": "key"},
+    ],
+    "chests": [
+        {"x": 3, "y": 3, "contents": "heart"},
+        {"x": 3, "y": 11, "contents": "key"},
+    ],
+    "signs": [
+        {"x": 4, "y": 7, "text": "The Crystal Dragon slumbers in the frozen depths..."},
+        {"x": 10, "y": 7, "text": "Beware the cracking ice beneath your feet!"},
+    ],
+}
+
+# Patch AREAS with frozen_peaks data (defined after the map constant)
+AREAS["frozen_peaks"]["map"] = FROZEN_PEAKS_MAP
+AREAS["frozen_peaks"]["spawns"] = FROZEN_PEAKS_SPAWNS

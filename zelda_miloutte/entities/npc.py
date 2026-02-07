@@ -8,7 +8,7 @@ from zelda_miloutte.settings import ENEMY_SIZE, BROWN
 class NPC(Entity):
     """A non-player character that the player can interact with."""
 
-    def __init__(self, x, y, name, variant="elder", dialogue_tree=None, quest_id=None):
+    def __init__(self, x, y, name, variant="elder", dialogue_tree=None, quest_id=None, shop_id=None):
         """
         Args:
             x, y: Position in pixels
@@ -17,12 +17,14 @@ class NPC(Entity):
             dialogue_tree: Dict mapping state -> list of message strings.
                            e.g. {"default": ["Hello!", "Welcome."], "quest_done": ["Thank you!"]}
             quest_id: Optional quest ID this NPC is associated with
+            shop_id: Optional shop ID — if set, opens a shop after dialogue
         """
         super().__init__(x, y, ENEMY_SIZE, ENEMY_SIZE, BROWN)
         self.name = name
         self.variant = variant
         self.dialogue_tree = dialogue_tree or {"default": ["..."]}
         self.quest_id = quest_id
+        self.shop_id = shop_id
         self.dialogue_state = "default"
 
         # Sprites

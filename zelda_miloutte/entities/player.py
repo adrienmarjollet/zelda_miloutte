@@ -5,10 +5,12 @@ from zelda_miloutte.settings import (
     PLAYER_BLINK_RATE, GOLD, SWORD_LENGTH, SWORD_WIDTH, SWORD_DURATION,
     SWORD_COOLDOWN, SWORD_DAMAGE, WHITE, TILE_SIZE,
     XP_BASE, XP_EXPONENT, LEVEL_HP_INTERVAL, LEVEL_ATTACK_INTERVAL, LEVEL_DEFENSE_INTERVAL,
+    PLAYER_MAX_MP, PLAYER_MP_REGEN,
 )
 from zelda_miloutte.sounds import get_sound_manager
 from zelda_miloutte.sprites import AnimatedSprite
 from zelda_miloutte.sprites.player_sprites import get_player_frames, get_sword_surfaces
+from zelda_miloutte.data.inventory import Inventory
 
 
 class Player(Entity):
@@ -19,6 +21,19 @@ class Player(Entity):
         self.max_hp = PLAYER_MAX_HP
         self.speed = PLAYER_SPEED
         self.keys = 0
+        self.gold = 0
+
+        # Inventory
+        self.inventory = Inventory()
+
+        # Mana
+        self.mp = PLAYER_MAX_MP
+        self.max_mp = PLAYER_MAX_MP
+
+        # Abilities
+        self.abilities = []            # list of Ability instances
+        self.active_ability_index = 0  # index into self.abilities
+        self.unlocked_abilities = []   # list of ability name strings
 
         # RPG Stats
         self.level = 1
@@ -48,12 +63,41 @@ class Player(Entity):
 
     @property
     def attack_power(self):
-        return SWORD_DAMAGE + self.base_attack
+        equip_atk = self.inventory.get_stat_bonus("attack")
+        return SWORD_DAMAGE + self.base_attack + equip_atk
+
+    @property
+    def active_ability(self):
+        """Return the currently selected ability, or None if no abilities."""
+        if not self.abilities:
+            return None
+        idx = self.active_ability_index % len(self.abilities)
+        return self.abilities[idx]
+
+    def cycle_ability(self):
+        """Cycle to the next ability. Returns the new active ability or None."""
+        if not self.abilities:
+            return None
+        self.active_ability_index = (self.active_ability_index + 1) % len(self.abilities)
+        return self.active_ability
+
+    def unlock_ability(self, ability_name):
+        """Unlock an ability by name. Returns True if newly unlocked."""
+        if ability_name in self.unlocked_abilities:
+            return False
+        from zelda_miloutte.abilities import create_ability
+        ability = create_ability(ability_name)
+        if ability is None:
+            return False
+        self.unlocked_abilities.append(ability_name)
+        self.abilities.append(ability)
+        return True
 
     def take_damage(self, amount):
         if self.invincible:
             return False
-        effective = max(1, amount - self.base_defense)
+        equip_def = self.inventory.get_stat_bonus("defense")
+        effective = max(1, amount - self.base_defense - equip_def)
         self.hp -= effective
         get_sound_manager().play_player_hurt()
         if self.hp <= 0:
@@ -151,7 +195,7 @@ class Player(Entity):
             self.vx = self.knockback_vx
             self.vy = self.knockback_vy
         else:
-            speed = self.speed
+            speed = self.speed + self.inventory.get_stat_bonus("speed")
             # Apply slow status effect
             if "slow" in self.status_effects:
                 speed *= self.status_effects["slow"].get("multiplier", 0.5)
@@ -190,13 +234,22 @@ class Player(Entity):
         # Invincibility
         if self.invincible:
             self.invincible_timer -= dt
-            self.blink_timer += dt
-            if self.blink_timer >= PLAYER_BLINK_RATE:
-                self.blink_timer = 0
-                self.visible = not self.visible
+            # Don't blink if shield barrier is active
+            shield_active = any(
+                ab.name == "shield_barrier" and ab.active for ab in self.abilities
+            )
+            if not shield_active:
+                self.blink_timer += dt
+                if self.blink_timer >= PLAYER_BLINK_RATE:
+                    self.blink_timer = 0
+                    self.visible = not self.visible
             if self.invincible_timer <= 0:
                 self.invincible = False
                 self.visible = True
+
+        # Mana regeneration
+        if self.mp < self.max_mp:
+            self.mp = min(self.max_mp, self.mp + PLAYER_MP_REGEN * dt)
 
         # Status effects
         self.update_statuses(dt)

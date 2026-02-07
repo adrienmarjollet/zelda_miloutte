@@ -14,9 +14,11 @@ from zelda_miloutte.sounds import get_sound_manager
 from zelda_miloutte.sprites import AnimatedSprite
 from zelda_miloutte.sprites.magma_golem_sprites import get_magma_golem_frames, get_magma_projectile_sprite
 from zelda_miloutte.sprites.effects import flash_white, scale_shrink
+from zelda_miloutte.ai_state import EnemyAI, AlertState
+from zelda_miloutte.pathfinding import has_line_of_sight
 
 
-class MagmaGolem(Entity):
+class MagmaGolem(Entity, EnemyAI):
     """A slow tank enemy that lobs magma projectiles."""
 
     def __init__(self, x, y):
@@ -25,6 +27,7 @@ class MagmaGolem(Entity):
         self.max_hp = MAGMA_GOLEM_HP
         self.damage = MAGMA_GOLEM_DAMAGE
         self.speed = MAGMA_GOLEM_SPEED
+        self.chase_speed = MAGMA_GOLEM_SPEED
         self.chase_range = MAGMA_GOLEM_CHASE_RANGE
 
         # Shooting behavior
@@ -50,12 +53,26 @@ class MagmaGolem(Entity):
         self.drop_chance = 0.3
         self.drop_table = [("heart", 3), ("key", 1)]
 
+        # Gold drop
+        self.gold_drop_chance = 0.6
+        self.gold_drop_range = (3, 12)
+
         # Sprites
         self.anim = AnimatedSprite(get_magma_golem_frames(), frame_duration=0.20)
         self._white_frames = {
             d: [flash_white(f) for f in frames]
             for d, frames in self.anim.frames.items()
         }
+
+        # Initialize smart AI -- golem is slow but persistent
+        self.init_ai(
+            detection_range=MAGMA_GOLEM_CHASE_RANGE,
+            lose_range=MAGMA_GOLEM_CHASE_RANGE * 2.5,
+            pathfind_interval=0.7,
+            use_pathfinding=True,
+            suspicious_duration=1.2,
+            lost_duration=4.0,
+        )
 
     def take_damage(self, amount):
         if self.dying:
@@ -69,24 +86,23 @@ class MagmaGolem(Entity):
             get_sound_manager().play_enemy_death()
 
     def get_drop(self):
-        """Determine if the enemy drops an item and which one.
-        Returns the item_type string ("heart" or "key") or None.
-        """
-        # Check if a drop happens
         if random.random() > self.drop_chance:
             return None
-
-        # Use weighted random choice to pick which item
         items = [item_type for item_type, weight in self.drop_table]
         weights = [weight for item_type, weight in self.drop_table]
         return random.choices(items, weights=weights, k=1)[0]
+
+    def get_gold_drop(self):
+        if random.random() > self.gold_drop_chance:
+            return 0
+        return random.randint(self.gold_drop_range[0], self.gold_drop_range[1])
 
     def _distance_to(self, target):
         dx = target.center_x - self.center_x
         dy = target.center_y - self.center_y
         return math.sqrt(dx * dx + dy * dy)
 
-    def _move_toward(self, tx, ty, speed):
+    def _move_toward(self, tx, ty, speed, dt=None):
         dx = tx - self.center_x
         dy = ty - self.center_y
         dist = math.sqrt(dx * dx + dy * dy)
@@ -96,6 +112,14 @@ class MagmaGolem(Entity):
             return
         self.vx = (dx / dist) * speed
         self.vy = (dy / dist) * speed
+
+    def _update_facing_toward(self, tx, ty):
+        dx = tx - self.center_x
+        dy = ty - self.center_y
+        if abs(dx) > abs(dy):
+            self.facing = "right" if dx > 0 else "left"
+        else:
+            self.facing = "down" if dy > 0 else "up"
 
     def _shoot(self, player):
         """Create a magma projectile aimed at the player."""
@@ -108,7 +132,6 @@ class MagmaGolem(Entity):
         # Create projectile from golem's center toward player's center
         sprite = get_magma_projectile_sprite()
 
-        # Custom projectile with magma speed
         proj = Projectile(
             self.center_x, self.center_y,
             player.center_x, player.center_y,
@@ -150,22 +173,19 @@ class MagmaGolem(Entity):
             self.vx = self.knockback_vx
             self.vy = self.knockback_vy
         else:
-            # Check if player is in chase range
-            dist = self._distance_to(player)
-            if dist < self.chase_range:
-                # Slowly chase player
-                self._move_toward(player.center_x, player.center_y, self.speed)
-                # Update facing
-                dx = player.center_x - self.center_x
-                dy = player.center_y - self.center_y
-                if abs(dx) > abs(dy):
-                    self.facing = "right" if dx > 0 else "left"
-                else:
-                    self.facing = "down" if dy > 0 else "up"
+            # Use smart AI state machine
+            ai_result = self.update_ai(dt, player, tilemap)
 
-                # Shoot projectile if cooldown ready
-                if self.shoot_timer <= 0:
-                    self.pending_projectile = self._shoot(player)
+            if ai_result is not None:
+                target_x, target_y, speed = ai_result
+                self._move_toward(target_x, target_y, speed)
+                self._update_facing_toward(target_x, target_y)
+
+                # Shoot projectile if alert and has LOS and cooldown ready
+                if self.ai_state == AlertState.ALERT and self.shoot_timer <= 0:
+                    if has_line_of_sight(tilemap, self.center_x, self.center_y,
+                                        player.center_x, player.center_y):
+                        self.pending_projectile = self._shoot(player)
             else:
                 # Not in range, stop
                 self.vx = 0
@@ -205,3 +225,6 @@ class MagmaGolem(Entity):
         fx = r.centerx - frame.get_width() // 2
         fy = r.centery - frame.get_height() // 2
         surface.blit(frame, (fx, fy))
+
+        # Draw alert state icon
+        self.draw_alert_icon(surface, camera)

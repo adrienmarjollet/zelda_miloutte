@@ -25,6 +25,17 @@ _PAL = {
     '.': None,              # transparent
 }
 
+_SHIELD_PAL = {
+    'o': (20, 15, 10),      # outline
+    'm': (120, 120, 140),   # metal body
+    'M': (160, 160, 180),   # metal highlight
+    'r': (60, 60, 80),      # metal dark/rivet
+    'g': (160, 130, 40),    # gold trim
+    'G': (200, 170, 60),    # gold highlight
+    'e': (30, 120, 60),     # emblem green
+    '.': None,
+}
+
 _SWORD_PAL = {
     'w': (210, 215, 230),   # blade main
     'W': (170, 175, 195),   # blade shadow/edge
@@ -239,9 +250,49 @@ _SWORD_RIGHT = [
     "......ttt.........",
 ]
 
+# ── Shield sprites (per direction) ──────────────────────────────
+_SHIELD_DOWN = [
+    "..ogGGgo..",
+    ".omMMMMmo.",
+    ".omMeeMmo.",
+    ".omMeeMmo.",
+    ".omMMMMmo.",
+    ".orrrrro..",
+    "..ommmo...",
+]
+
+_SHIELD_UP = [
+    "...ommmo..",
+    "..orrrrro.",
+    ".omMMMMmo.",
+    ".omMeeMmo.",
+    ".omMeeMmo.",
+    ".omMMMMmo.",
+    "..ogGGgo..",
+]
+
+_SHIELD_LEFT = [
+    "..oommo.",
+    ".oMMMro.",
+    "oGMeMro.",
+    "oGMeMro.",
+    ".oMMMro.",
+    "..oommo.",
+]
+
+_SHIELD_RIGHT = [
+    ".ommoo..",
+    ".orMMMo.",
+    ".orMeMGo",
+    ".orMeMGo",
+    ".orMMMo.",
+    ".ommoo..",
+]
+
 # ── Build surfaces ────────────────────────────────────────────────
 _frames_cache = None
 _sword_cache = None
+_shield_cache = None
 
 
 def get_player_frames():
@@ -272,3 +323,18 @@ def get_sword_surfaces():
         "right": surface_from_grid(_SWORD_RIGHT, _SWORD_PAL, 2),
     }
     return _sword_cache
+
+
+def get_shield_surfaces():
+    """Return dict of {direction: surface} for shield sprites."""
+    global _shield_cache
+    if _shield_cache is not None:
+        return _shield_cache
+
+    _shield_cache = {
+        "down":  surface_from_grid(_SHIELD_DOWN, _SHIELD_PAL, 2),
+        "up":    surface_from_grid(_SHIELD_UP, _SHIELD_PAL, 2),
+        "left":  surface_from_grid(_SHIELD_LEFT, _SHIELD_PAL, 2),
+        "right": surface_from_grid(_SHIELD_RIGHT, _SHIELD_PAL, 2),
+    }
+    return _shield_cache

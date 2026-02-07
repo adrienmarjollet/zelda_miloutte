@@ -45,6 +45,8 @@ class DungeonState(GameplayState):
         self.player.xp_to_next = play_state.player.xp_to_next
         self.player.base_attack = play_state.player.base_attack
         self.player.base_defense = play_state.player.base_defense
+        self.player.gold = play_state.player.gold
+        self.player.inventory = play_state.player.inventory
 
         self.camera = Camera(self.tilemap.pixel_width, self.tilemap.pixel_height)
         self.hud = HUD()
@@ -120,6 +122,11 @@ class DungeonState(GameplayState):
     def enter(self):
         """Called when entering this state."""
         get_sound_manager().play_music('boss')
+        # Track boss fight start for achievements
+        self.game.achievement_manager.on_boss_fight_start()
+        # Discover boss in bestiary
+        boss_class = type(self.boss).__name__
+        self.game.bestiary.discover(boss_class)
 
     def _spawn_signs(self):
         from zelda_miloutte.entities.sign import Sign
@@ -142,6 +149,8 @@ class DungeonState(GameplayState):
         p.xp_to_next = self.player.xp_to_next
         p.base_attack = self.player.base_attack
         p.base_defense = self.player.base_defense
+        p.gold = self.player.gold
+        p.inventory = self.player.inventory
 
     def handle_event(self, event):
         pass
@@ -176,18 +185,25 @@ class DungeonState(GameplayState):
                         ))
                     self.game.transition_to(show_midgame_cutscene)
                 elif boss_class_name == "InfernoDrake":
-                    # Ending cutscene after final boss
+                    # Ending cutscene after final boss -> NG+ choice
+                    # Capture player ref before state changes
+                    player_ref = self.play_state.player
+
                     def show_ending():
                         self._copy_stats_back()
                         self.game.pop_state()  # pop dungeon
                         from zelda_miloutte.states.cinematic_state import CinematicState
-                        from zelda_miloutte.states.title_state import TitleState
+
+                        def on_cinematic_complete():
+                            self.game.pop_state()  # pop cinematic
+                            from zelda_miloutte.states.ng_plus_choice_state import NGPlusChoiceState
+                            self.game.change_state(NGPlusChoiceState(
+                                self.game, player_ref=player_ref
+                            ))
+
                         self.game.push_state(CinematicState(
                             self.game, cutscene_type="ending",
-                            on_complete=lambda: (
-                                self.game.pop_state(),
-                                self.game.change_state(TitleState(self.game)),
-                            )
+                            on_complete=on_cinematic_complete,
                         ))
                     self.game.transition_to(show_ending)
                 else:
@@ -438,6 +454,7 @@ class DungeonState(GameplayState):
         self._update_floating_texts(dt)
         self._update_damage_vignette(dt)
         self._update_item_glow(dt)
+        self._update_minimap(dt)
 
     def draw(self, surface):
         # Draw tilemap, chests, items, enemies, player, particles
@@ -478,6 +495,9 @@ class DungeonState(GameplayState):
 
         # Draw HUD with boss health bar (DungeonState-specific)
         self.hud.draw(surface, self.player, self.boss if self.boss.alive else None)
+
+        # Draw minimap
+        self._draw_minimap(surface)
 
         # Victory overlay (DungeonState-specific)
         if self.victory:

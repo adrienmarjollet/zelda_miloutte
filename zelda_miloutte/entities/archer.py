@@ -10,6 +10,8 @@ from zelda_miloutte.settings import (
 from zelda_miloutte.sprites import AnimatedSprite
 from zelda_miloutte.sprites.archer_sprites import get_archer_frames, get_projectile_sprite
 from zelda_miloutte.sprites.effects import flash_white
+from zelda_miloutte.ai_state import AlertState
+from zelda_miloutte.pathfinding import find_path, find_cover_position, has_line_of_sight, can_pathfind
 
 
 class Archer(Enemy):
@@ -30,6 +32,19 @@ class Archer(Enemy):
         self.flee_range = ARCHER_FLEE_RANGE
         self.shoot_cooldown = ARCHER_SHOOT_COOLDOWN
         self.shoot_timer = 0.0
+
+        # Optimal range: archers try to stay at this distance
+        self.optimal_range = ARCHER_SHOOT_RANGE * 0.7
+
+        # Strafing behavior
+        self._strafe_dir = 1  # 1 or -1
+        self._strafe_timer = 0.0
+        self._strafe_interval = 1.5  # Switch strafe direction every 1.5s
+
+        # Cover-seeking behavior
+        self._cover_pos = None
+        self._cover_timer = 0.0
+        self._cover_interval = 3.0  # Re-evaluate cover every 3s
 
         # Patrol (archers stay put by default)
         if patrol_points and len(patrol_points) >= 2:
@@ -55,6 +70,10 @@ class Archer(Enemy):
         self.drop_chance = 0.3
         self.drop_table = [("heart", 3), ("key", 1)]
 
+        # Gold drop
+        self.gold_drop_chance = 0.6
+        self.gold_drop_range = (1, 5)
+
         # Sprites (archer-specific)
         self.anim = AnimatedSprite(get_archer_frames(), frame_duration=0.18)
         self._white_frames = {
@@ -64,6 +83,14 @@ class Archer(Enemy):
 
         # Pending projectile to be added to game state
         self.pending_projectile = None
+
+        # Initialize smart AI with archer-specific settings
+        self.init_ai(
+            detection_range=ARCHER_SHOOT_RANGE,
+            lose_range=ARCHER_SHOOT_RANGE * 2.5,
+            pathfind_interval=0.8,
+            use_pathfinding=True,
+        )
 
     def shoot(self, player):
         """Create a projectile aimed at the player's current position."""
@@ -83,8 +110,20 @@ class Archer(Enemy):
         )
         return projectile
 
+    def _get_strafe_velocity(self, player, speed):
+        """Calculate velocity for strafing sideways relative to player direction."""
+        dx = player.center_x - self.center_x
+        dy = player.center_y - self.center_y
+        dist = math.sqrt(dx * dx + dy * dy)
+        if dist < 1:
+            return 0, 0
+        # Perpendicular direction for strafing
+        perp_x = -dy / dist * self._strafe_dir
+        perp_y = dx / dist * self._strafe_dir
+        return perp_x * speed, perp_y * speed
+
     def update(self, dt, player, tilemap):
-        """Update archer with ranged AI behavior."""
+        """Update archer with improved ranged AI behavior."""
         if self.dying:
             self.death_timer -= dt
             if self.death_timer <= 0:
@@ -101,6 +140,12 @@ class Archer(Enemy):
         if self.shoot_timer > 0:
             self.shoot_timer -= dt
 
+        # Update strafe timer
+        self._strafe_timer += dt
+        if self._strafe_timer >= self._strafe_interval:
+            self._strafe_timer = 0.0
+            self._strafe_dir *= -1
+
         # Clear pending projectile
         self.pending_projectile = None
 
@@ -109,36 +154,74 @@ class Archer(Enemy):
             self.vx = self.knockback_vx
             self.vy = self.knockback_vy
         else:
-            # Ranged AI behavior
-            dist = self._distance_to(player)
+            # Use smart AI state machine for detection
+            ai_result = self.update_ai(dt, player, tilemap)
 
-            # Face the player if in range
-            if dist < self.shoot_range:
-                dx = player.center_x - self.center_x
-                dy = player.center_y - self.center_y
-                if abs(dx) > abs(dy):
-                    self.facing = "right" if dx > 0 else "left"
+            if ai_result is not None and self.ai_state in (AlertState.ALERT, AlertState.SUSPICIOUS):
+                # Archer-specific combat AI
+                dist = self._distance_to(player)
+                has_los = has_line_of_sight(
+                    tilemap, self.center_x, self.center_y,
+                    player.center_x, player.center_y
+                )
+
+                # Face the player
+                self._update_facing_toward(player.center_x, player.center_y)
+
+                if dist < self.flee_range:
+                    # Too close -- flee away from player
+                    dx = self.center_x - player.center_x
+                    dy = self.center_y - player.center_y
+                    flee_dist = math.sqrt(dx * dx + dy * dy)
+                    if flee_dist > 0:
+                        self.vx = (dx / flee_dist) * self.speed
+                        self.vy = (dy / flee_dist) * self.speed
+                elif not has_los and self.ai_state == AlertState.ALERT:
+                    # No line of sight -- try to find a position with LOS
+                    # Use pathfinding to reach a better position
+                    self._cover_timer -= dt
+                    if self._cover_timer <= 0:
+                        self._cover_timer = self._cover_interval
+                        self._cover_pos = None  # Reset cover, find shooting position
+
+                    # Move toward player to re-establish LOS
+                    target_x, target_y, speed = ai_result
+                    self._move_toward(target_x, target_y, speed)
+                elif dist < self.shoot_range and has_los:
+                    # In shooting range with LOS -- strafe and shoot
+                    strafe_vx, strafe_vy = self._get_strafe_velocity(player, self.speed * 0.7)
+
+                    # Also add range-maintaining component
+                    dx = self.center_x - player.center_x
+                    dy = self.center_y - player.center_y
+                    range_dist = math.sqrt(dx * dx + dy * dy)
+                    if range_dist > 0:
+                        # Push toward optimal range
+                        range_factor = (dist - self.optimal_range) / self.optimal_range
+                        range_factor = max(-1.0, min(1.0, range_factor))
+                        # Negative range_factor = too close, positive = too far
+                        range_vx = -(dx / range_dist) * self.speed * 0.3 * range_factor
+                        range_vy = -(dy / range_dist) * self.speed * 0.3 * range_factor
+                    else:
+                        range_vx, range_vy = 0, 0
+
+                    self.vx = strafe_vx + range_vx
+                    self.vy = strafe_vy + range_vy
+
+                    # Shoot if cooldown ready
+                    if self.shoot_timer <= 0:
+                        self.pending_projectile = self.shoot(player)
                 else:
-                    self.facing = "down" if dy > 0 else "up"
-
-            # Flee if player is too close
-            if dist < self.flee_range:
-                # Move away from player
-                dx = self.center_x - player.center_x
-                dy = self.center_y - player.center_y
-                flee_dist = math.sqrt(dx * dx + dy * dy)
-                if flee_dist > 0:
-                    self.vx = (dx / flee_dist) * self.speed
-                    self.vy = (dy / flee_dist) * self.speed
-            # Shoot if in range and cooldown ready
-            elif dist < self.shoot_range:
-                # Stop moving and shoot
-                self.vx = 0
-                self.vy = 0
-                if self.shoot_timer <= 0:
-                    self.pending_projectile = self.shoot(player)
+                    # Out of shoot range -- approach using pathfinding
+                    target_x, target_y, speed = ai_result
+                    self._move_toward(target_x, target_y, speed)
+            elif ai_result is not None:
+                # LOST state -- move toward last known position
+                target_x, target_y, speed = ai_result
+                self._move_toward(target_x, target_y, speed)
+                self._update_facing_toward(target_x, target_y)
             else:
-                # No player in range, stay still (archers don't patrol actively)
+                # IDLE state -- stay still (archers don't patrol actively)
                 self.vx = 0
                 self.vy = 0
 

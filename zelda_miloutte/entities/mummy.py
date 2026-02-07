@@ -12,9 +12,10 @@ from zelda_miloutte.sounds import get_sound_manager
 from zelda_miloutte.sprites import AnimatedSprite
 from zelda_miloutte.sprites.mummy_sprites import get_mummy_frames
 from zelda_miloutte.sprites.effects import flash_white, scale_shrink
+from zelda_miloutte.ai_state import EnemyAI, AlertState
 
 
-class Mummy(Entity):
+class Mummy(Entity, EnemyAI):
     """A slow tank enemy that applies slow debuff on hit."""
 
     def __init__(self, x, y):
@@ -23,6 +24,7 @@ class Mummy(Entity):
         self.max_hp = MUMMY_HP
         self.damage = MUMMY_DAMAGE
         self.speed = MUMMY_SPEED
+        self.chase_speed = MUMMY_SPEED
         self.chase_range = MUMMY_CHASE_RANGE
 
         # Status effect flag
@@ -44,12 +46,26 @@ class Mummy(Entity):
         self.drop_chance = 0.3
         self.drop_table = [("heart", 3), ("key", 1)]
 
+        # Gold drop
+        self.gold_drop_chance = 0.6
+        self.gold_drop_range = (3, 10)
+
         # Sprites
         self.anim = AnimatedSprite(get_mummy_frames(), frame_duration=0.25)
         self._white_frames = {
             d: [flash_white(f) for f in frames]
             for d, frames in self.anim.frames.items()
         }
+
+        # Initialize smart AI -- mummy is slow but relentless
+        self.init_ai(
+            detection_range=MUMMY_CHASE_RANGE,
+            lose_range=MUMMY_CHASE_RANGE * 2.5,  # Hard to lose a mummy
+            pathfind_interval=0.6,
+            use_pathfinding=True,
+            suspicious_duration=1.5,  # Slow reaction
+            lost_duration=5.0,  # Takes long to give up
+        )
 
     def take_damage(self, amount):
         if self.dying:
@@ -63,24 +79,23 @@ class Mummy(Entity):
             get_sound_manager().play_enemy_death()
 
     def get_drop(self):
-        """Determine if the enemy drops an item and which one.
-        Returns the item_type string ("heart" or "key") or None.
-        """
-        # Check if a drop happens
         if random.random() > self.drop_chance:
             return None
-
-        # Use weighted random choice to pick which item
         items = [item_type for item_type, weight in self.drop_table]
         weights = [weight for item_type, weight in self.drop_table]
         return random.choices(items, weights=weights, k=1)[0]
+
+    def get_gold_drop(self):
+        if random.random() > self.gold_drop_chance:
+            return 0
+        return random.randint(self.gold_drop_range[0], self.gold_drop_range[1])
 
     def _distance_to(self, target):
         dx = target.center_x - self.center_x
         dy = target.center_y - self.center_y
         return math.sqrt(dx * dx + dy * dy)
 
-    def _move_toward(self, tx, ty, speed):
+    def _move_toward(self, tx, ty, speed, dt=None):
         dx = tx - self.center_x
         dy = ty - self.center_y
         dist = math.sqrt(dx * dx + dy * dy)
@@ -90,6 +105,14 @@ class Mummy(Entity):
             return
         self.vx = (dx / dist) * speed
         self.vy = (dy / dist) * speed
+
+    def _update_facing_toward(self, tx, ty):
+        dx = tx - self.center_x
+        dy = ty - self.center_y
+        if abs(dx) > abs(dy):
+            self.facing = "right" if dx > 0 else "left"
+        else:
+            self.facing = "down" if dy > 0 else "up"
 
     def update(self, dt, player, tilemap):
         if self.dying:
@@ -109,18 +132,13 @@ class Mummy(Entity):
             self.vx = self.knockback_vx
             self.vy = self.knockback_vy
         else:
-            # Check if player is in chase range
-            dist = self._distance_to(player)
-            if dist < self.chase_range:
-                # Chase player slowly
-                self._move_toward(player.center_x, player.center_y, self.speed)
-                # Update facing
-                dx = player.center_x - self.center_x
-                dy = player.center_y - self.center_y
-                if abs(dx) > abs(dy):
-                    self.facing = "right" if dx > 0 else "left"
-                else:
-                    self.facing = "down" if dy > 0 else "up"
+            # Use smart AI state machine
+            ai_result = self.update_ai(dt, player, tilemap)
+
+            if ai_result is not None:
+                target_x, target_y, speed = ai_result
+                self._move_toward(target_x, target_y, speed)
+                self._update_facing_toward(target_x, target_y)
             else:
                 # Not in range, stop
                 self.vx = 0
@@ -160,3 +178,6 @@ class Mummy(Entity):
         fx = r.centerx - frame.get_width() // 2
         fy = r.centery - frame.get_height() // 2
         surface.blit(frame, (fx, fy))
+
+        # Draw alert state icon
+        self.draw_alert_icon(surface, camera)
