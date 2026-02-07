@@ -509,97 +509,161 @@ class SoundManager:
         return sound
 
     def _generate_title_music(self):
-        """Generate gentle, dreamy title screen music with layered arpeggios — A/B structure."""
-        # Section A: Gentle C major arpeggios — music box feel
+        """Generate epic Zelda-inspired title theme — heroic Bb major fanfare."""
+        # Iconic opening fanfare — bold, triumphant (like the Zelda main theme)
+        # Uses Bb major tonality with heroic leaps and dotted rhythms
+        fanfare = [
+            (466, 0.15),  # Bb4 (pickup)
+            (0, 0.05),
+            (466, 0.6),   # Bb4 (held)
+            (466, 0.2),   # Bb4
+            (466, 0.2),   # Bb4
+            (466, 0.2),   # Bb4
+            (466, 0.6),   # Bb4 (held)
+            (0, 0.1),
+            (466, 0.2),   # Bb4
+            (466, 0.2),   # Bb4
+            (466, 0.2),   # Bb4
+            (466, 0.6),   # Bb4 (held)
+            (0, 0.1),
+            (466, 0.15),  # Bb4
+            (523, 0.15),  # C5
+            (587, 0.15),  # D5
+            (0, 0.05),
+        ]
+
+        # Section A: The heroic main melody
         melody_a = [
-            (523, 0.7),   # C5
-            (494, 0.5),   # B4
-            (440, 0.6),   # A4
-            (392, 0.8),   # G4 (linger)
+            (587, 0.8),   # D5 (hero note)
+            (0, 0.1),
+            (466, 0.3),   # Bb4
+            (0, 0.1),
+            (466, 0.2),   # Bb4
+            (523, 0.2),   # C5
+            (587, 0.8),   # D5
+            (0, 0.1),
+            (466, 0.3),   # Bb4
+            (0, 0.1),
+            (466, 0.2),   # Bb4
+            (523, 0.2),   # C5
+            (587, 0.4),   # D5
+            (659, 0.4),   # E5
+            (698, 0.9),   # F5 (soaring peak!)
             (0, 0.3),
-            (330, 0.6),   # E4
-            (392, 0.6),   # G4
-            (440, 0.8),   # A4
-            (523, 1.0),   # C5 (soar)
-            (0, 0.4),
-            (494, 0.5),   # B4
-            (440, 0.5),   # A4
-            (392, 0.7),   # G4
-            (330, 0.9),   # E4 (settle)
-            (0, 0.5),
+            (698, 0.3),   # F5
+            (659, 0.2),   # E5
+            (587, 0.2),   # D5
+            (523, 0.2),   # C5
+            (466, 0.8),   # Bb4 (resolve)
+            (0, 0.3),
         ]
-        # Section B: Shift to F major — warmth and resolution
+
+        # Section B: Adventurous climbing phrase
         melody_b = [
-            (349, 0.6),   # F4
-            (440, 0.6),   # A4
-            (523, 0.8),   # C5
-            (587, 0.9),   # D5 (higher reach)
-            (0, 0.3),
+            (349, 0.3),   # F4
+            (392, 0.3),   # G4
+            (440, 0.3),   # A4
+            (466, 0.6),   # Bb4
+            (0, 0.1),
+            (440, 0.2),   # A4
+            (466, 0.2),   # Bb4
             (523, 0.6),   # C5
-            (440, 0.5),   # A4
+            (0, 0.1),
+            (587, 0.3),   # D5
+            (523, 0.3),   # C5
+            (466, 0.3),   # Bb4
+            (440, 0.3),   # A4
             (392, 0.8),   # G4
+            (0, 0.2),
+            (349, 0.3),   # F4
+            (392, 0.3),   # G4
+            (440, 0.4),   # A4
+            (466, 1.0),   # Bb4 (triumphant resolve)
             (0, 0.4),
-            (349, 0.6),   # F4
-            (330, 0.5),   # E4
-            (294, 0.6),   # D4
-            (262, 1.2),   # C4 (long resolve)
-            (0, 0.6),
         ]
-        # Section C: Gentle variation — Am color
+
+        # Section C: Majestic ending — slower, grander
         melody_c = [
-            (440, 0.7),   # A4
-            (523, 0.6),   # C5
-            (494, 0.5),   # B4
-            (440, 0.8),   # A4
+            (587, 0.5),   # D5
+            (0, 0.1),
+            (587, 0.5),   # D5
+            (659, 0.5),   # E5
+            (698, 1.0),   # F5 (grand!)
+            (0, 0.2),
+            (659, 0.3),   # E5
+            (587, 0.3),   # D5
+            (523, 0.5),   # C5
+            (466, 0.5),   # Bb4
+            (0, 0.1),
+            (440, 0.3),   # A4
+            (466, 0.3),   # Bb4
+            (523, 0.5),   # C5
+            (587, 1.2),   # D5 (final heroic hold)
             (0, 0.3),
-            (392, 0.6),   # G4
-            (330, 0.6),   # E4
-            (294, 0.7),   # D4
-            (262, 0.9),   # C4
-            (0, 0.4),
-            (294, 0.5),   # D4
-            (330, 0.6),   # E4
-            (392, 0.8),   # G4
-            (440, 1.0),   # A4 (resolve up)
-            (0, 0.7),
+            (466, 1.5),   # Bb4 (resolve home)
+            (0, 0.8),
         ]
 
-        # Bass layer — slow root notes providing harmonic foundation
+        # Bass layer — strong root movement, march-like
         bass = [
-            (131, 1.8),   # C3
-            (0, 0.4),
-            (131, 1.2),   # C3
-            (147, 1.4),   # D3
-            (0, 0.3),
-            (165, 1.6),   # E3
-            (0, 0.5),
-            (131, 1.8),   # C3 (back home)
-            (0, 0.6),
-            # B section bass
-            (175, 1.8),   # F3
-            (0, 0.4),
+            # Under fanfare
+            (117, 1.2),   # Bb2
+            (117, 1.2),   # Bb2
+            (117, 0.8),   # Bb2
+            (131, 0.4),   # C3
+            (147, 0.4),   # D3
+            # Under A
+            (147, 1.2),   # D3
+            (0, 0.2),
+            (117, 1.0),   # Bb2
+            (147, 1.2),   # D3
+            (0, 0.2),
+            (117, 1.0),   # Bb2
+            (147, 0.6),   # D3
+            (165, 0.6),   # E3
             (175, 1.2),   # F3
-            (196, 1.4),   # G3
+            (0, 0.2),
+            (175, 0.6),   # F3
+            (147, 0.6),   # D3
+            (117, 1.2),   # Bb2
             (0, 0.3),
-            (165, 1.6),   # E3
-            (131, 1.4),   # C3
-            (0, 0.6),
-            # C section bass
-            (220, 1.6),   # A3
+            # Under B
+            (175, 1.0),   # F3
+            (0, 0.2),
+            (175, 0.8),   # F3
+            (131, 1.0),   # C3
+            (0, 0.2),
+            (147, 0.8),   # D3
+            (131, 0.6),   # C3
+            (117, 0.6),   # Bb2
+            (98, 1.0),    # G2
+            (0, 0.2),
+            (175, 0.8),   # F3
+            (131, 0.6),   # C3
+            (117, 1.2),   # Bb2
             (0, 0.4),
-            (196, 1.4),   # G3
-            (0, 0.3),
-            (165, 1.6),   # E3
-            (131, 1.2),   # C3
+            # Under C
+            (147, 1.0),   # D3
+            (147, 0.8),   # D3
+            (165, 0.6),   # E3
+            (175, 1.2),   # F3
+            (0, 0.2),
+            (147, 0.8),   # D3
+            (131, 0.8),   # C3
+            (117, 0.8),   # Bb2
+            (0, 0.1),
+            (131, 0.6),   # C3
+            (117, 0.6),   # Bb2
             (147, 1.4),   # D3
-            (0, 0.5),
+            (117, 1.8),   # Bb2 (final)
+            (0, 0.8),
         ]
 
-        tempo = 1.4  # Slow, dreamy
-        melody = self._scale_tempo(melody_a + melody_b + melody_c, tempo, rest_extra=1.2)
-        bass_scaled = self._scale_tempo(bass, tempo, rest_extra=1.1)
-        melody_samples = self._notes_to_samples(melody, amplitude=0.3, warm=True)
-        bass_samples = self._notes_to_samples(bass_scaled, amplitude=0.18, warm=True, tone_type='triangle')
+        tempo = 1.1  # Majestic but not too slow
+        melody = self._scale_tempo(fanfare + melody_a + melody_b + melody_c, tempo, rest_extra=1.0)
+        bass_scaled = self._scale_tempo(bass, tempo, rest_extra=1.0)
+        melody_samples = self._notes_to_samples(melody, amplitude=0.32, warm=True, tone_type='square')
+        bass_samples = self._notes_to_samples(bass_scaled, amplitude=0.20, warm=True, tone_type='triangle')
         mixed = self._mix_layers(melody_samples, bass_samples)
         return pygame.mixer.Sound(buffer=mixed)
 
