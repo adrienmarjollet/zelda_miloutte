@@ -44,6 +44,9 @@ class IceWraith(Entity):
         # XP value
         self.xp_value = 20
 
+        # Status effect on contact
+        self.applies_freeze = True
+
         # Drop system
         self.drop_chance = 0.3
         self.drop_table = [("heart", 3), ("key", 1)]

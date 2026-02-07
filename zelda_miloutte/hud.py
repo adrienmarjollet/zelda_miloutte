@@ -4,6 +4,7 @@ from .settings import (
     HUD_MARGIN, HEART_RED, KEY_YELLOW, BLACK, WHITE, DARK_RED,
     BOSS_BAR_WIDTH, BOSS_BAR_HEIGHT, BOSS_PURPLE, RED,
     MANA_BLUE, MANA_DARK,
+    STAMINA_MAX, STAMINA_BAR_WIDTH, STAMINA_BAR_HEIGHT,
 )
 from .sprites.hud_sprites import (
     get_hud_heart_full, get_hud_heart_half, get_hud_heart_empty,
@@ -108,7 +109,11 @@ class HUD:
         pygame.draw.rect(surface, (80, 80, 100), (xp_bar_x, xp_bar_y, xp_bar_w, xp_bar_h), 1)
 
         # MP bar (blue bar below XP bar)
-        self._draw_mp_bar(surface, player, xp_bar_x, xp_bar_y + xp_bar_h + 2)
+        mp_bar_y = xp_bar_y + xp_bar_h + 2
+        self._draw_mp_bar(surface, player, xp_bar_x, mp_bar_y)
+
+        # Stamina bar (below MP bar)
+        self._draw_stamina_bar(surface, player, xp_bar_x, mp_bar_y + 8)
 
         # Ability icon
         self._draw_ability_icon(surface, player)
@@ -140,6 +145,33 @@ class HUD:
             pygame.draw.rect(surface, MANA_BLUE, (bar_x, bar_y, fill_w, bar_h))
         # Border
         pygame.draw.rect(surface, (60, 80, 140), (bar_x, bar_y, bar_w, bar_h), 1)
+
+    def _draw_stamina_bar(self, surface, player, bar_x, bar_y):
+        """Draw the stamina bar below the MP bar."""
+        stamina = getattr(player, 'stamina', STAMINA_MAX)
+        max_stamina = getattr(player, 'max_stamina', STAMINA_MAX)
+        if max_stamina <= 0:
+            return
+        ratio = stamina / max_stamina
+        bar_w = STAMINA_BAR_WIDTH
+        bar_h = STAMINA_BAR_HEIGHT
+        # Label
+        st_label = self.small_font.render("ST", True, (200, 180, 50))
+        surface.blit(st_label, (bar_x - st_label.get_width() - 3, bar_y - 1))
+        # Background
+        pygame.draw.rect(surface, (50, 40, 20), (bar_x, bar_y, bar_w, bar_h))
+        # Fill (yellow/green when high, orange/red when low)
+        fill_w = int(bar_w * ratio)
+        if ratio > 0.5:
+            color = (180, 200, 50)
+        elif ratio > 0.25:
+            color = (220, 160, 30)
+        else:
+            color = (220, 60, 30)
+        if fill_w > 0:
+            pygame.draw.rect(surface, color, (bar_x, bar_y, fill_w, bar_h))
+        # Border
+        pygame.draw.rect(surface, (80, 70, 40), (bar_x, bar_y, bar_w, bar_h), 1)
 
     def _draw_ability_icon(self, surface, player):
         """Draw the currently selected ability icon on the HUD."""
@@ -199,6 +231,15 @@ class HUD:
             elif name == "slow":
                 color = (80, 150, 255)
                 label = "SLW"
+            elif name == "freeze":
+                color = (100, 200, 255)
+                label = "FRZ"
+            elif name == "burn":
+                color = (255, 120, 30)
+                label = "BRN"
+            elif name == "stun":
+                color = (255, 255, 80)
+                label = "STN"
             else:
                 color = WHITE
                 label = name[:3].upper()

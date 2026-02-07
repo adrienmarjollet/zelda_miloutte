@@ -139,6 +139,28 @@ _register("inferno_edge", "Inferno Edge", "Volcanic fury. +3 ATK",
           stats={"attack": 3}, tier="endgame",
           effect={"attack": 3})
 
+# Spears (longer range, narrower, slightly slower)
+_register("wooden_spear", "Wooden Spear", "Long reach. +1 ATK",
+          CATEGORY_EQUIPMENT, buy_price=35, equip_slot="weapon",
+          stats={"attack": 1, "weapon_type": "spear"}, tier="starter")
+_register("iron_spear", "Iron Spear", "Sturdy iron point. +3 ATK",
+          CATEGORY_EQUIPMENT, buy_price=90, equip_slot="weapon",
+          stats={"attack": 3, "weapon_type": "spear"}, tier="mid")
+_register("dragon_lance", "Dragon Lance", "Piercing dragon fang. +5 ATK",
+          CATEGORY_EQUIPMENT, buy_price=250, equip_slot="weapon",
+          stats={"attack": 5, "weapon_type": "spear"}, tier="endgame")
+
+# Axes (higher damage, wider arc, slower swing)
+_register("hand_axe", "Hand Axe", "Heavy chop. +2 ATK",
+          CATEGORY_EQUIPMENT, buy_price=40, equip_slot="weapon",
+          stats={"attack": 2, "weapon_type": "axe"}, tier="starter")
+_register("battle_axe", "Battle Axe", "Devastating cleave. +4 ATK",
+          CATEGORY_EQUIPMENT, buy_price=120, equip_slot="weapon",
+          stats={"attack": 4, "weapon_type": "axe"}, tier="mid")
+_register("berserker_axe", "Berserker Axe", "Unstoppable fury. +6 ATK",
+          CATEGORY_EQUIPMENT, buy_price=300, equip_slot="weapon",
+          stats={"attack": 6, "weapon_type": "axe"}, tier="endgame")
+
 # ── Equipment: Shields ───────────────────────────────────────────────────────
 
 _register("wooden_shield", "Wooden Shield", "A light wooden buckler. +1 DEF",
@@ -200,18 +222,24 @@ def get_item(item_id):
 
 # Enemy inventory drops (weighted: (item_id, weight))
 ENEMY_INV_DROP_TABLE = {
-    "starter": [("potion", 5), ("antidote", 2), ("wooden_sword", 1), ("leather_boots", 1)],
+    "starter": [("potion", 5), ("antidote", 2), ("wooden_sword", 1), ("leather_boots", 1),
+                ("wooden_spear", 1), ("hand_axe", 1)],
     "mid": [("potion", 4), ("bomb", 3), ("iron_sword", 1), ("guardian_shield", 1),
-            ("power_ring", 1), ("swift_boots", 1), ("fire_ring", 1)],
+            ("power_ring", 1), ("swift_boots", 1), ("fire_ring", 1),
+            ("iron_spear", 1), ("battle_axe", 1)],
     "endgame": [("elixir", 3), ("bomb", 3), ("flame_blade", 1), ("mirror_shield", 1),
-                ("sage_ring", 1), ("winged_boots", 1)],
+                ("sage_ring", 1), ("winged_boots", 1),
+                ("dragon_lance", 1), ("berserker_axe", 1)],
 }
 
 # Chest loot by tier
 CHEST_INV_LOOT = {
-    "starter": ["wooden_sword", "wooden_shield", "leather_boots", "potion"],
-    "mid": ["iron_sword", "guardian_shield", "swift_boots", "power_ring", "fire_ring", "bomb"],
-    "endgame": ["flame_blade", "mirror_shield", "winged_boots", "sage_ring", "elixir"],
+    "starter": ["wooden_sword", "wooden_shield", "leather_boots", "potion",
+                "wooden_spear", "hand_axe"],
+    "mid": ["iron_sword", "guardian_shield", "swift_boots", "power_ring", "fire_ring", "bomb",
+            "iron_spear", "battle_axe"],
+    "endgame": ["flame_blade", "mirror_shield", "winged_boots", "sage_ring", "elixir",
+                "dragon_lance", "berserker_axe"],
 }
 
 

@@ -329,6 +329,13 @@ class DungeonState(GameplayState):
         # Check for sign interaction
         self._check_sign_interaction()
 
+        # Hit stop: freeze gameplay briefly on impactful hits
+        if self._update_hitstop(dt):
+            self._update_camera(dt)
+            self._update_particles(dt)
+            self._update_floating_texts(dt)
+            return
+
         # Shared gameplay updates
         self._update_movement(dt)
 
@@ -381,15 +388,59 @@ class DungeonState(GameplayState):
         if hasattr(self.boss, 'pending_summons') and self.boss.pending_summons:
             from ..entities.vine_snapper import VineSnapper
             for summon_data in self.boss.pending_summons:
-                vs = VineSnapper(summon_data['x'], summon_data['y'])
+                if isinstance(summon_data, dict):
+                    sx, sy = summon_data['x'], summon_data['y']
+                else:
+                    sx, sy = summon_data  # tuple (x, y) from generic Boss
+                vs = VineSnapper(sx, sy)
                 self.enemies.append(vs)
             self.boss.pending_summons = []
+
+        # Handle boss shockwave (slam attack)
+        if hasattr(self.boss, 'pending_shockwave') and self.boss.pending_shockwave:
+            cx, cy, radius = self.boss.pending_shockwave
+            dist = ((self.player.center_x - cx)**2 + (self.player.center_y - cy)**2)**0.5
+            if dist < radius:
+                if self.player.take_damage(self.boss.damage):
+                    self.camera.shake(8, 0.4)
+                    self._trigger_damage_vignette()
+                self.player.apply_knockback(cx, cy, 300)
+            # Visual: ring of particles
+            self.particles.emit(
+                cx, cy, count=24,
+                color=[(255, 150, 50), (255, 200, 100)],
+                speed_range=(100, 200),
+                lifetime_range=(0.3, 0.5),
+                size_range=(3, 5),
+                gravity=0
+            )
+            self.camera.shake(6, 0.3)
+            self.boss.pending_shockwave = None
+
+        # Handle boss projectile barrage
+        if hasattr(self.boss, 'pending_projectiles') and self.boss.pending_projectiles:
+            for proj in self.boss.pending_projectiles:
+                self.projectiles.append(proj)
+            self.boss.pending_projectiles = []
 
         # Combat - shared for regular enemies, plus boss-specific
         self._update_combat(dt)
 
         # Boss-specific combat (DungeonState-specific)
         player = self.player
+
+        # Charged spin attack vs boss
+        if player.charge_attacking and player.charge_attack_rect:
+            if self.boss.alive and not getattr(self.boss, 'invulnerable', False):
+                if (id(self.boss) not in player.charge_hit_enemies
+                        and player.charge_attack_rect.colliderect(self.boss.rect)):
+                    self.boss.take_damage(player.charge_attack_damage)
+                    self.boss.apply_knockback(player.center_x, player.center_y, 150)
+                    self.particles.emit_sword_sparks(self.boss.center_x, self.boss.center_y)
+                    self.particles.emit_sword_sparks(self.boss.center_x, self.boss.center_y)
+                    player.charge_hit_enemies.add(id(self.boss))
+                    self.camera.shake(6, 0.2)
+
         if player.attacking and player.sword_rect:
             # Check invulnerable flag (e.g., Sand Worm when burrowed)
             if self.boss.alive and player.sword_rect.colliderect(self.boss.rect):

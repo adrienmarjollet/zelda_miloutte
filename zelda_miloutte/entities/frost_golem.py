@@ -46,6 +46,9 @@ class FrostGolem(Entity):
         # XP value
         self.xp_value = 30
 
+        # Status effect on contact
+        self.applies_freeze = True
+
         # Drop system
         self.drop_chance = 0.35
         self.drop_table = [("heart", 3), ("key", 1)]

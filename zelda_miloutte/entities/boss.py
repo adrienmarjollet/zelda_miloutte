@@ -1,10 +1,12 @@
 import math
+import random
 import pygame
 from .enemy import Enemy
 from ..settings import (
     BOSS_SIZE, BOSS_SPEED, BOSS_CHASE_SPEED, BOSS_CHARGE_SPEED,
     BOSS_HP, BOSS_DAMAGE, BOSS_CHARGE_DURATION, BOSS_CHARGE_COOLDOWN,
     BOSS_PHASE2_THRESHOLD, BOSS_PURPLE, TILE_SIZE,
+    ENEMY_TELEGRAPH_TIME, PROJECTILE_SPEED,
 )
 from ..sounds import get_sound_manager
 from ..sprites import AnimatedSprite
@@ -33,6 +35,27 @@ class Boss(Enemy):
         self.charge_cooldown = 0.0
         self.charge_dx = 0.0
         self.charge_dy = 0.0
+
+        # Boss charge telegraph
+        self.charge_telegraphing = False
+        self.charge_telegraph_timer = 0.0
+        self._charge_target_player = None
+
+        # Slam attack (AoE shockwave)
+        self.slamming = False
+        self.slam_timer = 0.0
+        self.slam_cooldown = 0.0
+        self.slam_radius = 80
+        self.slam_hit = False  # single-hit per slam
+        self.pending_shockwave = None  # (cx, cy, radius) for gameplay_state
+
+        # Projectile barrage
+        self.barrage_cooldown = 0.0
+        self.pending_projectiles = []  # collected by gameplay_state
+
+        # Summon minions
+        self.summon_cooldown = 0.0
+        self.pending_summons = []  # (x, y) positions for gameplay_state to spawn
 
         # Phase
         self.phase = 1
@@ -109,10 +132,43 @@ class Boss(Enemy):
 
         dist = self._distance_to(player)
 
+        # Update cooldowns
+        if self.slam_cooldown > 0:
+            self.slam_cooldown -= dt
+        if self.barrage_cooldown > 0:
+            self.barrage_cooldown -= dt
+        if self.summon_cooldown > 0:
+            self.summon_cooldown -= dt
+
+        # Clear pending actions
+        self.pending_shockwave = None
+        self.pending_projectiles = []
+        self.pending_summons = []
+
         # Skip AI during knockback
         if self.knockback_timer > 0:
             self.vx = self.knockback_vx
             self.vy = self.knockback_vy
+        elif self.slamming:
+            # Slam in progress: pause, then release shockwave
+            self.slam_timer -= dt
+            self.vx = 0
+            self.vy = 0
+            if self.slam_timer <= 0:
+                self.slamming = False
+                self.slam_cooldown = 4.0
+                # Emit shockwave
+                self.pending_shockwave = (self.center_x, self.center_y, self.slam_radius)
+        elif self.charge_telegraphing:
+            # Boss pauses before charge, shaking/pulsing
+            self.charge_telegraph_timer -= dt
+            self.vx = 0
+            self.vy = 0
+            if self.charge_telegraph_timer <= 0:
+                self.charge_telegraphing = False
+                if self._charge_target_player is not None:
+                    self._start_charge(self._charge_target_player)
+                    self._charge_target_player = None
         elif self.charging:
             self.charge_timer -= dt
             self.vx = self.charge_dx * self.charge_speed
@@ -127,11 +183,36 @@ class Boss(Enemy):
             if self.charge_cooldown > 0:
                 self.charge_cooldown -= dt
 
-            # Phase 2: charge attack
-            if self.phase == 2 and self.charge_cooldown <= 0 and dist < 200:
-                self._start_charge(player)
+            # Phase 2: choose attack pattern
+            if self.phase == 2:
+                attack_chosen = False
+
+                # Slam attack when player is close
+                if not attack_chosen and self.slam_cooldown <= 0 and dist < 70:
+                    self._start_slam()
+                    attack_chosen = True
+
+                # Charge attack at medium range
+                if not attack_chosen and self.charge_cooldown <= 0 and dist < 200:
+                    self.charge_telegraphing = True
+                    self.charge_telegraph_timer = ENEMY_TELEGRAPH_TIME * 0.8
+                    self._charge_target_player = player
+                    attack_chosen = True
+
+                # Projectile barrage at range
+                if not attack_chosen and self.barrage_cooldown <= 0 and dist > 100:
+                    self._fire_barrage(player)
+                    attack_chosen = True
+
+                # Summon minions periodically
+                if self.summon_cooldown <= 0 and dist > 60:
+                    self._summon_minions()
+
+                if not attack_chosen:
+                    self._move_toward(player.center_x, player.center_y,
+                                      self.chase_speed, dt)
             else:
-                # Chase player
+                # Phase 1: just chase
                 self._move_toward(player.center_x, player.center_y,
                                   self.chase_speed, dt)
 
@@ -148,6 +229,44 @@ class Boss(Enemy):
         tilemap.resolve_collision_x(self)
         self.y += self.vy * dt
         tilemap.resolve_collision_y(self)
+
+    def _start_slam(self):
+        """Start a ground slam (AoE shockwave)."""
+        self.slamming = True
+        self.slam_timer = 0.4  # wind-up before impact
+        self.slam_hit = False
+
+    def _fire_barrage(self, player):
+        """Fire a spread of projectiles toward the player."""
+        from .projectile import Projectile
+        self.barrage_cooldown = 5.0
+        num_shots = 5
+        spread_angle = math.pi / 4  # 45 degree spread
+        dx = player.center_x - self.center_x
+        dy = player.center_y - self.center_y
+        base_angle = math.atan2(dy, dx)
+
+        for i in range(num_shots):
+            angle = base_angle + spread_angle * (i / (num_shots - 1) - 0.5)
+            target_x = self.center_x + math.cos(angle) * 200
+            target_y = self.center_y + math.sin(angle) * 200
+            proj = Projectile(
+                self.center_x, self.center_y,
+                target_x, target_y,
+                self.damage, speed=PROJECTILE_SPEED * 0.8
+            )
+            self.pending_projectiles.append(proj)
+
+    def _summon_minions(self):
+        """Queue minion spawn positions around the boss."""
+        self.summon_cooldown = 12.0
+        num_minions = 2
+        for i in range(num_minions):
+            angle = random.uniform(0, 2 * math.pi)
+            dist = random.randint(60, 100)
+            sx = self.center_x + math.cos(angle) * dist
+            sy = self.center_y + math.sin(angle) * dist
+            self.pending_summons.append((sx, sy))
 
     def _start_charge(self, player):
         dx = player.center_x - self.center_x
@@ -183,4 +302,29 @@ class Boss(Enemy):
 
         fx = r.centerx - frame.get_width() // 2
         fy = r.centery - frame.get_height() // 2
-        surface.blit(frame, (fx, fy))
+
+        # Slam telegraph visual: growing orange ring
+        if self.slamming:
+            progress = 1.0 - (self.slam_timer / 0.4)
+            ring_r = int(self.slam_radius * progress)
+            if ring_r > 4:
+                ring_surf = pygame.Surface((ring_r * 2, ring_r * 2), pygame.SRCALPHA)
+                alpha = int(150 * (1.0 - progress))
+                pygame.draw.circle(ring_surf, (255, 150, 50, alpha), (ring_r, ring_r), ring_r, 3)
+                surface.blit(ring_surf, (r.centerx - ring_r, r.centery - ring_r))
+
+        # Boss charge telegraph visual: shake and red pulse
+        if self.charge_telegraphing:
+            import math as _math
+            pulse = abs(_math.sin(self.charge_telegraph_timer * 15))
+            tint_surf = frame.copy()
+            red_overlay = pygame.Surface(tint_surf.get_size(), pygame.SRCALPHA)
+            red_overlay.fill((255, 30, 30, int(100 * pulse)))
+            tint_surf.blit(red_overlay, (0, 0))
+            # Shake offset
+            import random as _random
+            shake_x = _random.randint(-3, 3)
+            shake_y = _random.randint(-3, 3)
+            surface.blit(tint_surf, (fx + shake_x, fy + shake_y))
+        else:
+            surface.blit(frame, (fx, fy))

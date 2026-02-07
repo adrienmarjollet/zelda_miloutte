@@ -93,18 +93,31 @@ class Archer(Enemy):
         )
 
     def shoot(self, player):
-        """Create a projectile aimed at the player's current position."""
+        """Create a projectile aimed at the player's predicted position."""
         if self.shoot_timer > 0:
             return None
 
         # Reset cooldown
         self.shoot_timer = self.shoot_cooldown
 
-        # Create projectile from archer's center toward player's center
+        # Lead the shot: predict where the player will be
+        from ..settings import PROJECTILE_SPEED
+        dx = player.center_x - self.center_x
+        dy = player.center_y - self.center_y
+        dist = math.sqrt(dx * dx + dy * dy)
+        if dist > 0:
+            travel_time = dist / PROJECTILE_SPEED
+            # Predict player position based on current velocity
+            pred_x = player.center_x + player.vx * travel_time * 0.6
+            pred_y = player.center_y + player.vy * travel_time * 0.6
+        else:
+            pred_x = player.center_x
+            pred_y = player.center_y
+
         sprite = get_projectile_sprite()
         projectile = Projectile(
             self.center_x, self.center_y,
-            player.center_x, player.center_y,
+            pred_x, pred_y,
             self.damage,
             sprite
         )

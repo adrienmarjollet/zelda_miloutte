@@ -409,6 +409,13 @@ class PlayState(GameplayState):
             if not self._check_npc_interaction():
                 self._check_sign_interaction()
 
+        # Hit stop: freeze gameplay briefly on impactful hits
+        if self._update_hitstop(dt):
+            self._update_camera(dt)
+            self._update_particles(dt)
+            self._update_floating_texts(dt)
+            return
+
         # Shared gameplay updates
         self._update_movement(dt)
 

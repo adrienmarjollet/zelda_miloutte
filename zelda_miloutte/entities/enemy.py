@@ -5,6 +5,7 @@ from .entity import Entity
 from ..settings import (
     ENEMY_SIZE, ENEMY_SPEED, ENEMY_CHASE_SPEED, ENEMY_CHASE_RANGE,
     ENEMY_HP, ENEMY_DAMAGE, ENEMY_PATROL_PAUSE, RED, TILE_SIZE,
+    ENEMY_TELEGRAPH_TIME, ENEMY_WINDUP_PULLBACK,
 )
 from ..sounds import get_sound_manager
 from ..sprites import AnimatedSprite
@@ -34,6 +35,14 @@ class Enemy(Entity, EnemyAI):
         # Damage flash
         self.flash_timer = 0.0
         self.flash_duration = 0.15
+
+        # Attack telegraph (wind-up before lunge)
+        self.telegraph_timer = 0.0
+        self.telegraphing = False
+        self._telegraph_target_x = 0.0
+        self._telegraph_target_y = 0.0
+        self._lunge_timer = 0.0
+        self._lunging = False
 
         # Death animation
         self.death_timer = 0.0
@@ -103,6 +112,11 @@ class Enemy(Entity, EnemyAI):
         dy = target.center_y - self.center_y
         return math.sqrt(dx * dx + dy * dy)
 
+    def _distance_to_point(self, tx, ty):
+        dx = tx - self.center_x
+        dy = ty - self.center_y
+        return math.sqrt(dx * dx + dy * dy)
+
     def _move_toward(self, tx, ty, speed, dt=None):
         dx = tx - self.center_x
         dy = ty - self.center_y
@@ -150,10 +164,49 @@ class Enemy(Entity, EnemyAI):
         if self.flash_timer > 0:
             self.flash_timer -= dt
 
+        # Stun timer (from parry)
+        if not hasattr(self, 'stun_timer'):
+            self.stun_timer = 0.0
+        if self.stun_timer > 0:
+            self.stun_timer -= dt
+            self.vx = 0
+            self.vy = 0
+            # Move with collision (for knockback during stun)
+            self.x += self.vx * dt
+            tilemap.resolve_collision_x(self)
+            self.y += self.vy * dt
+            tilemap.resolve_collision_y(self)
+            self.anim.update(dt, False)
+            return
+
         # Skip AI during knockback
         if self.knockback_timer > 0:
             self.vx = self.knockback_vx
             self.vy = self.knockback_vy
+        elif self._lunging:
+            # Post-telegraph lunge: fast dash toward player
+            self._lunge_timer -= dt
+            if self._lunge_timer <= 0:
+                self._lunging = False
+                self.vx = 0
+                self.vy = 0
+        elif self.telegraphing:
+            # Wind-up pause: enemy stops, pulls back slightly
+            self.telegraph_timer -= dt
+            self.vx = 0
+            self.vy = 0
+            if self.telegraph_timer <= 0:
+                self.telegraphing = False
+                # Lunge toward player
+                self._lunging = True
+                self._lunge_timer = 0.2
+                dist = self._distance_to_point(self._telegraph_target_x, self._telegraph_target_y)
+                if dist > 0:
+                    dx = self._telegraph_target_x - self.center_x
+                    dy = self._telegraph_target_y - self.center_y
+                    lunge_speed = self.chase_speed * 2.5
+                    self.vx = (dx / dist) * lunge_speed
+                    self.vy = (dy / dist) * lunge_speed
         else:
             # Use smart AI state machine
             ai_result = self.update_ai(dt, player, tilemap)
@@ -162,6 +215,17 @@ class Enemy(Entity, EnemyAI):
                 target_x, target_y, speed = ai_result
                 self._move_toward(target_x, target_y, speed)
                 self._update_facing_toward(target_x, target_y)
+
+                # Trigger telegraph when close enough and in ALERT state
+                from ..ai_state import AlertState
+                if (hasattr(self, 'ai_state') and self.ai_state == AlertState.ALERT
+                        and self._distance_to(player) < 60
+                        and not self.telegraphing and not self._lunging):
+                    self.telegraphing = True
+                    self.telegraph_timer = ENEMY_TELEGRAPH_TIME
+                    self._telegraph_target_x = player.center_x
+                    self._telegraph_target_y = player.center_y
+                    self._update_facing_toward(player.center_x, player.center_y)
             else:
                 # AI returned None -- do patrol
                 self._do_patrol(dt)
@@ -199,7 +263,28 @@ class Enemy(Entity, EnemyAI):
 
         fx = r.centerx - frame.get_width() // 2
         fy = r.centery - frame.get_height() // 2
-        surface.blit(frame, (fx, fy))
+
+        # Telegraph visual: red pulsing tint and pull-back offset
+        if self.telegraphing:
+            # Pulsing red overlay
+            pulse = abs(math.sin(self.telegraph_timer * 12))
+            tint_surf = frame.copy()
+            red_overlay = pygame.Surface(tint_surf.get_size(), pygame.SRCALPHA)
+            red_overlay.fill((255, 40, 40, int(80 * pulse)))
+            tint_surf.blit(red_overlay, (0, 0))
+            # Pull back slightly
+            pb = ENEMY_WINDUP_PULLBACK * (self.telegraph_timer / ENEMY_TELEGRAPH_TIME)
+            if self.facing == "up":
+                fy += pb
+            elif self.facing == "down":
+                fy -= pb
+            elif self.facing == "left":
+                fx += pb
+            elif self.facing == "right":
+                fx -= pb
+            surface.blit(tint_surf, (fx, fy))
+        else:
+            surface.blit(frame, (fx, fy))
 
         # Draw alert state icon
         self.draw_alert_icon(surface, camera)

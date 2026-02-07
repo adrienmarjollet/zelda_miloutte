@@ -1,7 +1,7 @@
 import random
 import pygame
 from .state import State
-from ..settings import RED, SCREEN_WIDTH, SCREEN_HEIGHT
+from ..settings import RED, SCREEN_WIDTH, SCREEN_HEIGHT, COMBO_HIT3_KNOCKBACK_MULT, PARRY_STUN_DURATION
 from ..entities.item import Item
 from ..entities.gold import Gold
 from ..world.tile import TileType
@@ -37,6 +37,9 @@ class GameplayState(State):
         self._screen_flash_alpha = 0
         self.campfires = []
         self.gold_pickups = []
+
+        # Hit stop (freeze-frame on impactful hits)
+        self.hitstop_timer = 0.0
         self.shop_ui = ShopUI()
         self._init_dialogue_box()
 
@@ -161,19 +164,81 @@ class GameplayState(State):
             trail["timer"] -= dt
         self.fire_trails = [t for t in self.fire_trails if t["timer"] > 0]
 
+    def _trigger_hitstop(self, duration=0.04):
+        """Trigger a brief freeze-frame for impactful hits."""
+        self.hitstop_timer = max(self.hitstop_timer, duration)
+
+    def _update_hitstop(self, dt):
+        """Update hitstop timer. Returns True if game should be frozen this frame."""
+        if self.hitstop_timer > 0:
+            self.hitstop_timer -= dt
+            return True
+        return False
+
     def _update_combat(self, dt):
         """Handle sword vs enemies collision with particles, knockback, and camera shake."""
         player = self.player
         damage = player.attack_power
+
+        # Critical hit system: 10% chance for 2x damage
+        is_crit = random.random() < 0.10
+
         if player.attacking and player.sword_rect:
+            # Combo knockback: stronger on 3rd hit
+            knockback_strength = 200
+            if player.combo_count == 2:
+                knockback_strength = int(200 * COMBO_HIT3_KNOCKBACK_MULT)
             for enemy in self.enemies:
                 if enemy.alive and player.sword_rect.colliderect(enemy.rect):
-                    enemy.take_damage(damage)
+                    actual_damage = damage
+                    hit_crit = is_crit
+                    if hit_crit:
+                        actual_damage = damage * 2
+                    enemy.take_damage(actual_damage)
                     # Apply knockback to enemy
-                    enemy.apply_knockback(player.center_x, player.center_y, 200)
+                    kb = knockback_strength
+                    if hit_crit:
+                        kb = int(kb * 1.5)
+                    enemy.apply_knockback(player.center_x, player.center_y, kb)
                     # Emit sword sparks on hit
                     self.particles.emit_sword_sparks(enemy.center_x, enemy.center_y)
+                    # Floating damage number
+                    from ..ui.floating_text import FloatingText
+                    if hit_crit:
+                        self.floating_texts.append(FloatingText(
+                            f"CRIT {actual_damage}!", enemy.center_x, enemy.center_y - 15,
+                            (255, 255, 50), size=26, duration=0.9
+                        ))
+                        self.particles.emit_sword_sparks(enemy.center_x, enemy.center_y)
+                        self.particles.emit_sword_sparks(enemy.center_x, enemy.center_y)
+                        self.camera.shake(6, 0.2)
+                        self._trigger_hitstop(0.06)
+                    else:
+                        self.floating_texts.append(FloatingText(
+                            str(actual_damage), enemy.center_x, enemy.center_y - 10,
+                            (255, 255, 255), size=20, duration=0.6
+                        ))
+                        self._trigger_hitstop(0.03)
+                    # Extra effects on combo finisher
+                    if player.combo_count == 2:
+                        self.particles.emit_sword_sparks(enemy.center_x, enemy.center_y)
+                        self.camera.shake(4, 0.15)
+                        self._trigger_hitstop(0.05)
 
+        # Charged spin attack AoE vs enemies (hit each enemy only once per spin)
+        if player.charge_attacking and player.charge_attack_rect:
+            charge_dmg = player.charge_attack_damage
+            for enemy in self.enemies:
+                if enemy.alive and id(enemy) not in player.charge_hit_enemies:
+                    if player.charge_attack_rect.colliderect(enemy.rect):
+                        enemy.take_damage(charge_dmg)
+                        enemy.apply_knockback(player.center_x, player.center_y, 350)
+                        self.particles.emit_sword_sparks(enemy.center_x, enemy.center_y)
+                        self.particles.emit_sword_sparks(enemy.center_x, enemy.center_y)
+                        player.charge_hit_enemies.add(id(enemy))
+                        self.camera.shake(5, 0.2)
+
+        if player.attacking and player.sword_rect:
             # Check for chest hits
             for chest in self.chests:
                 if not chest.opened and player.sword_rect.colliderect(chest.rect):
@@ -376,6 +441,33 @@ class GameplayState(State):
         player = self.player
         for enemy in self.enemies:
             if enemy.alive and player.collides_with(enemy):
+                # Check for parry: player is attacking and within parry window
+                if player.parry_window_timer > 0 and not player.parried_successfully:
+                    # Successful parry! Stun the enemy
+                    player.parried_successfully = True
+                    enemy.flash_timer = PARRY_STUN_DURATION
+                    # Stun: set a stun timer on the enemy
+                    enemy.telegraphing = False
+                    enemy._lunging = False
+                    enemy.knockback_timer = 0
+                    enemy.vx = 0
+                    enemy.vy = 0
+                    if not hasattr(enemy, 'stun_timer'):
+                        enemy.stun_timer = 0.0
+                    enemy.stun_timer = PARRY_STUN_DURATION
+                    # Strong knockback on enemy
+                    enemy.apply_knockback(player.center_x, player.center_y, 300)
+                    # Visual and audio feedback
+                    self.camera.shake(6, 0.2)
+                    self.particles.emit_sword_sparks(enemy.center_x, enemy.center_y)
+                    self.particles.emit_sword_sparks(enemy.center_x, enemy.center_y)
+                    from ..ui.floating_text import FloatingText
+                    self.floating_texts.append(FloatingText(
+                        "PARRY!", player.center_x, player.center_y - 25,
+                        (255, 255, 100), size=24, duration=0.8
+                    ))
+                    continue
+
                 if player.take_damage(enemy.damage):
                     # Trigger screen shake on damage
                     self.camera.shake(5, 0.3)
@@ -385,6 +477,10 @@ class GameplayState(State):
                         player.apply_status("poison", 6.0, {"tick_damage": 1, "tick_interval": 2.0})
                     if hasattr(enemy, 'applies_slow') and enemy.applies_slow:
                         player.apply_status("slow", 4.0, {"speed_multiplier": 0.5})
+                    if hasattr(enemy, 'applies_freeze') and enemy.applies_freeze:
+                        player.apply_status("freeze", 1.5)
+                    if hasattr(enemy, 'applies_burn') and enemy.applies_burn:
+                        player.apply_status("burn", 4.0, {"damage": 1, "tick_interval": 1.0})
                 # Apply knockback to player
                 player.apply_knockback(enemy.center_x, enemy.center_y, 200)
 
@@ -453,9 +549,36 @@ class GameplayState(State):
         for projectile in self.projectiles:
             projectile.update(dt, self.tilemap)
 
-        # Projectile vs player collision
         for projectile in self.projectiles:
-            if projectile.alive and player.collides_with(projectile):
+            if not projectile.alive:
+                continue
+
+            # Sword deflection: player can bat projectiles back with a sword swing
+            if (projectile.owner == "enemy" and not projectile.deflected
+                    and player.attacking and player.sword_rect
+                    and player.sword_rect.colliderect(projectile.rect)):
+                projectile.deflect(player.center_x, player.center_y)
+                self.particles.emit_sword_sparks(projectile.center_x, projectile.center_y)
+                self.camera.shake(3, 0.1)
+                continue
+
+            # Deflected projectile vs enemies
+            if projectile.deflected and projectile.owner == "player":
+                for enemy in self.enemies:
+                    if enemy.alive and projectile.rect.colliderect(enemy.rect):
+                        enemy.take_damage(projectile.damage * 2)  # bonus damage on deflect
+                        enemy.apply_knockback(
+                            projectile.center_x - projectile.vx * 0.1,
+                            projectile.center_y - projectile.vy * 0.1,
+                            200
+                        )
+                        self.particles.emit_sword_sparks(enemy.center_x, enemy.center_y)
+                        projectile.alive = False
+                        break
+                continue
+
+            # Projectile vs player collision
+            if projectile.owner == "enemy" and player.collides_with(projectile):
                 if player.take_damage(projectile.damage):
                     # Trigger screen shake on projectile hit
                     self.camera.shake(4, 0.2)
