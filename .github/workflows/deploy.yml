@@ -26,10 +26,10 @@ jobs:
         run: pip install pygbag
 
       - name: Build with pygbag
-        run: python -m pygbag --build $GITHUB_WORKSPACE/zelda_miloutte
+        run: python -m pygbag --build $GITHUB_WORKSPACE
 
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages
-          folder: zelda_miloutte/build/web
+          folder: build/web
