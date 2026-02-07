@@ -8,7 +8,7 @@ from zelda_miloutte.settings import ENEMY_SIZE, BROWN
 class NPC(Entity):
     """A non-player character that the player can interact with."""
 
-    def __init__(self, x, y, name, variant="elder", dialogue_tree=None, quest_id=None):
+    def __init__(self, x, y, name, variant="elder", dialogue_tree=None, quest_id=None, shop_id=None):
         """
         Args:
             x, y: Position in pixels
@@ -17,12 +17,14 @@ class NPC(Entity):
             dialogue_tree: Dict mapping state -> list of message strings.
                            e.g. {"default": ["Hello!", "Welcome."], "quest_done": ["Thank you!"]}
             quest_id: Optional quest ID this NPC is associated with
+            shop_id: Optional shop ID — if set, opens a shop after dialogue
         """
         super().__init__(x, y, ENEMY_SIZE, ENEMY_SIZE, BROWN)
         self.name = name
         self.variant = variant
         self.dialogue_tree = dialogue_tree or {"default": ["..."]}
         self.quest_id = quest_id
+        self.shop_id = shop_id
         self.dialogue_state = "default"
 
         # Sprites
@@ -42,6 +44,20 @@ class NPC(Entity):
         }
         fn = frame_fns.get(self.variant, get_villager_frames)
         self._anim = AnimatedSprite(fn(), frame_duration=0.4)
+
+    def update_dialogue_state(self, quest_manager):
+        """Update dialogue state based on quest progress."""
+        if not self.quest_id:
+            return
+        quest = quest_manager.get_quest(self.quest_id)
+        if quest is None:
+            return
+        if quest.status == "completed":
+            self.dialogue_state = "quest_done"
+        elif quest.status == "active":
+            self.dialogue_state = "quest_active"
+        else:
+            self.dialogue_state = "default"
 
     def get_dialogue(self):
         """Return the current dialogue messages based on state."""

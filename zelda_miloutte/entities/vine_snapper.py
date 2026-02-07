@@ -12,6 +12,7 @@ from zelda_miloutte.sounds import get_sound_manager
 from zelda_miloutte.sprites import AnimatedSprite
 from zelda_miloutte.sprites.vine_snapper_sprites import get_vine_snapper_frames, get_thorn_sprite
 from zelda_miloutte.sprites.effects import flash_white, scale_shrink
+from zelda_miloutte.pathfinding import has_line_of_sight
 
 
 class VineSnapper(Entity):
@@ -42,6 +43,10 @@ class VineSnapper(Entity):
         # Drop system
         self.drop_chance = 0.3
         self.drop_table = [("heart", 3), ("key", 1)]
+
+        # Gold drop
+        self.gold_drop_chance = 0.6
+        self.gold_drop_range = (1, 5)
 
         # Sprites
         self.anim = AnimatedSprite(get_vine_snapper_frames(), frame_duration=0.25)
@@ -79,6 +84,11 @@ class VineSnapper(Entity):
         items = [item_type for item_type, weight in self.drop_table]
         weights = [weight for item_type, weight in self.drop_table]
         return random.choices(items, weights=weights, k=1)[0]
+
+    def get_gold_drop(self):
+        if random.random() > self.gold_drop_chance:
+            return 0
+        return random.randint(self.gold_drop_range[0], self.gold_drop_range[1])
 
     def _distance_to(self, target):
         dx = target.center_x - self.center_x
@@ -130,10 +140,12 @@ class VineSnapper(Entity):
         # Clear pending projectile
         self.pending_projectile = None
 
-        # Stationary AI: only shoot if player is in range
+        # Stationary AI: only shoot if player is in range AND has line of sight
         dist = self._distance_to(player)
         if dist < self.shoot_range and self.shoot_timer <= 0:
-            self.pending_projectile = self.shoot(player)
+            if has_line_of_sight(tilemap, self.center_x, self.center_y,
+                                player.center_x, player.center_y):
+                self.pending_projectile = self.shoot(player)
 
         # Vine Snapper doesn't move (stationary)
         self.vx = 0

@@ -53,6 +53,9 @@ class PauseState(State):
             "story_progress": self.game.world_state.get("story_progress", 0),
             "quests": self.game.world_state.get("quests", {}),
         }
+        # Save minimap visited tiles
+        if hasattr(play_state, 'minimap'):
+            data["visited_tiles"] = play_state.minimap.get_save_data()
         return data
 
     def _save_to_slot(self, slot):

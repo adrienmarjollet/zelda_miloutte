@@ -61,6 +61,8 @@ class SaveManager:
                     "timestamp": data.get("timestamp", 0),
                     "level": data.get("player", {}).get("level", 1),
                     "area": data.get("current_area", "overworld"),
+                    "ng_plus_count": data.get("ng_plus_count", 0),
+                    "play_time": data.get("play_time", 0.0),
                 }
             else:
                 saves[slot] = None

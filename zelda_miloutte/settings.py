@@ -37,6 +37,12 @@ PLAYER_SIZE = 28
 PLAYER_MAX_HP = 6
 PLAYER_INVINCIBILITY_TIME = 1.0
 PLAYER_BLINK_RATE = 0.1
+PLAYER_MAX_MP = 50
+PLAYER_MP_REGEN = 1.0  # MP per second
+
+# Mana bar color
+MANA_BLUE = (40, 100, 220)
+MANA_DARK = (20, 50, 110)
 
 # Sword
 SWORD_LENGTH = 36
@@ -157,6 +163,34 @@ INFERNO_DRAKE_CHASE_SPEED = 100.0
 INFERNO_DRAKE_DAMAGE = 3
 INFERNO_DRAKE_SIZE = 48
 
+# Ice Wraith
+ICE_WRAITH_SIZE = 28
+ICE_WRAITH_SPEED = 90.0
+ICE_WRAITH_HP = 3
+ICE_WRAITH_DAMAGE = 1
+ICE_WRAITH_CHASE_RANGE = 180.0
+ICE_WRAITH_PHASE_COOLDOWN = 5.0
+
+# Frost Golem
+FROST_GOLEM_SIZE = 28
+FROST_GOLEM_SPEED = 35.0
+FROST_GOLEM_HP = 8
+FROST_GOLEM_DAMAGE = 2
+FROST_GOLEM_CHASE_RANGE = 200.0
+FROST_GOLEM_SLAM_COOLDOWN = 4.0
+FROST_GOLEM_SLAM_RADIUS = 60
+
+# Crystal Dragon Boss
+CRYSTAL_DRAGON_HP = 20
+CRYSTAL_DRAGON_SPEED = 60.0
+CRYSTAL_DRAGON_CHASE_SPEED = 90.0
+CRYSTAL_DRAGON_DAMAGE = 3
+CRYSTAL_DRAGON_SIZE = 48
+
+# Ice colors
+SNOW_WHITE = (230, 235, 245)
+FROZEN_WALL_BLUE = (60, 100, 160)
+
 # RPG Stats
 XP_BASE = 100
 XP_EXPONENT = 1.5
@@ -165,8 +199,54 @@ LEVEL_HP_INTERVAL = 2       # +2 max_hp every 2 levels
 LEVEL_ATTACK_INTERVAL = 3   # +1 base_attack every 3 levels
 LEVEL_DEFENSE_INTERVAL = 4  # +1 base_defense every 4 levels
 
+# Shield / Parry
+SHIELD_SPEED_MULTIPLIER = 0.5
+SHIELD_DAMAGE_REDUCTION = 0.5
+SHIELD_WIDTH = 20
+SHIELD_HEIGHT = 12
+PARRY_WINDOW = 0.2          # 200ms perfect-parry window
+PARRY_STUN_DURATION = 1.5   # stun duration on perfect parry
+PARRY_FREEZE_FRAMES = 2     # screen-freeze frames on perfect parry
+
+# Dodge Roll
+DODGE_ROLL_SPEED = 450.0      # pixels/sec (~3 tiles in 0.21s)
+DODGE_ROLL_DURATION = 0.21
+DODGE_ROLL_COOLDOWN = 1.0
+DODGE_DOUBLE_TAP_WINDOW = 0.3  # seconds between taps to trigger roll
+DODGE_AFTERIMAGE_COUNT = 3
+
+# Combo System
+COMBO_WINDOW = 0.4           # seconds to chain next hit
+COMBO_HIT2_DAMAGE_MULT = 1.2
+COMBO_HIT3_DAMAGE_MULT = 1.5
+COMBO_HIT3_KNOCKBACK_MULT = 1.5
+COMBO_HIT2_DURATION_MULT = 0.7   # faster jab
+COMBO_HIT3_WIDTH_MULT = 1.4      # wider arc
+
+# Charged Attack
+CHARGE_ATTACK_TIME = 1.0     # hold for 1 second
+CHARGE_ATTACK_DAMAGE_MULT = 2.0
+CHARGE_ATTACK_RADIUS = 60    # AoE radius around player
+
+# Stamina
+STAMINA_MAX = 100.0
+STAMINA_REGEN_RATE = 30.0    # per second when not blocking
+STAMINA_BLOCK_DRAIN = 20.0   # per second while blocking
+STAMINA_DODGE_COST = 25.0
+STAMINA_BAR_WIDTH = 60
+STAMINA_BAR_HEIGHT = 6
+
+# Enemy Telegraphing
+ENEMY_TELEGRAPH_TIME = 0.5   # show ! icon before attack
+ENEMY_WINDUP_PULLBACK = 8    # pixels pulled back before strike
+
 # Camera
 CAMERA_LERP = 0.1
+
+# Room system
+ROOM_WIDTH_TILES = 25   # 25 tiles * 32px = 800px (screen width)
+ROOM_HEIGHT_TILES = 18  # 18 tiles * 32px = 576px (close to screen height)
+ROOM_TRANSITION_DURATION = 0.5  # Scroll duration in seconds
 
 # HUD
 HUD_HEIGHT = 40

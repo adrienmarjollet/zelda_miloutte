@@ -2,8 +2,12 @@ from enum import Enum
 from zelda_miloutte.settings import (
     GREEN, DARK_GREEN, GRAY, DARK_GRAY, BROWN, BLUE, FLOOR_COLOR,
     LIGHT_BROWN, BOSS_PURPLE, WATER_BLUE, ICE_BLUE, FOREST_GREEN,
-    SAND_TAN, LAVA_ORANGE,
+    SAND_TAN, LAVA_ORANGE, SNOW_WHITE, FROZEN_WALL_BLUE,
 )
+
+# Colors for new tile types
+CRACKED_WALL_COLOR = (130, 130, 120)
+SECRET_FLOOR_COLOR = (140, 120, 160)
 
 
 class TileType(Enum):
@@ -26,10 +30,24 @@ class TileType(Enum):
     FOREST_FLOOR = 16
     SAND = 17
     LAVA = 18
+    BARRIER_RED = 19
+    BARRIER_BLUE = 20
+    BRIDGE = 21
+    ICE = 22
+    CRACKED_ICE = 23
+    FROZEN_WALL = 24
+    SNOW = 25
+    CRACKED_WALL = 26
+    SECRET_FLOOR = 27
+    WATERFALL = 28
 
     @property
     def solid(self):
-        return self in (TileType.WALL, TileType.TREE, TileType.ROCK, TileType.WATER, TileType.PIT)
+        return self in (
+            TileType.WALL, TileType.TREE, TileType.ROCK, TileType.WATER, TileType.PIT,
+            TileType.BARRIER_RED, TileType.BARRIER_BLUE, TileType.FROZEN_WALL,
+            TileType.CRACKED_WALL,
+        )
 
     @property
     def color(self):
@@ -53,4 +71,14 @@ class TileType(Enum):
             TileType.FOREST_FLOOR: FOREST_GREEN,
             TileType.SAND: SAND_TAN,
             TileType.LAVA: LAVA_ORANGE,
+            TileType.BARRIER_RED: (200, 50, 50),
+            TileType.BARRIER_BLUE: (50, 100, 200),
+            TileType.BRIDGE: (139, 90, 43),
+            TileType.ICE: ICE_BLUE,
+            TileType.CRACKED_ICE: (140, 200, 230),
+            TileType.FROZEN_WALL: FROZEN_WALL_BLUE,
+            TileType.SNOW: SNOW_WHITE,
+            TileType.CRACKED_WALL: CRACKED_WALL_COLOR,
+            TileType.SECRET_FLOOR: SECRET_FLOOR_COLOR,
+            TileType.WATERFALL: WATER_BLUE,
         }[self]

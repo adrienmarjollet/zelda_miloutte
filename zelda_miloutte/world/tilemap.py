@@ -1,7 +1,7 @@
 import pygame
 from zelda_miloutte.settings import TILE_SIZE, SCREEN_WIDTH, SCREEN_HEIGHT
 from zelda_miloutte.world.tile import TileType
-from zelda_miloutte.sprites.tile_sprites import get_tile_surface
+from zelda_miloutte.sprites.tile_sprites import get_tile_surface, get_tile_surface_variant
 
 
 class TileMap:
@@ -20,12 +20,13 @@ class TileMap:
                 tile_row.append(TileType(val))
             self.tiles.append(tile_row)
 
-        # Pre-build tile surfaces (keyed by tile value)
-        self._tile_surfaces = {}
-        for row in map_data:
-            for val in row:
-                if val not in self._tile_surfaces:
-                    self._tile_surfaces[val] = get_tile_surface(val)
+        # Pre-build tile variant surfaces per position
+        self._tile_surface_grid = []
+        for r, row in enumerate(map_data):
+            surf_row = []
+            for c, val in enumerate(row):
+                surf_row.append(get_tile_surface_variant(val, c, r))
+            self._tile_surface_grid.append(surf_row)
 
     def get_tile(self, col, row):
         if 0 <= row < self.rows and 0 <= col < self.cols:
@@ -90,7 +91,6 @@ class TileMap:
 
         for row in range(start_row, end_row):
             for col in range(start_col, end_col):
-                val = self.data[row][col]
                 x = col * TILE_SIZE - int(camera.x)
                 y = row * TILE_SIZE - int(camera.y)
-                surface.blit(self._tile_surfaces[val], (x, y))
+                surface.blit(self._tile_surface_grid[row][col], (x, y))

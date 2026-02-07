@@ -118,6 +118,17 @@ SIDE_QUESTS = [
         prerequisites=["story_5"],
     ),
     Quest(
+        id="side_companion",
+        name="A Lost Friend",
+        description="Find a lost companion in the forest. A villager mentioned seeing a small creature nearby.",
+        objectives=[
+            _obj("talk", "companion_keeper", 1, "Talk to the animal keeper in the village"),
+            _obj("find", "companion", 1, "Find the lost companion in the forest"),
+        ],
+        rewards={"xp": 100},
+        prerequisites=["story_1"],
+    ),
+    Quest(
         id="side_6",
         name="Monster Hunter",
         description="Defeat all 4 bosses across the land.",

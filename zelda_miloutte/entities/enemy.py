@@ -10,9 +10,10 @@ from zelda_miloutte.sounds import get_sound_manager
 from zelda_miloutte.sprites import AnimatedSprite
 from zelda_miloutte.sprites.enemy_sprites import get_enemy_frames
 from zelda_miloutte.sprites.effects import flash_white, scale_shrink
+from zelda_miloutte.ai_state import EnemyAI
 
 
-class Enemy(Entity):
+class Enemy(Entity, EnemyAI):
     def __init__(self, x, y, patrol_points=None):
         super().__init__(x, y, ENEMY_SIZE, ENEMY_SIZE, RED)
         self.hp = ENEMY_HP
@@ -46,12 +47,24 @@ class Enemy(Entity):
         self.drop_chance = 0.3  # 30% chance to drop an item
         self.drop_table = [("heart", 3), ("key", 1)]  # hearts 3x more likely than keys
 
+        # Gold drop
+        self.gold_drop_chance = 0.6  # 60% chance to drop gold
+        self.gold_drop_range = (1, 5)  # min/max gold amount
+
         # Sprites
         self.anim = AnimatedSprite(get_enemy_frames(), frame_duration=0.18)
         self._white_frames = {
             d: [flash_white(f) for f in frames]
             for d, frames in self.anim.frames.items()
         }
+
+        # Initialize smart AI
+        self.init_ai(
+            detection_range=ENEMY_CHASE_RANGE,
+            lose_range=ENEMY_CHASE_RANGE * 2.0,
+            pathfind_interval=0.5,
+            use_pathfinding=True,
+        )
 
     def take_damage(self, amount):
         if self.dying:
@@ -77,12 +90,20 @@ class Enemy(Entity):
         weights = [weight for item_type, weight in self.drop_table]
         return random.choices(items, weights=weights, k=1)[0]
 
+    def get_gold_drop(self):
+        """Determine if the enemy drops gold and how much.
+        Returns gold amount (int) or 0.
+        """
+        if random.random() > self.gold_drop_chance:
+            return 0
+        return random.randint(self.gold_drop_range[0], self.gold_drop_range[1])
+
     def _distance_to(self, target):
         dx = target.center_x - self.center_x
         dy = target.center_y - self.center_y
         return math.sqrt(dx * dx + dy * dy)
 
-    def _move_toward(self, tx, ty, speed, dt):
+    def _move_toward(self, tx, ty, speed, dt=None):
         dx = tx - self.center_x
         dy = ty - self.center_y
         dist = math.sqrt(dx * dx + dy * dy)
@@ -93,6 +114,28 @@ class Enemy(Entity):
         self.vx = (dx / dist) * speed
         self.vy = (dy / dist) * speed
         return False
+
+    def _update_facing_toward(self, tx, ty):
+        """Update facing direction toward a target position."""
+        dx = tx - self.center_x
+        dy = ty - self.center_y
+        if abs(dx) > abs(dy):
+            self.facing = "right" if dx > 0 else "left"
+        else:
+            self.facing = "down" if dy > 0 else "up"
+
+    def _do_patrol(self, dt):
+        """Execute patrol behavior (idle state)."""
+        if self.patrol_pause > 0:
+            self.patrol_pause -= dt
+            self.vx = 0
+            self.vy = 0
+        else:
+            target = self.patrol_points[self.patrol_index]
+            arrived = self._move_toward(target[0], target[1], self.speed)
+            if arrived:
+                self.patrol_index = (self.patrol_index + 1) % len(self.patrol_points)
+                self.patrol_pause = ENEMY_PATROL_PAUSE
 
     def update(self, dt, player, tilemap):
         if self.dying:
@@ -112,31 +155,16 @@ class Enemy(Entity):
             self.vx = self.knockback_vx
             self.vy = self.knockback_vy
         else:
-            # Check if player is in chase range
-            dist = self._distance_to(player)
-            if dist < self.chase_range:
-                # Chase player
-                self._move_toward(player.center_x, player.center_y,
-                                  self.chase_speed, dt)
-                # Update facing
-                dx = player.center_x - self.center_x
-                dy = player.center_y - self.center_y
-                if abs(dx) > abs(dy):
-                    self.facing = "right" if dx > 0 else "left"
-                else:
-                    self.facing = "down" if dy > 0 else "up"
+            # Use smart AI state machine
+            ai_result = self.update_ai(dt, player, tilemap)
+
+            if ai_result is not None:
+                target_x, target_y, speed = ai_result
+                self._move_toward(target_x, target_y, speed)
+                self._update_facing_toward(target_x, target_y)
             else:
-                # Patrol
-                if self.patrol_pause > 0:
-                    self.patrol_pause -= dt
-                    self.vx = 0
-                    self.vy = 0
-                else:
-                    target = self.patrol_points[self.patrol_index]
-                    arrived = self._move_toward(target[0], target[1], self.speed, dt)
-                    if arrived:
-                        self.patrol_index = (self.patrol_index + 1) % len(self.patrol_points)
-                        self.patrol_pause = ENEMY_PATROL_PAUSE
+                # AI returned None -- do patrol
+                self._do_patrol(dt)
 
         # Move with collision
         self.x += self.vx * dt
@@ -172,3 +200,6 @@ class Enemy(Entity):
         fx = r.centerx - frame.get_width() // 2
         fy = r.centery - frame.get_height() // 2
         surface.blit(frame, (fx, fy))
+
+        # Draw alert state icon
+        self.draw_alert_icon(surface, camera)

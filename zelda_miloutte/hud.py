@@ -3,11 +3,13 @@ from zelda_miloutte.settings import (
     SCREEN_WIDTH, HUD_HEIGHT, HUD_HEART_SIZE, HUD_HEART_SPACING,
     HUD_MARGIN, HEART_RED, KEY_YELLOW, BLACK, WHITE, DARK_RED,
     BOSS_BAR_WIDTH, BOSS_BAR_HEIGHT, BOSS_PURPLE, RED,
+    MANA_BLUE, MANA_DARK,
 )
 from zelda_miloutte.sprites.hud_sprites import (
     get_hud_heart_full, get_hud_heart_half, get_hud_heart_empty,
     get_hud_key_icon,
 )
+from zelda_miloutte.sprites.gold_sprites import get_hud_coin_icon
 
 
 class HUD:
@@ -19,6 +21,7 @@ class HUD:
         self._heart_half = None
         self._heart_empty = None
         self._key_icon = None
+        self._coin_icon = None
         # Smooth XP bar animation
         self._displayed_xp_ratio = 0.0
 
@@ -28,6 +31,7 @@ class HUD:
             self._heart_half = get_hud_heart_half()
             self._heart_empty = get_hud_heart_empty()
             self._key_icon = get_hud_key_icon()
+            self._coin_icon = get_hud_coin_icon()
 
     def _get_font(self):
         if self.font is None:
@@ -63,6 +67,13 @@ class HUD:
         text = font.render(f"x{player.keys}", True, WHITE)
         surface.blit(text, (key_x + self._key_icon.get_width() + 4, HUD_MARGIN + 4))
 
+        # Gold coin icon + count
+        gold = getattr(player, 'gold', 0)
+        gold_x = key_x + self._key_icon.get_width() + 4 + text.get_width() + 16
+        surface.blit(self._coin_icon, (gold_x, HUD_MARGIN))
+        gold_text = font.render(f"{gold}", True, (255, 200, 50))
+        surface.blit(gold_text, (gold_x + self._coin_icon.get_width() + 4, HUD_MARGIN + 4))
+
         # Level + XP bar (below hearts)
         level = getattr(player, 'level', 1)
         xp = getattr(player, 'xp', 0)
@@ -96,6 +107,12 @@ class HUD:
         # Border
         pygame.draw.rect(surface, (80, 80, 100), (xp_bar_x, xp_bar_y, xp_bar_w, xp_bar_h), 1)
 
+        # MP bar (blue bar below XP bar)
+        self._draw_mp_bar(surface, player, xp_bar_x, xp_bar_y + xp_bar_h + 2)
+
+        # Ability icon
+        self._draw_ability_icon(surface, player)
+
         # Status effect icons
         self._draw_status_effects(surface, player)
 
@@ -103,15 +120,79 @@ class HUD:
         if boss and boss.alive and not boss.dying:
             self._draw_boss_bar(surface, boss)
 
+    def _draw_mp_bar(self, surface, player, bar_x, bar_y):
+        """Draw the mana bar below the XP bar."""
+        mp = getattr(player, 'mp', 0)
+        max_mp = getattr(player, 'max_mp', 50)
+        if max_mp <= 0:
+            return
+        mp_ratio = mp / max_mp
+        bar_w = 80
+        bar_h = 6
+        # Label
+        mp_label = self.small_font.render("MP", True, (100, 160, 255))
+        surface.blit(mp_label, (bar_x - mp_label.get_width() - 3, bar_y - 1))
+        # Background
+        pygame.draw.rect(surface, MANA_DARK, (bar_x, bar_y, bar_w, bar_h))
+        # Fill
+        fill_w = int(bar_w * mp_ratio)
+        if fill_w > 0:
+            pygame.draw.rect(surface, MANA_BLUE, (bar_x, bar_y, fill_w, bar_h))
+        # Border
+        pygame.draw.rect(surface, (60, 80, 140), (bar_x, bar_y, bar_w, bar_h), 1)
+
+    def _draw_ability_icon(self, surface, player):
+        """Draw the currently selected ability icon on the HUD."""
+        ability = getattr(player, 'active_ability', None)
+        if ability is None:
+            return
+
+        from zelda_miloutte.sprites.ability_sprites import get_ability_icon
+        icon = get_ability_icon(ability.name)
+        if icon is None:
+            return
+
+        # Position in top-right area of HUD (before status effects)
+        ix = SCREEN_WIDTH - HUD_MARGIN - 120
+        iy = HUD_MARGIN
+
+        # Background box
+        box_size = max(icon.get_width(), icon.get_height()) + 4
+        bg = pygame.Surface((box_size, box_size), pygame.SRCALPHA)
+        bg.fill((0, 0, 0, 120))
+        surface.blit(bg, (ix - 2, iy - 2))
+
+        # Icon
+        surface.blit(icon, (ix, iy))
+
+        # Cooldown overlay (gray out if on cooldown)
+        if ability.cooldown_timer > 0:
+            cd_surf = pygame.Surface((box_size, box_size), pygame.SRCALPHA)
+            cd_surf.fill((0, 0, 0, 140))
+            surface.blit(cd_surf, (ix - 2, iy - 2))
+            # Cooldown timer text
+            cd_text = self.small_font.render(f"{ability.cooldown_timer:.1f}", True, WHITE)
+            surface.blit(cd_text, (ix + box_size // 2 - cd_text.get_width() // 2 - 2,
+                                   iy + box_size // 2 - cd_text.get_height() // 2 - 2))
+
+        # Ability name below icon
+        name_text = self.small_font.render(ability.display_name, True, (200, 200, 200))
+        surface.blit(name_text, (ix - 2, iy + box_size))
+
+        # Key hint
+        key_text = self.small_font.render("[R]", True, (150, 150, 150))
+        surface.blit(key_text, (ix + box_size + 2, iy + 2))
+
     def _draw_status_effects(self, surface, player):
-        """Draw status effect indicators next to hearts."""
+        """Draw status effect indicators with remaining duration."""
         effects = getattr(player, 'status_effects', {})
         if not effects:
             return
         font = self._get_font()
+        small = self.small_font
         ex = SCREEN_WIDTH - HUD_MARGIN - 60
         ey = HUD_MARGIN + 2
-        for name in effects:
+        for name, effect_data in effects.items():
             if name == "poison":
                 color = (80, 200, 80)
                 label = "PSN"
@@ -123,7 +204,12 @@ class HUD:
                 label = name[:3].upper()
             txt = font.render(label, True, color)
             surface.blit(txt, (ex, ey))
-            ex -= 40
+            # Draw remaining duration below
+            remaining = effect_data.get("timer", 0) if isinstance(effect_data, dict) else 0
+            if remaining > 0:
+                timer_txt = small.render(f"{remaining:.0f}s", True, color)
+                surface.blit(timer_txt, (ex + 2, ey + 18))
+            ex -= 45
 
     def _draw_boss_bar(self, surface, boss):
         bar_x = (SCREEN_WIDTH - BOSS_BAR_WIDTH) // 2
