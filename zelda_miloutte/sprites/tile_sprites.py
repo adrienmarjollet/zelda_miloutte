@@ -496,6 +496,34 @@ _tile_cache = {}
 _variant_cache = {}
 
 
+def _create_portal_surface():
+    """Create a 32x32 swirling portal surface for the 3D dungeon entrance."""
+    import math
+    surf = pygame.Surface((32, 32))
+    center = 16
+    for y in range(32):
+        for x in range(32):
+            dx = x - center
+            dy = y - center
+            dist = math.sqrt(dx * dx + dy * dy)
+            if dist < 14:
+                # Swirling purple-blue gradient
+                angle = math.atan2(dy, dx)
+                t = dist / 14.0
+                swirl = math.sin(angle * 3 + dist * 0.5) * 0.5 + 0.5
+                r = int(100 + 100 * swirl * (1 - t))
+                g = int(30 + 50 * (1 - swirl) * (1 - t))
+                b = int(160 + 80 * swirl * (1 - t))
+                surf.set_at((x, y), (r, g, b))
+            elif dist < 16:
+                # Dark border ring
+                surf.set_at((x, y), (60, 30, 80))
+            else:
+                # Grass background
+                surf.set_at((x, y), (76, 153, 0))
+    return surf
+
+
 def get_tile_surface(tile_type_value):
     """Return a 32x32 surface for the given TileType integer value.
 
@@ -503,6 +531,12 @@ def get_tile_surface(tile_type_value):
     """
     if tile_type_value in _tile_cache:
         return _tile_cache[tile_type_value]
+
+    # Special case for 3D dungeon portal
+    if tile_type_value == 29:
+        surf = _create_portal_surface()
+        _tile_cache[tile_type_value] = surf
+        return surf
 
     grid, palette = _TILE_DATA[tile_type_value]
     surf = surface_from_grid(grid, palette, scale=2)
@@ -1099,6 +1133,7 @@ _TILE_DATA = {
     26: (CRACKED_WALL_GRID, _CRACKED_WALL_PAL),            # CRACKED_WALL
     27: (SECRET_FLOOR_GRID, _SECRET_FLOOR_PAL),             # SECRET_FLOOR
     28: (WATERFALL_GRID_F1, _WATERFALL_PAL),                # WATERFALL
+    29: (None, None),                                        # DUNGEON_3D_ENTRANCE (custom)
 }
 
 # Add waterfall animation frames

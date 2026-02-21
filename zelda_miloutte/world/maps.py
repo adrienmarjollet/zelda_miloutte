@@ -2,6 +2,7 @@
 # 0=GRASS, 1=WALL, 2=TREE, 3=ROCK, 4=WATER, 5=FLOOR, 6=DOOR, 7=DUNGEON_ENTRANCE, 8=BOSS_DOOR, 9=SPIKES, 10=PIT, 11=DUNGEON_ENTRANCE_2
 # 12=TRANSITION_N, 13=TRANSITION_S, 14=TRANSITION_E, 15=TRANSITION_W, 16=FOREST_FLOOR, 17=SAND, 18=LAVA
 # 19=BARRIER_RED, 20=BARRIER_BLUE, 21=BRIDGE, 22=ICE, 23=CRACKED_ICE, 24=FROZEN_WALL, 25=SNOW
+# 29=DUNGEON_3D_ENTRANCE
 
 # Overworld: 30 columns x 20 rows
 # West half (cols 0-14): Cozy village with houses, paths, gardens. NO enemies.
@@ -25,7 +26,7 @@ OVERWORLD = [
     [2, 0, 2, 5, 2, 0, 0, 0, 0, 0,11, 5, 5, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 5, 5, 5, 2],
     [2, 0, 2, 6, 2, 0, 0, 0, 0, 0, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 5, 5, 5, 2],
     [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 5, 5, 5, 2],
-    [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 5, 5, 5, 2],
+    [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,29, 0, 0, 0, 0, 0, 0, 0, 0, 2, 5, 5, 5, 2],
     [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2],
     [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
 ]
@@ -71,6 +72,10 @@ OVERWORLD_SPAWNS = {
         {
             "x": 26, "y": 17,
             "text": "You need a key to enter the dungeon.",
+        },
+        {
+            "x": 16, "y": 16,
+            "text": "A strange portal shimmers here... Step in to enter the Phantom Depths. (3D Dungeon - requires a key)",
         },
     ],
     "npcs": [
