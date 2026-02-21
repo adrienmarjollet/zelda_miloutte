@@ -14,9 +14,10 @@ uv run zelda-miloutte
 
 # Install dependencies
 uv sync
-```
 
-There are no tests or linting configured.
+# Run tests
+uv run pytest tests/ -v
+```
 
 ## Architecture
 
