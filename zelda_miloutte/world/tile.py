@@ -40,6 +40,7 @@ class TileType(Enum):
     CRACKED_WALL = 26
     SECRET_FLOOR = 27
     WATERFALL = 28
+    DUNGEON_3D_ENTRANCE = 29
 
     @property
     def solid(self):
@@ -81,4 +82,5 @@ class TileType(Enum):
             TileType.CRACKED_WALL: CRACKED_WALL_COLOR,
             TileType.SECRET_FLOOR: SECRET_FLOOR_COLOR,
             TileType.WATERFALL: WATER_BLUE,
+            TileType.DUNGEON_3D_ENTRANCE: (160, 80, 200),
         }[self]

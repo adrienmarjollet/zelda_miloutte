@@ -548,6 +548,17 @@ class PlayState(GameplayState):
 
                 self.game.transition_to(enter_dungeon2)
 
+        elif tile_type is not None and tile_type.name == "DUNGEON_3D_ENTRANCE":
+            if player.keys > 0:
+                player.keys -= 1
+                get_sound_manager().play_dungeon_enter()
+
+                def enter_3d_dungeon():
+                    from .dungeon3d_state import Dungeon3DState
+                    self.game.push_state(Dungeon3DState(self.game, self))
+
+                self.game.transition_to(enter_3d_dungeon)
+
         # Check player death
         self._check_player_death()
 
